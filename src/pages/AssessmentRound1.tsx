@@ -1,0 +1,464 @@
+import React, { useEffect, useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { apiRequest } from "../services/api";
+import type { Question, AssessmentAttempt } from "../types";
+import {
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  ArrowRight,
+  ArrowLeft,
+  Send,
+} from "lucide-react";
+
+export const AssessmentRound1: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const attemptId = searchParams.get("attemptId");
+  const navigate = useNavigate();
+
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [mcqAnswers, setMcqAnswers] = useState<Record<string, string>>({});
+  const [writtenEssay, setWrittenEssay] = useState<string>("");
+  const [timeLeft, setTimeLeft] = useState<number>(25 * 60); // 25 mins in seconds
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [round1Result, setRound1Result] = useState<{ score: number } | null>(null);
+
+  useEffect(() => {
+    async function loadQuestions() {
+      try {
+        const data = await apiRequest<{
+          attempt: AssessmentAttempt;
+          round1Questions: Question[];
+          durationR1: number;
+        }>("/assessment/start", {
+          method: "POST",
+          body: JSON.stringify({ assessmentId: "" }), // will fetch active attempt questions
+        });
+
+        setQuestions(data.round1Questions);
+        setTimeLeft((data.durationR1 || 25) * 60);
+      } catch (err) {
+        console.error("Failed to load questions:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadQuestions();
+  }, [attemptId]);
+
+  // Timer countdown
+  useEffect(() => {
+    if (round1Result || isSubmitting) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          handleSubmit();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [round1Result, isSubmitting]);
+
+  const handleSelectOption = (questionId: string, option: string) => {
+    setMcqAnswers((prev) => ({ ...prev, [questionId]: option }));
+  };
+
+  const handleSubmit = async () => {
+    if (isSubmitting || !attemptId) return;
+    setIsSubmitting(true);
+
+    try {
+      const res = await apiRequest<{ round1Score: number }>("/assessment/submit-round1", {
+        method: "POST",
+        body: JSON.stringify({
+          attemptId,
+          mcqAnswers,
+          writtenEssay,
+        }),
+      });
+
+      setRound1Result({ score: res.round1Score });
+    } catch (err: any) {
+      alert(err.message || "Failed to submit Round 1");
+      setIsSubmitting(false);
+    }
+  };
+
+  const formatTime = (secs: number) => {
+    const mins = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${mins.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  };
+
+  const countWords = (text: string) => {
+    const trimmed = text.trim();
+    return trimmed ? trimmed.split(/\s+/).length : 0;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center text-xs text-slate-400">
+        Loading Round 1 questions...
+      </div>
+    );
+  }
+
+  // Round 1 Complete Result Transition Screen
+  if (round1Result) {
+    return (
+      <div className="max-w-xl mx-auto my-12 p-8 bg-white rounded-3xl border border-slate-200 shadow-xl text-center space-y-6">
+        <div className="w-20 h-20 rounded-3xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center mx-auto shadow-inner">
+          <CheckCircle2 className="w-10 h-10" />
+        </div>
+        <div>
+          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">
+            Round 1 Completed!
+          </h2>
+          <p className="text-xs text-slate-500 mt-1 font-medium">
+            Cognitive & English Grammar Assessment Submitted Successfully
+          </p>
+        </div>
+
+        <div className="p-6 rounded-2xl bg-emerald-50/70 border border-emerald-200 shadow-sm">
+          <span className="text-[11px] text-emerald-800 uppercase tracking-widest font-extrabold">
+            Verified Round 1 Score
+          </span>
+          <p className="text-4xl font-black text-emerald-700 mt-1">
+            {round1Result.score} Points
+          </p>
+        </div>
+
+        <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-left text-xs text-slate-800 space-y-2.5">
+          <p className="font-bold flex items-center gap-2 text-slate-900">
+            <AlertCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+            Mandatory Preparation for Round 2 (Coding Laboratory):
+          </p>
+          <ul className="list-disc pl-5 space-y-1 text-slate-600 text-[11px]">
+            <li>Live camera stream must stay granted and unblocked throughout the session.</li>
+            <li>Browser must remain in fullscreen mode without exiting.</li>
+            <li>
+              <strong>Anti-Cheating Policy:</strong> Navigating away from the browser tab twice will
+              trigger an immediate proctor lockout.
+            </li>
+          </ul>
+        </div>
+
+        <button
+          onClick={() => navigate(`/assessment/round2?attemptId=${attemptId}`)}
+          className="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-lg shadow-emerald-600/25 cursor-pointer transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+        >
+          Proceed to Round 2 (Coding & SQL Test)
+          <ArrowRight className="w-4 h-4" />
+        </button>
+      </div>
+    );
+  }
+
+  const currentQ = questions[activeIdx];
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+      {/* Top Header Bar */}
+      <div className="flex items-center justify-between bg-white px-6 py-4 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+          <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[11px] font-extrabold text-emerald-800 uppercase tracking-wide">
+            Round 1 of 2
+          </span>
+          <h2 className="text-base font-extrabold text-slate-900 mt-1">
+            Aptitude, Verbal & Domain Assessment
+          </h2>
+        </div>
+
+        <div className="flex items-center gap-4">
+          {/* Countdown timer */}
+          <div
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-mono font-bold shadow-xs ${
+              timeLeft < 300
+                ? "bg-rose-50 border-rose-300 text-rose-600 animate-pulse"
+                : "bg-slate-50 border-slate-200 text-slate-800"
+            }`}
+          >
+            <Clock className="w-4 h-4 text-emerald-600" />
+            {formatTime(timeLeft)}
+          </div>
+
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all shadow-md shadow-emerald-600/20 cursor-pointer"
+          >
+            <Send className="w-3.5 h-3.5" />
+            Submit Round 1
+          </button>
+        </div>
+      </div>
+
+      {/* Domain Sections Quick Navigation Bar */}
+      {(() => {
+        const sections = [
+          {
+            id: "APTITUDE_VERBAL",
+            label: "🧠 Aptitude & Verbal",
+            match: (q: Question) => q.category === "APTITUDE" || q.category === "VERBAL",
+          },
+          {
+            id: "WRITTEN",
+            label: "✍️ Written Essay",
+            match: (q: Question) => q.category === "WRITTEN_PROMPT",
+          },
+        ].filter((s) => questions.some(s.match));
+
+        return (
+          <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center gap-2.5">
+            <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider ml-2 mr-1">
+              Sections:
+            </span>
+            {sections.map((sec) => {
+              const firstIdx = questions.findIndex(sec.match);
+              const isCurrentSection = currentQ && sec.match(currentQ);
+              const totalInSec = questions.filter(sec.match).length;
+              const answeredInSec = questions
+                .filter(sec.match)
+                .filter((q) =>
+                  q.category === "WRITTEN_PROMPT"
+                    ? Boolean(writtenEssay.trim())
+                    : Boolean(mcqAnswers[q.id])
+                ).length;
+
+              return (
+                <button
+                  key={sec.id}
+                  onClick={() => {
+                    if (firstIdx !== -1) setActiveIdx(firstIdx);
+                  }}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+                    isCurrentSection
+                      ? "bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-400/30"
+                      : "bg-white hover:bg-slate-50 text-slate-700 border border-slate-200"
+                  }`}
+                >
+                  <span>{sec.label}</span>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+                      isCurrentSection
+                        ? "bg-white/25 text-white"
+                        : "bg-slate-100 text-slate-700"
+                    }`}
+                  >
+                    {answeredInSec}/{totalInSec}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        );
+      })()}
+
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Left Column: Question Content */}
+        <div className="lg:col-span-3 bg-white p-8 rounded-3xl border border-slate-200 shadow-sm space-y-6">
+          {currentQ && (
+            <>
+              {/* Question metadata badge */}
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-extrabold text-xs flex items-center justify-center shadow-xs">
+                    {activeIdx + 1}
+                  </span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Section: {currentQ.category.replace("_", " ")}
+                  </span>
+                </div>
+                <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-extrabold text-emerald-800">
+                  {currentQ.points} Points
+                </span>
+              </div>
+
+              {/* Title & Description */}
+              <div className="space-y-3">
+                <h3 className="text-lg font-extrabold text-slate-900">{currentQ.title}</h3>
+                <div className="text-xs text-slate-800 leading-relaxed whitespace-pre-line bg-slate-50 p-5 rounded-2xl border border-slate-200 font-medium">
+                  {currentQ.content}
+                </div>
+              </div>
+
+              {/* Interaction: MCQs vs Written Essay */}
+              {currentQ.category === "WRITTEN_PROMPT" ? (
+                <div className="space-y-3 pt-2">
+                  <div className="flex justify-between items-center text-xs text-slate-600">
+                    <span className="font-bold text-slate-900">Compose your analytical response:</span>
+                    <span className="font-mono">
+                      Word Count:{" "}
+                      <strong
+                        className={
+                          countWords(writtenEssay) >= 100 ? "text-emerald-600 font-bold" : "text-amber-600 font-bold"
+                        }
+                      >
+                        {countWords(writtenEssay)}
+                      </strong>{" "}
+                      (Min: 100)
+                    </span>
+                  </div>
+
+                  <textarea
+                    rows={8}
+                    value={writtenEssay}
+                    onChange={(e) => setWrittenEssay(e.target.value)}
+                    placeholder="Type your response here... It will be evaluated for grammar, clarity, spelling, and sentence construction."
+                    className="w-full text-xs p-4 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-sans leading-relaxed text-slate-900 transition-all"
+                  />
+                </div>
+              ) : (
+                /* MCQs Options */
+                <div className="space-y-3 pt-2">
+                  <p className="text-xs font-bold text-slate-900">Select the correct option:</p>
+                  <div className="space-y-2.5">
+                    {Array.isArray(currentQ.options) &&
+                      currentQ.options.map((option, idx) => {
+                        const isSelected = mcqAnswers[currentQ.id] === option;
+                        return (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => handleSelectOption(currentQ.id, option)}
+                            className={`w-full text-left p-4 rounded-xl border text-xs font-semibold transition-all flex items-center gap-3.5 cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0 ${
+                              isSelected
+                                ? "bg-emerald-50 border-emerald-600 text-emerald-950 shadow-sm ring-2 ring-emerald-500/20"
+                                : "bg-white border-slate-200 text-slate-700 hover:bg-emerald-50/30 hover:border-emerald-300"
+                            }`}
+                          >
+                            <span
+                              className={`w-6 h-6 rounded-full border flex items-center justify-center text-[11px] font-extrabold ${
+                                isSelected
+                                  ? "border-emerald-600 bg-emerald-600 text-white shadow-sm"
+                                  : "border-slate-300 bg-slate-50 text-slate-600"
+                              }`}
+                            >
+                              {String.fromCharCode(65 + idx)}
+                            </span>
+                            <span className="flex-1">{option}</span>
+                          </button>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+
+              {/* Prev / Next controls */}
+              <div className="flex items-center justify-between pt-6 border-t border-slate-100">
+                <button
+                  type="button"
+                  disabled={activeIdx === 0}
+                  onClick={() => setActiveIdx((prev) => prev - 1)}
+                  className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl border border-slate-200 bg-white disabled:opacity-40 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer transition-all shadow-xs"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  Previous
+                </button>
+
+                <button
+                  type="button"
+                  disabled={activeIdx === questions.length - 1}
+                  onClick={() => setActiveIdx((prev) => prev + 1)}
+                  className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 text-white text-xs font-bold shadow-md shadow-emerald-600/20 cursor-pointer transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+                >
+                  Next Question
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Right Column: Question Palette */}
+        <div className="space-y-4">
+          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+            <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">
+              Question Navigator
+            </h4>
+
+            {/* Grouped by Section */}
+            {(() => {
+              const groups = [
+                {
+                  title: "🧠 Aptitude & Verbal",
+                  filter: (q: Question) => q.category === "APTITUDE" || q.category === "VERBAL",
+                },
+                {
+                  title: "✍️ Written Prompt",
+                  filter: (q: Question) => q.category === "WRITTEN_PROMPT",
+                },
+              ].filter((g) => questions.some(g.filter));
+
+              return (
+                <div className="space-y-4">
+                  {groups.map((grp) => {
+                    const groupQuestions = questions
+                      .map((q, originalIdx) => ({ q, originalIdx }))
+                      .filter(({ q }) => grp.filter(q));
+
+                    return (
+                      <div key={grp.title} className="space-y-2">
+                        <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                          {grp.title}
+                        </span>
+                        <div className="grid grid-cols-4 gap-2">
+                          {groupQuestions.map(({ q, originalIdx }) => {
+                            const isAnswered =
+                              q.category === "WRITTEN_PROMPT"
+                                ? Boolean(writtenEssay.trim())
+                                : Boolean(mcqAnswers[q.id]);
+                            const isActive = activeIdx === originalIdx;
+
+                            return (
+                              <button
+                                key={q.id}
+                                onClick={() => setActiveIdx(originalIdx)}
+                                className={`h-10 rounded-xl font-extrabold text-xs transition-all cursor-pointer flex items-center justify-center ${
+                                  isActive
+                                    ? "bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-400"
+                                    : isAnswered
+                                    ? "bg-emerald-50 text-emerald-800 border border-emerald-300"
+                                    : "bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100"
+                                }`}
+                              >
+                                {originalIdx + 1}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
+
+            <div className="pt-4 border-t border-slate-100 text-[11px] text-slate-600 space-y-2 font-medium">
+              <div className="flex items-center gap-2.5">
+                <span className="w-3 h-3 rounded-full bg-emerald-500" />
+                <span>Answered</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <span className="w-3 h-3 rounded-full bg-slate-200 border border-slate-300" />
+                <span>Unanswered</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <span className="w-3 h-3 rounded-full bg-emerald-600" />
+                <span>Current Question</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
