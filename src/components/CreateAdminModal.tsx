@@ -61,14 +61,14 @@ export const CreateAdminModal: React.FC<CreateAdminModalProps> = ({ onClose, onS
     <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
       <div className="bg-white w-full max-w-md rounded-3xl border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="p-6 bg-gradient-to-r from-emerald-50 to-teal-50/50 border-b border-emerald-100 flex items-center justify-between">
+        <div className="p-6 bg-[#eff5ff] border-b border-[#16499c]/20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-600/20">
+            <div className="w-10 h-10 rounded-2xl bg-[#16499c] text-white flex items-center justify-center shadow-md shadow-[#16499c]/20">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-base font-extrabold text-slate-900">Register New Administrator</h3>
-              <p className="text-[11px] text-emerald-800 font-medium">Grant supervisory & exam control privileges</p>
+              <p className="text-[11px] text-[#16499c] font-medium">Grant supervisory & exam control privileges</p>
             </div>
           </div>
           <button
@@ -89,7 +89,7 @@ export const CreateAdminModal: React.FC<CreateAdminModalProps> = ({ onClose, onS
           )}
 
           {successMessage && (
-            <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
+            <div className="p-3.5 rounded-xl bg-[#eff5ff] border border-[#16499c]/30 text-[#16499c] text-xs font-semibold flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
               <span>{successMessage}</span>
             </div>
@@ -106,7 +106,7 @@ export const CreateAdminModal: React.FC<CreateAdminModalProps> = ({ onClose, onS
               placeholder="e.g. Sarah Connor"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-xs text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 font-medium transition-all"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-xs text-slate-900 focus:outline-none focus:border-[#16499c] focus:ring-2 focus:ring-[#16499c]/20 font-medium transition-all"
             />
           </div>
 
@@ -121,7 +121,7 @@ export const CreateAdminModal: React.FC<CreateAdminModalProps> = ({ onClose, onS
               placeholder="e.g. sarah.admin@izeon.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-xs text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 font-medium transition-all"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-xs text-slate-900 focus:outline-none focus:border-[#16499c] focus:ring-2 focus:ring-[#16499c]/20 font-medium transition-all"
             />
           </div>
 
@@ -136,7 +136,7 @@ export const CreateAdminModal: React.FC<CreateAdminModalProps> = ({ onClose, onS
               placeholder="At least 6 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-xs text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 font-medium transition-all"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-xs text-slate-900 focus:outline-none focus:border-[#16499c] focus:ring-2 focus:ring-[#16499c]/20 font-medium transition-all"
             />
           </div>
 
@@ -151,7 +151,7 @@ export const CreateAdminModal: React.FC<CreateAdminModalProps> = ({ onClose, onS
               placeholder="Re-enter password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-xs text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 font-medium transition-all"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-xs text-slate-900 focus:outline-none focus:border-[#16499c] focus:ring-2 focus:ring-[#16499c]/20 font-medium transition-all"
             />
           </div>
 
@@ -166,7 +166,7 @@ export const CreateAdminModal: React.FC<CreateAdminModalProps> = ({ onClose, onS
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-extrabold shadow-md shadow-emerald-600/20 cursor-pointer transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+              className="px-5 py-2 rounded-xl bg-[#16499c] hover:bg-[#123c80] disabled:opacity-50 text-white text-xs font-extrabold shadow-md shadow-[#16499c]/20 cursor-pointer transition-all transform hover:-translate-y-0.5 active:translate-y-0"
             >
               {isSubmitting ? "Creating..." : "Create Admin Account"}
             </button>

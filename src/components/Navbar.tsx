@@ -43,8 +43,8 @@ export const Navbar: React.FC = () => {
                     Account Restricted
                   </span>
                 ) : (
-                  <span className="flex items-center gap-1 text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full font-semibold">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span className="flex items-center gap-1 text-[#16499c] bg-[#eff5ff] border border-[#16499c]/30 px-2.5 py-0.5 rounded-full font-semibold">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#16499c]" />
                     Assessment Ready
                   </span>
                 )}
@@ -54,8 +54,8 @@ export const Navbar: React.FC = () => {
             {/* Role Badge */}
             <span
               className={`px-2.5 py-1 rounded-lg text-[11px] font-bold tracking-wider uppercase ${user.role === "ADMIN"
-                  ? "bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-xs"
-                  : "bg-[#eff5ff] text-[#16499c] border border-[#16499c]/30"
+                  ? "bg-[#eff5ff] text-[#16499c] border border-[#16499c]/30 shadow-xs"
+                  : "bg-slate-100 text-slate-700 border border-slate-200"
                 }`}
             >
               {user.role}
@@ -91,7 +91,7 @@ export const Navbar: React.FC = () => {
             </Link>
             <Link
               to="/register"
-              className="text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-xl shadow-xs transition-all"
+              className="text-xs font-bold text-white bg-[#16499c] hover:bg-[#123c80] px-4 py-2 rounded-xl shadow-xs transition-all"
             >
               Create Account
             </Link>

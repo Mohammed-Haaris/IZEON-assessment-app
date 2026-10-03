@@ -47,7 +47,7 @@ export const CameraTile: React.FC<CameraTileProps> = ({ onPermissionChange, clas
   return (
     <div
       className={`relative rounded-xl overflow-hidden bg-slate-900 border-2 ${
-        hasPermission ? "border-emerald-500 shadow-lg shadow-emerald-500/10" : "border-rose-500"
+        hasPermission ? "border-[#16499c] shadow-lg shadow-[#16499c]/10" : "border-rose-500"
       } ${className}`}
     >
       {/* Video feed */}

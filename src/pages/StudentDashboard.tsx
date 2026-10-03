@@ -135,12 +135,12 @@ export const StudentDashboard: React.FC = () => {
           ) : assessment ? (
             <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
               {/* Header Banner */}
-              <div className="bg-emerald-50/70 border-b border-emerald-100/80 p-8 relative overflow-hidden">
-                <div className="absolute right-0 top-0 -mt-10 -mr-10 w-64 h-64 bg-emerald-200/30 rounded-full blur-3xl pointer-events-none" />
+              <div className="bg-[#eff5ff]/80 border-b border-[#16499c]/20 p-8 relative overflow-hidden">
+                <div className="absolute right-0 top-0 -mt-10 -mr-10 w-64 h-64 bg-[#16499c]/10 rounded-full blur-3xl pointer-events-none" />
                 <div className="relative z-10 flex flex-wrap items-center justify-between gap-6">
                   <div>
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-200 mb-2.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white text-[#16499c] text-xs font-bold border border-[#16499c]/30 mb-2.5">
+                      <span className="w-2 h-2 rounded-full bg-[#16499c] animate-pulse" />
                       Active Assessment Live
                     </span>
                     <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
@@ -153,11 +153,11 @@ export const StudentDashboard: React.FC = () => {
 
                   {existingAttempt?.status === "COMPLETED" ? (
                     <div className="flex flex-col items-end gap-1.5">
-                      <div className="px-6 py-3.5 bg-emerald-600 text-white rounded-2xl flex items-center gap-2 text-sm font-extrabold shadow-md shadow-emerald-600/20">
-                        <CheckCircle2 className="w-5 h-5 text-emerald-100" />
+                      <div className="px-6 py-3.5 bg-[#16499c] text-white rounded-2xl flex items-center gap-2 text-sm font-extrabold shadow-md shadow-[#16499c]/20">
+                        <CheckCircle2 className="w-5 h-5 text-blue-100" />
                         Assessment Completed
                       </div>
-                      <span className="text-[11px] font-semibold text-emerald-800">
+                      <span className="text-[11px] font-semibold text-[#16499c]">
                         Both rounds submitted. Retakes disabled.
                       </span>
                     </div>
@@ -185,7 +185,7 @@ export const StudentDashboard: React.FC = () => {
                     <button
                       onClick={handleStartAssessment}
                       disabled={isStarting}
-                      className="flex items-center gap-2.5 px-8 py-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base transition-all shadow-lg shadow-emerald-600/25 cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
+                      className="flex items-center gap-2.5 px-8 py-4 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-bold text-base transition-all shadow-lg shadow-[#16499c]/25 cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
                     >
                       <Play className="w-5 h-5 fill-white" />
                       {existingAttempt ? "Resume Assessment" : "Start Assessment Now"}
@@ -196,9 +196,9 @@ export const StudentDashboard: React.FC = () => {
 
               {/* Completed Notice Strip */}
               {existingAttempt?.status === "COMPLETED" && (
-                <div className="p-5 bg-emerald-50/90 border-b border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="p-5 bg-[#eff5ff] border-b border-[#16499c]/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-[#16499c] text-white flex items-center justify-center shrink-0">
                       <CheckCircle2 className="w-5 h-5" />
                     </div>
                     <div>
@@ -210,7 +210,7 @@ export const StudentDashboard: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-extrabold text-[10px] uppercase tracking-wider shrink-0 border border-emerald-200">
+                  <span className="px-3 py-1 rounded-full bg-[#eff5ff] text-[#16499c] font-extrabold text-[10px] uppercase tracking-wider shrink-0 border border-[#16499c]/30">
                     Submission Locked
                   </span>
                 </div>
@@ -219,12 +219,12 @@ export const StudentDashboard: React.FC = () => {
               {/* Assessment Breakdown Cards */}
               <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/40">
                 {/* Round 1 Card */}
-                <div className="bg-white p-7 rounded-2xl border border-slate-200 shadow-sm space-y-4 hover:border-emerald-300 transition-all">
+                <div className="bg-white p-7 rounded-2xl border border-slate-200 shadow-sm space-y-4 hover:border-[#16499c]/40 transition-all">
                   <div className="flex items-center justify-between">
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 shadow-inner">
+                    <div className="w-12 h-12 rounded-2xl bg-[#eff5ff] border border-[#16499c]/30 flex items-center justify-center text-[#16499c] shadow-inner">
                       <FileText className="w-6 h-6" />
                     </div>
-                    <span className="px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs sm:text-sm font-bold text-emerald-800 font-mono">
+                    <span className="px-3.5 py-1.5 rounded-full bg-[#eff5ff] border border-[#16499c]/30 text-xs sm:text-sm font-bold text-[#16499c] font-mono">
                       ⏱ {assessment.durationR1} Minutes
                     </span>
                   </div>
@@ -236,15 +236,15 @@ export const StudentDashboard: React.FC = () => {
                   </div>
                   <ul className="text-sm text-slate-800 space-y-2.5 pt-3 border-t border-slate-100">
                     <li className="flex items-center gap-2.5">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-[#16499c] shrink-0" />
                       <span>Maths, puzzles & logical thinking questions</span>
                     </li>
                     <li className="flex items-center gap-2.5">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-[#16499c] shrink-0" />
                       <span>Basic domain questions matching your selected role</span>
                     </li>
                     <li className="flex items-center gap-2.5">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-[#16499c] shrink-0" />
                       <span>Short written English answer (minimum 100 words)</span>
                     </li>
                   </ul>
@@ -268,11 +268,11 @@ export const StudentDashboard: React.FC = () => {
                   </div>
                   <ul className="text-sm text-slate-800 space-y-2.5 pt-3 border-t border-slate-100">
                     <li className="flex items-center gap-2.5">
-                      <Camera className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <Camera className="w-4 h-4 text-[#16499c] shrink-0" />
                       <span><strong>Webcam Required:</strong> Your camera must stay on throughout the test</span>
                     </li>
                     <li className="flex items-center gap-2.5">
-                      <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+                      <ShieldCheck className="w-4 h-4 text-[#16499c] shrink-0" />
                       <span><strong>Write & Run Code:</strong> Python for Developers or SQL for Data Analysts</span>
                     </li>
                     <li className="flex items-center gap-2.5 text-rose-600 font-medium">

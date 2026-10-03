@@ -12,13 +12,13 @@
 
 @layer base {
   :root {
-    --primary-emerald: #059669;
-    --primary-emerald-hover: #047857;
-    --mint-accent: #10b981;
-    --soft-green-bg: #f4fbf7;
+    --primary-blue: #16499c;
+    --primary-blue-hover: #123c80;
+    --blue-accent: #2563eb;
+    --soft-blue-bg: #eff5ff;
     --pure-white: #ffffff;
 
-    /* Logo Brand Blue (Secondary Color) */
+    /* Logo Brand Blue (Primary Theme Color) */
     --brand-blue: #16499c;
     --brand-blue-hover: #123c80;
     --brand-blue-light: #eff5ff;
@@ -26,7 +26,21 @@
   }
 }
 
-/* Secondary Button and Border Utilities using Logo Blue */
+/* Primary and Secondary Button and Border Utilities using Logo Blue */
+.btn-primary {
+  background-color: #16499c;
+  color: #ffffff;
+  border: 1px solid #16499c;
+  box-shadow: 0 4px 14px 0 rgba(22, 73, 156, 0.25);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-primary:hover {
+  background-color: #123c80;
+  border-color: #123c80;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px 0 rgba(22, 73, 156, 0.35);
+}
+
 .btn-secondary {
   background-color: #16499c;
   color: #ffffff;
@@ -63,7 +77,7 @@ html, body, #root {
   margin: 0;
   padding: 0;
   font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: #f7faf8;
+  background-color: #f8fafc;
   color: #0f172a;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -77,14 +91,14 @@ code, pre, kbd, samp {
 
 /* Glassmorphism & Glow Utilities */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  border: 1px solid rgba(22, 73, 156, 0.15);
 }
 
-.emerald-glow {
-  box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.2);
+.blue-glow {
+  box-shadow: 0 10px 25px -5px rgba(22, 73, 156, 0.2);
 }
 
 .card-elevated {
@@ -94,8 +108,8 @@ code, pre, kbd, samp {
 }
 
 .card-elevated:hover {
-  border-color: #a7f3d0;
-  box-shadow: 0 8px 24px -4px rgba(16, 185, 129, 0.08);
+  border-color: rgba(22, 73, 156, 0.4);
+  box-shadow: 0 8px 24px -4px rgba(22, 73, 156, 0.12);
 }
 
 /* Custom crisp scrollbars */
@@ -104,12 +118,12 @@ code, pre, kbd, samp {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f3;
+  background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #a7f3d0;
+  background: #93c5fd;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #10b981;
+  background: #16499c;
 }

@@ -42,7 +42,7 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
         {/* Header */}
         <div className="px-6 py-5 bg-slate-900 text-white flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center font-bold text-base shadow-sm">
+            <div className="w-10 h-10 rounded-xl bg-[#16499c] flex items-center justify-center font-bold text-base shadow-sm">
               {attempt.user?.name?.charAt(0).toUpperCase() || "C"}
             </div>
             <div>
@@ -51,7 +51,7 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                 <span
                   className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
                     isPass
-                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                      ? "bg-[#16499c]/20 text-[#93c5fd] border border-[#16499c]/30"
                       : attempt.status === "COMPLETED"
                       ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
                       : "bg-[#16499c]/20 text-[#93c5fd] border border-[#16499c]/30"
@@ -71,7 +71,7 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={() => generateCandidateScorecardPDF(attempt)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors cursor-pointer shadow-sm shadow-emerald-600/25"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-semibold text-xs transition-colors cursor-pointer shadow-sm shadow-[#16499c]/25"
             >
               <Download className="w-3.5 h-3.5" />
               Download Scorecard PDF
@@ -91,7 +91,7 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
           <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
             <div>
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                <Briefcase className="w-3.5 h-3.5 text-emerald-600" />
+                <Briefcase className="w-3.5 h-3.5 text-[#16499c]" />
                 Target Track / Role
               </span>
               <p className="font-bold text-slate-900 mt-1 text-sm">
@@ -100,7 +100,7 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
             </div>
             <div>
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-emerald-600" />
+                <User className="w-3.5 h-3.5 text-[#16499c]" />
                 Roll Number
               </span>
               <p className="font-mono font-bold text-slate-900 mt-1 text-sm">
@@ -109,7 +109,7 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
             </div>
             <div>
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                <GraduationCap className="w-3.5 h-3.5 text-emerald-600" />
+                <GraduationCap className="w-3.5 h-3.5 text-[#16499c]" />
                 Department
               </span>
               <p className="font-semibold text-slate-900 mt-1 text-sm">
@@ -118,7 +118,7 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
             </div>
             <div>
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                <GraduationCap className="w-3.5 h-3.5 text-emerald-600" />
+                <GraduationCap className="w-3.5 h-3.5 text-[#16499c]" />
                 College / Institution
               </span>
               <p className="font-semibold text-slate-900 mt-1 text-sm">
@@ -128,7 +128,7 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
 
             <div>
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                <Phone className="w-3.5 h-3.5 text-[#16499c]" />
                 Mobile Number
               </span>
               <p className="font-mono font-semibold text-slate-800 mt-1 text-sm">
@@ -137,14 +137,14 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
             </div>
             <div>
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+                <Calendar className="w-3.5 h-3.5 text-[#16499c]" />
                 Date of Birth (DOB)
               </span>
               <p className="text-slate-800 font-medium mt-1 text-sm">{attempt.user?.dob || "—"}</p>
             </div>
             <div>
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                <ShieldAlert className="w-3.5 h-3.5 text-emerald-600" />
+                <ShieldAlert className="w-3.5 h-3.5 text-[#16499c]" />
                 Tab Switch Violations
               </span>
               <p
@@ -157,7 +157,7 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
             </div>
             <div>
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-emerald-600" />
+                <Calendar className="w-3.5 h-3.5 text-[#16499c]" />
                 Attempt Started
               </span>
               <p className="text-slate-800 font-medium mt-1 text-sm">
@@ -168,38 +168,38 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
 
           {/* Scores Overview Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-4 rounded-2xl bg-teal-50/60 border border-teal-100 flex items-center justify-between">
+            <div className="p-4 rounded-2xl bg-[#eff5ff]/60 border border-[#16499c]/20 flex items-center justify-between">
               <div>
-                <span className="text-[11px] font-bold uppercase text-teal-700">
+                <span className="text-[11px] font-bold uppercase text-[#16499c]">
                   Round 1: Cognitive
                 </span>
-                <p className="text-2xl font-black text-teal-900 mt-0.5">
+                <p className="text-2xl font-black text-slate-900 mt-0.5">
                   {attempt.round1Score !== null && attempt.round1Score !== undefined
                     ? `${attempt.round1Score} Pts`
                     : "—"}
                 </p>
               </div>
-              <Award className="w-8 h-8 text-teal-300" />
+              <Award className="w-8 h-8 text-[#93c5fd]" />
             </div>
 
-            <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-100 flex items-center justify-between">
+            <div className="p-4 rounded-2xl bg-[#eff5ff]/60 border border-[#16499c]/20 flex items-center justify-between">
               <div>
-                <span className="text-[11px] font-bold uppercase text-emerald-700">
+                <span className="text-[11px] font-bold uppercase text-[#16499c]">
                   Round 2: Technical
                 </span>
-                <p className="text-2xl font-black text-emerald-900 mt-0.5">
+                <p className="text-2xl font-black text-slate-900 mt-0.5">
                   {attempt.round2Score !== null && attempt.round2Score !== undefined
                     ? `${attempt.round2Score} Pts`
                     : "—"}
                 </p>
               </div>
-              <Code2 className="w-8 h-8 text-emerald-300" />
+              <Code2 className="w-8 h-8 text-[#93c5fd]" />
             </div>
 
             <div
               className={`p-4 rounded-2xl border flex items-center justify-between ${
                 isPass
-                  ? "bg-emerald-50 border-emerald-200"
+                  ? "bg-[#eff5ff] border-[#16499c]/30"
                   : "bg-slate-50 border-slate-200"
               }`}
             >
@@ -215,7 +215,7 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                 </p>
               </div>
               {isPass ? (
-                <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                <CheckCircle2 className="w-8 h-8 text-[#16499c]" />
               ) : (
                 <XCircle className="w-8 h-8 text-slate-400" />
               )}
@@ -259,7 +259,7 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                         Question ID: {qId.slice(0, 8)}...
                       </span>
                     </div>
-                    <pre className="text-xs font-mono overflow-x-auto p-2 bg-slate-950/80 rounded-xl text-emerald-400 leading-relaxed max-h-56">
+                    <pre className="text-xs font-mono overflow-x-auto p-2 bg-slate-950/80 rounded-xl text-[#93c5fd] leading-relaxed max-h-56">
                       {String(code)}
                     </pre>
                   </div>

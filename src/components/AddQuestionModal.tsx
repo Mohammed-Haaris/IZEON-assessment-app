@@ -223,12 +223,12 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/50 backdrop-blur-sm animate-in fade-in duration-150">
       <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-slate-200/80 overflow-hidden max-h-[90vh] flex flex-col">
         {/* Top Light Green Brand Line */}
-        <div className="h-1.5 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600" />
+        <div className="h-1.5 bg-gradient-to-r from-[#16499c] via-[#2563eb] to-[#123c80]" />
 
         {/* Header */}
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 shadow-xs">
+            <div className="w-10 h-10 rounded-2xl bg-[#eff5ff] border border-[#16499c]/30 flex items-center justify-center text-[#16499c] shadow-xs">
               <Plus className="w-5 h-5" />
             </div>
             <div>
@@ -258,7 +258,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
           {/* Assessment Selection - Custom Crafted Dropdown */}
           <div>
             <label className="block font-bold text-slate-800 mb-1.5 flex items-center gap-1.5">
-              <BookOpen className="w-3.5 h-3.5 text-emerald-600" />
+              <BookOpen className="w-3.5 h-3.5 text-[#16499c]" />
               Target Assessment
             </label>
             <CustomSelect
@@ -273,7 +273,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
             <div>
               <label className="block font-bold text-slate-800 mb-1.5 flex items-center gap-1.5">
-                <Target className="w-3.5 h-3.5 text-emerald-600" />
+                <Target className="w-3.5 h-3.5 text-[#16499c]" />
                 Target Track
               </label>
               <CustomSelect
@@ -285,7 +285,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
 
             <div>
               <label className="block font-bold text-slate-800 mb-1.5 flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-emerald-600" />
+                <Layers className="w-3.5 h-3.5 text-[#16499c]" />
                 Assessment Round
               </label>
               <CustomSelect
@@ -298,7 +298,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
             {/* Category Selector - Custom Crafted Dropdown */}
             <div>
               <label className="block font-bold text-slate-800 mb-1.5 flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#16499c]" />
                 Category Type
               </label>
               <CustomSelect
@@ -319,7 +319,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g., SQL: Department Salary Aggregations or Python: Data Filtering"
-                className="w-full p-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium"
+                className="w-full p-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] font-medium"
               />
             </div>
             <div>
@@ -331,7 +331,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
                 required
                 value={points}
                 onChange={(e) => setPoints(Number(e.target.value))}
-                className="w-full p-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium"
+                className="w-full p-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] font-medium"
               />
             </div>
           </div>
@@ -347,7 +347,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="Enter the complete question, scenario, or SQL/Python problem specifications..."
-              className="w-full p-3 rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 leading-relaxed font-sans font-medium"
+              className="w-full p-3 rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] leading-relaxed font-sans font-medium"
             />
           </div>
 
@@ -368,7 +368,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
                     name="correctAnswerRadio"
                     checked={Boolean(correctAnswer && correctAnswer === opt && opt.trim() !== "")}
                     onChange={() => opt.trim() && setCorrectAnswer(opt)}
-                    className="w-4 h-4 text-emerald-600 accent-emerald-600 focus:ring-emerald-500"
+                    className="w-4 h-4 text-[#16499c] accent-[#16499c] focus:ring-[#16499c]"
                   />
                   <span className="w-5 text-center font-bold text-slate-500">
                     {String.fromCharCode(65 + idx)}.
@@ -383,7 +383,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
                       }
                     }}
                     placeholder={`Option ${String.fromCharCode(65 + idx)}`}
-                    className="flex-1 p-2 rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium"
+                    className="flex-1 p-2 rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] font-medium"
                   />
                 </div>
               ))}
@@ -401,7 +401,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
                     onClick={() => setCodeLanguageTab("python")}
                     className={`px-3 py-1 rounded-lg font-bold cursor-pointer transition-all ${
                       codeLanguageTab === "python"
-                        ? "bg-emerald-600 text-white shadow-xs"
+                        ? "bg-[#16499c] text-white shadow-xs"
                         : "text-slate-600 hover:bg-slate-100"
                     }`}
                   >
@@ -412,7 +412,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
                     onClick={() => setCodeLanguageTab("sql")}
                     className={`px-3 py-1 rounded-lg font-bold cursor-pointer transition-all ${
                       codeLanguageTab === "sql"
-                        ? "bg-emerald-600 text-white shadow-xs"
+                        ? "bg-[#16499c] text-white shadow-xs"
                         : "text-slate-600 hover:bg-slate-100"
                     }`}
                   >
@@ -423,7 +423,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
                     onClick={() => setCodeLanguageTab("javascript")}
                     className={`px-3 py-1 rounded-lg font-bold cursor-pointer transition-all ${
                       codeLanguageTab === "javascript"
-                        ? "bg-emerald-600 text-white shadow-xs"
+                        ? "bg-[#16499c] text-white shadow-xs"
                         : "text-slate-600 hover:bg-slate-100"
                     }`}
                   >
@@ -442,7 +442,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
                     value={sampleInput}
                     onChange={(e) => setSampleInput(e.target.value)}
                     placeholder="e.g., transactions dataset or nums = [2, 7]"
-                    className="w-full p-2 rounded-xl border border-slate-200 bg-white font-mono text-[11px] text-slate-900 focus:outline-none focus:border-emerald-500"
+                    className="w-full p-2 rounded-xl border border-slate-200 bg-white font-mono text-[11px] text-slate-900 focus:outline-none focus:border-[#16499c]"
                   />
                 </div>
                 <div>
@@ -454,7 +454,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
                     value={sampleOutput}
                     onChange={(e) => setSampleOutput(e.target.value)}
                     placeholder="e.g., {'total_volume': 350.0} or [0, 1]"
-                    className="w-full p-2 rounded-xl border border-slate-200 bg-white font-mono text-[11px] text-slate-900 focus:outline-none focus:border-emerald-500"
+                    className="w-full p-2 rounded-xl border border-slate-200 bg-white font-mono text-[11px] text-slate-900 focus:outline-none focus:border-[#16499c]"
                   />
                 </div>
               </div>
@@ -469,7 +469,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
                     rows={4}
                     value={starterCodePy}
                     onChange={(e) => setStarterCodePy(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border border-slate-200 font-mono text-[11px] bg-white text-slate-900 focus:outline-none focus:border-emerald-500"
+                    className="w-full p-2.5 rounded-xl border border-slate-200 font-mono text-[11px] bg-white text-slate-900 focus:outline-none focus:border-[#16499c]"
                   />
                 </div>
               )}
@@ -483,7 +483,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
                     rows={4}
                     value={starterCodeSql}
                     onChange={(e) => setStarterCodeSql(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border border-slate-200 font-mono text-[11px] bg-white text-slate-900 focus:outline-none focus:border-emerald-500"
+                    className="w-full p-2.5 rounded-xl border border-slate-200 font-mono text-[11px] bg-white text-slate-900 focus:outline-none focus:border-[#16499c]"
                   />
                 </div>
               )}
@@ -497,7 +497,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
                     rows={4}
                     value={starterCodeJs}
                     onChange={(e) => setStarterCodeJs(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border border-slate-200 font-mono text-[11px] bg-white text-slate-900 focus:outline-none focus:border-emerald-500"
+                    className="w-full p-2.5 rounded-xl border border-slate-200 font-mono text-[11px] bg-white text-slate-900 focus:outline-none focus:border-[#16499c]"
                   />
                 </div>
               )}
@@ -517,7 +517,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-xs cursor-pointer disabled:opacity-50 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-extrabold text-xs shadow-xs cursor-pointer disabled:opacity-50 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
             >
               <Plus className="w-4 h-4" />
               {isSubmitting ? "Adding Question..." : "Add Question to Exam"}

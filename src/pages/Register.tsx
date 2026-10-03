@@ -65,7 +65,7 @@ export const Register: React.FC = () => {
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 py-8">
       <div className="w-full max-w-2xl bg-white rounded-3xl shadow-xl border border-slate-200/90 p-8 md:p-10 space-y-6 relative overflow-hidden">
         {/* Top Accent Line */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-600 via-[#16499c] to-emerald-500" />
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#16499c] via-[#2563eb] to-[#123c80]" />
 
         {/* Header */}
         <div className="text-center space-y-2">
@@ -102,7 +102,7 @@ export const Register: React.FC = () => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g., Alex Johnson"
-                  className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                  className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] transition-all"
                 />
               </div>
             </div>
@@ -120,7 +120,7 @@ export const Register: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="alex@example.com"
-                  className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                  className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] transition-all"
                 />
               </div>
             </div>
@@ -138,7 +138,7 @@ export const Register: React.FC = () => {
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value)}
                   placeholder="+91 98765 43210"
-                  className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                  className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] transition-all"
                 />
               </div>
             </div>
@@ -155,7 +155,7 @@ export const Register: React.FC = () => {
                   required
                   value={dob}
                   onChange={(e) => setDob(e.target.value)}
-                  className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                  className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] transition-all"
                 />
               </div>
             </div>
@@ -173,7 +173,7 @@ export const Register: React.FC = () => {
                   value={rollNumber}
                   onChange={(e) => setRollNumber(e.target.value)}
                   placeholder="e.g., 2021CS104"
-                  className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                  className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] transition-all"
                 />
               </div>
             </div>
@@ -191,7 +191,7 @@ export const Register: React.FC = () => {
                   value={department}
                   onChange={(e) => setDepartment(e.target.value)}
                   placeholder="e.g., Computer Science / IT"
-                  className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                  className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] transition-all"
                 />
               </div>
             </div>
@@ -209,7 +209,7 @@ export const Register: React.FC = () => {
                   value={college}
                   onChange={(e) => setCollege(e.target.value)}
                   placeholder="e.g., National Engineering College"
-                  className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                  className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] transition-all"
                 />
               </div>
             </div>
@@ -225,14 +225,14 @@ export const Register: React.FC = () => {
                   onClick={() => setPosition("Software Developer")}
                   className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-start gap-3.5 ${
                     position === "Software Developer"
-                      ? "border-emerald-600 bg-emerald-50/80 ring-2 ring-emerald-500/20 shadow-sm"
+                      ? "border-[#16499c] bg-[#eff5ff] ring-2 ring-[#16499c]/20 shadow-sm"
                       : "border-slate-200 hover:border-slate-300 bg-white"
                   }`}
                 >
                   <div
                     className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
                       position === "Software Developer"
-                        ? "bg-emerald-600 text-white shadow-sm"
+                        ? "bg-[#16499c] text-white shadow-sm"
                         : "bg-slate-100 text-slate-600"
                     }`}
                   >
@@ -242,7 +242,7 @@ export const Register: React.FC = () => {
                     <div className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
                       Software Developer
                       {position === "Software Developer" && (
-                        <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+                        <span className="w-2 h-2 rounded-full bg-[#16499c]"></span>
                       )}
                     </div>
                     <div className="text-xs text-slate-600 mt-1 font-normal">
@@ -256,14 +256,14 @@ export const Register: React.FC = () => {
                   onClick={() => setPosition("Data Analyst")}
                   className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-start gap-3.5 ${
                     position === "Data Analyst"
-                      ? "border-emerald-600 bg-emerald-50/80 ring-2 ring-emerald-500/20 shadow-sm"
+                      ? "border-[#16499c] bg-[#eff5ff] ring-2 ring-[#16499c]/20 shadow-sm"
                       : "border-slate-200 hover:border-slate-300 bg-white"
                   }`}
                 >
                   <div
                     className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
                       position === "Data Analyst"
-                        ? "bg-emerald-600 text-white shadow-sm"
+                        ? "bg-[#16499c] text-white shadow-sm"
                         : "bg-slate-100 text-slate-600"
                     }`}
                   >
@@ -273,7 +273,7 @@ export const Register: React.FC = () => {
                     <div className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
                       Data Analyst
                       {position === "Data Analyst" && (
-                        <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+                        <span className="w-2 h-2 rounded-full bg-[#16499c]"></span>
                       )}
                     </div>
                     <div className="text-xs text-slate-600 mt-1 font-normal">
@@ -298,13 +298,13 @@ export const Register: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] transition-all"
               />
             </div>
           </div>
 
-          <div className="p-4 bg-emerald-50/80 border border-emerald-200 rounded-2xl text-xs text-emerald-950 flex items-start gap-2.5 font-medium leading-relaxed">
-            <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
+          <div className="p-4 bg-[#eff5ff] border border-[#16499c]/25 rounded-2xl text-xs text-slate-800 flex items-start gap-2.5 font-medium leading-relaxed">
+            <ShieldCheck className="w-4 h-4 text-[#16499c] shrink-0 mt-0.5" />
             <span>
               Candidate Note: Direct assessment access enabled. You can begin your examination immediately after registration.
             </span>
@@ -313,7 +313,7 @@ export const Register: React.FC = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-sm transition-all shadow-md shadow-emerald-600/25 cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#16499c] hover:bg-[#123c80] disabled:opacity-50 text-white font-bold text-sm transition-all shadow-md shadow-[#16499c]/25 cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
           >
             {isSubmitting ? "Registering Candidate..." : "Complete Registration"}
             <ArrowRight className="w-4 h-4" />
@@ -323,7 +323,7 @@ export const Register: React.FC = () => {
         {/* Footer */}
         <div className="text-center text-sm text-slate-600 pt-4 border-t border-slate-100 font-medium">
           Already registered?{" "}
-          <Link to="/login" className="font-bold text-emerald-700 hover:text-emerald-800 hover:underline">
+          <Link to="/login" className="font-bold text-[#16499c] hover:text-[#123c80] hover:underline">
             Sign In Here
           </Link>
         </div>

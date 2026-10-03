@@ -320,7 +320,7 @@ export const AdminDashboard: React.FC = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsCreateAdminOpen(true)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm shadow-emerald-600/20 transition-all cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white text-xs font-bold shadow-sm shadow-[#16499c]/20 transition-all cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
             >
               <UserPlus className="w-3.5 h-3.5" />
               Register New Admin
@@ -354,8 +354,8 @@ export const AdminDashboard: React.FC = () => {
 
         {/* Real-time KPI Stats Strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-100">
-          <div className="p-3.5 rounded-2xl bg-emerald-50/40 border border-emerald-100/60 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0 shadow-xs">
+          <div className="p-3.5 rounded-2xl bg-[#eff5ff]/40 border border-[#16499c]/20 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white border border-[#16499c]/30 text-[#16499c] flex items-center justify-center shrink-0 shadow-xs">
               <Users className="w-5 h-5" />
             </div>
             <div>
@@ -378,8 +378,8 @@ export const AdminDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-emerald-50/40 border border-emerald-100/60 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0 shadow-xs">
+          <div className="p-3.5 rounded-2xl bg-[#eff5ff]/40 border border-[#16499c]/20 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white border border-[#16499c]/30 text-[#16499c] flex items-center justify-center shrink-0 shadow-xs">
               <Award className="w-5 h-5" />
             </div>
             <div>
@@ -450,7 +450,7 @@ export const AdminDashboard: React.FC = () => {
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => handleGiveChance(attempt.id, "Admin authorized candidate to resume assessment")}
-                      className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-sm shadow-emerald-600/20 transition-all cursor-pointer flex items-center gap-1.5"
+                      className="px-4 py-2 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-extrabold text-xs shadow-sm shadow-[#16499c]/20 transition-all cursor-pointer flex items-center gap-1.5"
                     >
                       <CheckCircle2 className="w-4 h-4" />
                       Give Another Chance
@@ -485,8 +485,8 @@ export const AdminDashboard: React.FC = () => {
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${isActive
-                ? "bg-emerald-700 text-white shadow-xs"
-                : "text-slate-600 hover:text-emerald-800 hover:bg-emerald-50/50"
+                ? "bg-[#16499c] text-white shadow-xs"
+                : "text-slate-600 hover:text-[#16499c] hover:bg-[#eff5ff]"
                 }`}
             >
               <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-400"}`} />
@@ -494,8 +494,8 @@ export const AdminDashboard: React.FC = () => {
               {tab.badge !== undefined && tab.badge > 0 && (
                 <span
                   className={`px-2 py-0.5 rounded-full text-[10px] font-extrabold ${isActive
-                    ? "bg-white text-emerald-800"
-                    : "bg-emerald-100 text-emerald-800"
+                    ? "bg-white text-[#16499c]"
+                    : "bg-[#eff5ff] text-[#16499c]"
                     }`}
                 >
                   {tab.badge}
@@ -512,13 +512,13 @@ export const AdminDashboard: React.FC = () => {
           {/* Filter Bar */}
           <div className="flex flex-col sm:flex-row gap-3 justify-between items-center bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
             <div className="relative w-full sm:w-96">
-              <Search className="w-4 h-4 text-emerald-600 absolute left-3 top-2.5" />
+              <Search className="w-4 h-4 text-[#16499c] absolute left-3 top-2.5" />
               <input
                 type="text"
                 placeholder="Search by name, roll no, dept, position, phone..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full text-xs pl-9 pr-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-medium"
+                className="w-full text-xs pl-9 pr-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] font-medium"
               />
             </div>
 
@@ -529,8 +529,8 @@ export const AdminDashboard: React.FC = () => {
                   key={status}
                   onClick={() => setStatusFilter(status)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition-all ${statusFilter === status
-                    ? "bg-emerald-700 text-white shadow-xs"
-                    : "bg-slate-100 text-slate-600 hover:bg-emerald-50/60 hover:text-emerald-900"
+                    ? "bg-[#16499c] text-white shadow-xs"
+                    : "bg-slate-100 text-slate-600 hover:bg-[#eff5ff] hover:text-[#16499c]"
                     }`}
                 >
                   {status === "ALL" ? "All" : status === "APPROVED" ? "Active" : "Restricted"}
@@ -559,7 +559,7 @@ export const AdminDashboard: React.FC = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-emerald-50/40 border-b border-emerald-100/80 text-[11px] font-extrabold uppercase tracking-wider text-emerald-950">
+                  <tr className="bg-[#eff5ff]/40 border-b border-[#16499c]/20 text-[11px] font-extrabold uppercase tracking-wider text-slate-900">
                     <th className="py-3.5 px-6">Candidate</th>
                     <th className="py-3.5 px-6">Roll & Dept</th>
                     <th className="py-3.5 px-6">Applied Role</th>
@@ -579,7 +579,7 @@ export const AdminDashboard: React.FC = () => {
                     </tr>
                   ) : (
                     filteredStudents.map((student) => (
-                      <tr key={student.id} className="hover:bg-emerald-50/20 transition-colors">
+                      <tr key={student.id} className="hover:bg-[#eff5ff]/30 transition-colors">
                         <td className="py-3.5 px-6">
                           <div className="font-bold text-slate-900">{student.name}</div>
                           <div className="text-[11px] font-mono text-slate-400">{student.email}</div>
@@ -613,7 +613,7 @@ export const AdminDashboard: React.FC = () => {
                         <td className="py-3.5 px-6">
                           <span
                             className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${student.status === "APPROVED"
-                              ? "bg-emerald-100 text-emerald-800"
+                              ? "bg-[#eff5ff] text-[#16499c]"
                               : student.status === "PENDING_APPROVAL"
                                 ? "bg-amber-100 text-amber-800"
                                 : "bg-rose-100 text-rose-800"
@@ -630,7 +630,7 @@ export const AdminDashboard: React.FC = () => {
                             {student.status === "PENDING_APPROVAL" ? (
                               <button
                                 onClick={() => handleUpdateStudentStatus(student.id, "APPROVED")}
-                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs cursor-pointer transition-all"
+                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-bold text-xs shadow-xs cursor-pointer transition-all"
                               >
                                 <Check className="w-3.5 h-3.5" />
                                 Activate
@@ -645,7 +645,7 @@ export const AdminDashboard: React.FC = () => {
                             ) : (
                               <button
                                 onClick={() => handleUpdateStudentStatus(student.id, "APPROVED")}
-                                className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer"
+                                className="text-[11px] font-bold text-[#16499c] hover:text-[#16499c] hover:underline cursor-pointer"
                               >
                                 Restore Access
                               </button>
@@ -673,11 +673,11 @@ export const AdminDashboard: React.FC = () => {
       {/* TAB 2: LIVE PROCTORING & MALPRACTICE LOGS */}
       {activeTab === "proctor" && (
         <div className="space-y-6">
-          <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-xs text-emerald-950 flex items-start gap-3 shadow-xs">
-            <ShieldAlert className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
+          <div className="p-4 rounded-2xl bg-[#eff5ff]/80 border border-[#16499c]/30 text-xs text-slate-900 flex items-start gap-3 shadow-xs">
+            <ShieldAlert className="w-5 h-5 text-[#16499c] shrink-0 mt-0.5" />
             <div>
-              <p className="font-extrabold text-emerald-950">Real-time Anti-Cheating System is Active</p>
-              <p className="text-[11px] text-emerald-900/70 mt-0.5 font-medium">
+              <p className="font-extrabold text-slate-900">Real-time Anti-Cheating System is Active</p>
+              <p className="text-[11px] text-slate-600 mt-0.5 font-medium">
                 When a candidate switches tabs twice in Round 2, an instant interactive pop-up
                 will appear allowing you to either give them another chance or immediately disqualify
                 them.
@@ -730,7 +730,7 @@ export const AdminDashboard: React.FC = () => {
                       <td className="py-3.5 px-6">
                         <span
                           className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${log.adminDecision === "GIVEN_CHANCE"
-                            ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                            ? "bg-[#eff5ff] text-[#16499c] border border-[#16499c]/30"
                             : log.adminDecision === "REJECTED"
                               ? "bg-rose-100 text-rose-800 border border-rose-200"
                               : "bg-amber-100 text-amber-800 border border-amber-200"
@@ -748,7 +748,7 @@ export const AdminDashboard: React.FC = () => {
                             <button
                               onClick={() => handleGiveChance(log.attemptId, "Admin authorized candidate to resume", log.id)}
                               disabled={processingLogId === log.id}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] disabled:opacity-50 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
                               title="Give candidate another chance and unlock assessment"
                             >
                               <CheckCircle2 className="w-3.5 h-3.5" />
@@ -766,7 +766,7 @@ export const AdminDashboard: React.FC = () => {
                           </div>
                         ) : log.adminDecision === "GIVEN_CHANCE" ? (
                           <div className="flex items-center justify-end gap-2">
-                            <span className="inline-flex items-center gap-1 text-emerald-700 font-bold text-xs">
+                            <span className="inline-flex items-center gap-1 text-[#16499c] font-bold text-xs">
                               <CheckCircle2 className="w-3.5 h-3.5" />
                               Chance Granted
                             </span>
@@ -814,7 +814,7 @@ export const AdminDashboard: React.FC = () => {
                 setSelectedAssessmentForAdd(assessments[0]?.id || "");
                 setIsAddQuestionOpen(true);
               }}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md shadow-emerald-600/20 cursor-pointer transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-extrabold text-xs shadow-md shadow-[#16499c]/20 cursor-pointer transition-all transform hover:-translate-y-0.5 active:translate-y-0"
             >
               <Plus className="w-4 h-4" />
               Add New Question
@@ -825,17 +825,17 @@ export const AdminDashboard: React.FC = () => {
             {assessments.map((a) => (
               <div
                 key={a.id}
-                className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:border-emerald-300 hover:shadow-md transition-all space-y-4 flex flex-col justify-between"
+                className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:border-[#16499c]/40 hover:shadow-md transition-all space-y-4 flex flex-col justify-between"
               >
                 <div className="space-y-3">
                   <div className="flex justify-between items-start">
                     <div>
-                      <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-bold uppercase border border-emerald-200">
+                      <span className="px-3 py-1 rounded-full bg-[#eff5ff] text-[#16499c] text-[10px] font-bold uppercase border border-[#16499c]/30">
                         {a.isActive ? "Active Exam" : "Inactive"}
                       </span>
                       <h3 className="text-base font-bold text-slate-900 mt-1.5">{a.title}</h3>
                     </div>
-                    <span className="text-xs font-mono text-emerald-800 font-bold bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl">
+                    <span className="text-xs font-mono text-[#16499c] font-bold bg-[#eff5ff] border border-[#16499c]/30 px-3 py-1 rounded-xl">
                       {a._count?.questions || 0} Questions
                     </span>
                   </div>
@@ -858,9 +858,9 @@ export const AdminDashboard: React.FC = () => {
                 <div className="pt-4 border-t border-slate-100 flex gap-2">
                   <button
                     onClick={() => setViewQuestionsAssessment(a)}
-                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl border border-slate-200 bg-white hover:bg-emerald-50/50 hover:border-emerald-200 text-xs font-bold text-slate-700 hover:text-emerald-800 cursor-pointer transition-all shadow-xs"
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl border border-slate-200 bg-white hover:bg-[#eff5ff]/50 hover:border-[#16499c]/30 text-xs font-bold text-slate-700 hover:text-[#16499c] cursor-pointer transition-all shadow-xs"
                   >
-                    <Eye className="w-3.5 h-3.5 text-emerald-700" />
+                    <Eye className="w-3.5 h-3.5 text-[#16499c]" />
                     View & Manage Questions
                   </button>
 
@@ -869,7 +869,7 @@ export const AdminDashboard: React.FC = () => {
                       setSelectedAssessmentForAdd(a.id);
                       setIsAddQuestionOpen(true);
                     }}
-                    className="flex items-center gap-1 py-2.5 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold cursor-pointer transition-all"
+                    className="flex items-center gap-1 py-2.5 px-3 rounded-xl bg-[#eff5ff] hover:bg-[#eff5ff] text-[#16499c] border border-[#16499c]/30 text-xs font-bold cursor-pointer transition-all"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     Add Question
@@ -951,7 +951,7 @@ export const AdminDashboard: React.FC = () => {
                   </span>
                   <p className="text-2xl font-black text-slate-900 mt-1">{completedAttempts.length}</p>
                 </div>
-                <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
+                <div className="w-10 h-10 rounded-2xl bg-[#eff5ff] border border-[#16499c]/20 flex items-center justify-center text-[#16499c]">
                   <CheckCircle2 className="w-5 h-5" />
                 </div>
               </div>
@@ -961,7 +961,7 @@ export const AdminDashboard: React.FC = () => {
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                     Qualified (≥ {passingThreshold} Pts)
                   </span>
-                  <p className="text-2xl font-black text-emerald-600 mt-1">
+                  <p className="text-2xl font-black text-[#16499c] mt-1">
                     {passedCandidates.length}
                     <span className="text-xs font-normal text-slate-400 ml-1">
                       (
@@ -972,7 +972,7 @@ export const AdminDashboard: React.FC = () => {
                     </span>
                   </p>
                 </div>
-                <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600">
+                <div className="w-10 h-10 rounded-2xl bg-[#eff5ff] border border-[#16499c]/20 flex items-center justify-center text-[#16499c]">
                   <Award className="w-5 h-5" />
                 </div>
               </div>
@@ -982,11 +982,11 @@ export const AdminDashboard: React.FC = () => {
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                     Average Score
                   </span>
-                  <p className="text-2xl font-black text-emerald-700 mt-1">
+                  <p className="text-2xl font-black text-[#16499c] mt-1">
                     {avgScore} <span className="text-xs font-normal text-slate-400">Pts</span>
                   </p>
                 </div>
-                <div className="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700">
+                <div className="w-10 h-10 rounded-2xl bg-[#eff5ff] border border-[#16499c]/20 flex items-center justify-center text-[#16499c]">
                   <Award className="w-5 h-5" />
                 </div>
               </div>
@@ -1003,7 +1003,7 @@ export const AdminDashboard: React.FC = () => {
                     placeholder="Search candidate, roll no, college, dept..."
                     value={resultsSearchQuery}
                     onChange={(e) => setResultsSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all"
+                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-[#16499c] focus:bg-white transition-all"
                   />
                   {resultsSearchQuery && (
                     <button
@@ -1073,7 +1073,7 @@ export const AdminDashboard: React.FC = () => {
                   disabled={filteredAttempts.length === 0}
                   className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs shadow-md shadow-slate-900/20 cursor-pointer transition-all"
                 >
-                  <Download className="w-4 h-4 text-emerald-400" />
+                  <Download className="w-4 h-4 text-blue-300" />
                   Export Report (PDF)
                 </button>
               </div>
@@ -1153,12 +1153,12 @@ export const AdminDashboard: React.FC = () => {
                               <div className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
                                 {att.user?.position === "Data Analyst" ? (
                                   <>
-                                    <span>📊</span>
+
                                     <span>Data Analyst</span>
                                   </>
                                 ) : (
                                   <>
-                                    <span>💻</span>
+
                                     <span>Software Dev</span>
                                   </>
                                 )}
@@ -1179,8 +1179,8 @@ export const AdminDashboard: React.FC = () => {
                             {/* Round 2 Score */}
                             <td className="py-3.5 px-5 text-center whitespace-nowrap">
                               {att.round2Score !== null && att.round2Score !== undefined ? (
-                                <span className="font-bold text-emerald-700 text-sm">
-                                  {att.round2Score} <span className="text-[11px] text-emerald-600/70 font-normal">pts</span>
+                                <span className="font-bold text-[#16499c] text-sm">
+                                  {att.round2Score} <span className="text-[11px] text-[#16499c]/70 font-normal">pts</span>
                                 </span>
                               ) : (
                                 <span className="text-slate-300 font-medium">—</span>
@@ -1194,7 +1194,7 @@ export const AdminDashboard: React.FC = () => {
                               </div>
                               {att.status === "COMPLETED" && (
                                 <div
-                                  className={`text-[9px] font-bold uppercase tracking-wider mt-0.5 ${isPass ? "text-emerald-600" : "text-rose-500"
+                                  className={`text-[9px] font-bold uppercase tracking-wider mt-0.5 ${isPass ? "text-[#16499c]" : "text-rose-500"
                                     }`}
                                 >
                                   {isPass ? "✓ Qualified" : "✗ Not Qualified"}
@@ -1218,13 +1218,13 @@ export const AdminDashboard: React.FC = () => {
                               <span
                                 className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${att.status === "COMPLETED"
                                   ? isPass
-                                    ? "bg-emerald-50 text-emerald-700"
+                                    ? "bg-[#eff5ff] text-[#16499c]"
                                     : "bg-slate-100 text-slate-600"
                                   : att.status === "DISQUALIFIED"
                                     ? "bg-rose-50 text-rose-700"
                                     : att.status === "MALPRACTICE_LOCKED"
                                       ? "bg-amber-50 text-amber-700"
-                                      : "bg-teal-50 text-teal-700"
+                                      : "bg-[#eff5ff] text-[#16499c]"
                                   }`}
                               >
                                 {att.status === "COMPLETED"
@@ -1241,7 +1241,7 @@ export const AdminDashboard: React.FC = () => {
                                 {att.status === "MALPRACTICE_LOCKED" && (
                                   <button
                                     onClick={() => handleGiveChance(att.id, "Admin granted chance from scores table")}
-                                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer transition-colors shadow-xs"
+                                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white text-xs font-bold cursor-pointer transition-colors shadow-xs"
                                     title="Give candidate another chance and unlock assessment"
                                   >
                                     <CheckCircle2 className="w-3.5 h-3.5" />
@@ -1260,7 +1260,7 @@ export const AdminDashboard: React.FC = () => {
 
                                 <button
                                   onClick={() => generateCandidateScorecardPDF(att)}
-                                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 text-xs font-semibold cursor-pointer transition-colors"
+                                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#eff5ff] hover:bg-[#eff5ff] text-[#16499c] border border-[#16499c]/30 text-xs font-semibold cursor-pointer transition-colors"
                                   title="Download Individual Candidate Scorecard PDF"
                                 >
                                   <Download className="w-3.5 h-3.5" />
@@ -1295,8 +1295,8 @@ export const AdminDashboard: React.FC = () => {
         <div className="space-y-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 font-bold text-[10px] uppercase tracking-wider border border-emerald-200 mb-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#eff5ff] text-[#16499c] font-bold text-[10px] uppercase tracking-wider border border-[#16499c]/30 mb-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#16499c]" />
                 Administrative Access Control
               </div>
               <h3 className="text-base font-extrabold text-slate-900">
@@ -1309,7 +1309,7 @@ export const AdminDashboard: React.FC = () => {
 
             <button
               onClick={() => setIsCreateAdminOpen(true)}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md shadow-emerald-600/20 cursor-pointer transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-extrabold text-xs shadow-md shadow-[#16499c]/20 cursor-pointer transition-all transform hover:-translate-y-0.5 active:translate-y-0"
             >
               <UserPlus className="w-4 h-4" />
               Register New Administrator
@@ -1350,7 +1350,7 @@ export const AdminDashboard: React.FC = () => {
                       <tr key={adm.id} className="hover:bg-slate-50/80 transition-colors">
                         <td className="py-4 px-6">
                           <div className="font-bold text-slate-900 flex items-center gap-2">
-                            <span className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 font-black text-xs flex items-center justify-center border border-emerald-200">
+                            <span className="w-7 h-7 rounded-lg bg-[#eff5ff] text-[#16499c] font-black text-xs flex items-center justify-center border border-[#16499c]/30">
                               {adm.name.charAt(0).toUpperCase()}
                             </span>
                             <span>{adm.name}</span>
@@ -1360,12 +1360,12 @@ export const AdminDashboard: React.FC = () => {
                           {adm.email}
                         </td>
                         <td className="py-4 px-6 text-center whitespace-nowrap">
-                          <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-extrabold border border-emerald-200 uppercase tracking-wider">
+                          <span className="px-2.5 py-1 rounded-full bg-[#eff5ff] text-[#16499c] text-[10px] font-extrabold border border-[#16499c]/30 uppercase tracking-wider">
                             {adm.role}
                           </span>
                         </td>
                         <td className="py-4 px-6 text-center whitespace-nowrap">
-                          <span className="px-2.5 py-1 rounded-full bg-teal-50 text-teal-800 text-[10px] font-bold uppercase tracking-wider border border-teal-200">
+                          <span className="px-2.5 py-1 rounded-full bg-[#eff5ff] text-[#16499c] text-[10px] font-bold uppercase tracking-wider border border-[#16499c]/30">
                             {adm.status}
                           </span>
                         </td>

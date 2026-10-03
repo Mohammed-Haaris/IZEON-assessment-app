@@ -41,7 +41,7 @@ export const Login: React.FC = () => {
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-200/90 p-8 md:p-10 space-y-6 relative overflow-hidden">
         {/* Decorative Top Accent Glow */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-600 via-[#16499c] to-emerald-500" />
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#16499c] via-[#2563eb] to-[#123c80]" />
         
         {/* Header */}
         <div className="text-center space-y-2">
@@ -89,7 +89,7 @@ export const Login: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
-                className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium placeholder:text-slate-400"
+                className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] transition-all font-medium placeholder:text-slate-400"
               />
             </div>
           </div>
@@ -104,7 +104,7 @@ export const Login: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium placeholder:text-slate-400"
+                className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] transition-all font-medium placeholder:text-slate-400"
               />
             </div>
           </div>
@@ -112,7 +112,7 @@ export const Login: React.FC = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-sm transition-all shadow-md shadow-emerald-600/25 cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#16499c] hover:bg-[#123c80] disabled:opacity-50 text-white font-bold text-sm transition-all shadow-md shadow-[#16499c]/25 cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
           >
             {isSubmitting ? "Signing in..." : "Sign In to Portal"}
             <ArrowRight className="w-4 h-4" />
@@ -122,7 +122,7 @@ export const Login: React.FC = () => {
         {/* Footer */}
         <div className="text-center text-sm text-slate-600 pt-4 border-t border-slate-100 font-medium">
           New student candidate?{" "}
-          <Link to="/register" className="font-bold text-emerald-700 hover:text-emerald-800 hover:underline">
+          <Link to="/register" className="font-bold text-[#16499c] hover:text-[#123c80] hover:underline">
             Register for Assessment
           </Link>
         </div>
