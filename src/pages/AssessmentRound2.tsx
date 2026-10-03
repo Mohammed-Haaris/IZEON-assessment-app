@@ -5,6 +5,7 @@ import { CameraTile } from "../components/CameraTile";
 import { CameraGuard } from "../components/CameraGuard";
 import { getSocket } from "../services/socket";
 import { apiRequest } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 import type { Question } from "../types";
 import {
   Maximize2,
@@ -24,15 +25,23 @@ import {
 } from "lucide-react";
 
 export const AssessmentRound2: React.FC = () => {
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const attemptId = searchParams.get("attemptId");
   const [activeAttemptId, setActiveAttemptId] = useState<string | null>(attemptId);
   const effectiveAttemptId = attemptId || activeAttemptId;
   const navigate = useNavigate();
 
+  const candidateRole =
+    user?.position ||
+    (JSON.parse(localStorage.getItem("izeon_user") || "{}")?.position as string | undefined);
+  const isDataAnalyst = candidateRole === "Data Analyst";
+
   const [questions, setQuestions] = useState<Question[]>([]);
   const [activeIdx, setActiveIdx] = useState(0);
-  const [language, setLanguage] = useState<"python" | "sql" | "javascript">("python");
+  const [language, setLanguage] = useState<"python" | "sql" | "javascript">(
+    isDataAnalyst ? "sql" : "python"
+  );
   const [codeAnswers, setCodeAnswers] = useState<Record<string, string>>({});
   const [testOutput, setTestOutput] = useState<string>("");
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -100,7 +109,19 @@ export const AssessmentRound2: React.FC = () => {
         }
 
         if (res.assessment?.questions) {
-          const r2 = res.assessment.questions.filter((q: any) => q.round === "ROUND_2_CODING");
+          let r2 = res.assessment.questions.filter((q: any) => q.round === "ROUND_2_CODING");
+
+          // Strict role-based filtering:
+          // Software Developer candidates must NEVER see SQL questions; only Data Analyst candidates can see SQL.
+          if (candidateRole === "Software Developer") {
+            r2 = r2.filter((q: any) => q.category !== "SQL" && q.targetRole !== "Data Analyst");
+          } else if (candidateRole === "Data Analyst") {
+            r2 = r2.filter((q: any) => q.targetRole !== "Software Developer");
+          } else {
+            // General / default fallback: exclude SQL unless candidate is Data Analyst
+            r2 = r2.filter((q: any) => q.category !== "SQL");
+          }
+
           setQuestions(r2);
 
           // Populate initial starter codes
@@ -120,8 +141,8 @@ export const AssessmentRound2: React.FC = () => {
             initialCodes[`${q.id}_python`] = pyStarter;
             initialCodes[`${q.id}_javascript`] = jsStarter;
 
-            // Preferred initial
-            if (q.category === "SQL" || q.starterCode?.sql) {
+            // Preferred initial code per question
+            if (isDataAnalyst && (q.category === "SQL" || q.starterCode?.sql)) {
               initialCodes[q.id] = sqlStarter;
             } else if (q.category === "PYTHON" || q.starterCode?.python) {
               initialCodes[q.id] = pyStarter;
@@ -131,11 +152,21 @@ export const AssessmentRound2: React.FC = () => {
           });
           setCodeAnswers(initialCodes);
 
-          // Auto-select language for first question
-          if (r2[0]?.category === "SQL" || r2[0]?.starterCode?.sql) {
-            setLanguage("sql");
-          } else if (r2[0]?.category === "PYTHON" || r2[0]?.starterCode?.python) {
-            setLanguage("python");
+          // Auto-select language for first question:
+          // Data Analyst defaults to SQL or Python; Software Developer defaults to Python or JavaScript (never SQL)
+          if (isDataAnalyst) {
+            if (r2[0]?.category === "SQL" || r2[0]?.starterCode?.sql) {
+              setLanguage("sql");
+            } else {
+              setLanguage("python");
+            }
+          } else {
+            // Software Developer
+            if (r2[0]?.starterCode?.javascript) {
+              setLanguage("javascript");
+            } else {
+              setLanguage("python");
+            }
           }
         }
       } catch (err) {
@@ -646,10 +677,19 @@ export const AssessmentRound2: React.FC = () => {
                     key={q.id}
                     onClick={() => {
                       setActiveIdx(idx);
-                      if (q.category === "SQL" || q.starterCode?.sql) {
-                        setLanguage("sql");
-                      } else if (q.category === "PYTHON" || q.starterCode?.python) {
-                        setLanguage("python");
+                      if (isDataAnalyst) {
+                        if (q.category === "SQL" || q.starterCode?.sql) {
+                          setLanguage("sql");
+                        } else {
+                          setLanguage("python");
+                        }
+                      } else {
+                        // Software Developer
+                        if (q.starterCode?.javascript) {
+                          setLanguage("javascript");
+                        } else {
+                          setLanguage("python");
+                        }
                       }
                     }}
                     className={`px-4 py-2 rounded-xl text-sm font-bold cursor-pointer transition-all ${
@@ -677,7 +717,7 @@ export const AssessmentRound2: React.FC = () => {
           <div className="px-4 py-2.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between shrink-0">
             {/* Editor Dialect Indicator */}
             <div className="flex items-center gap-2">
-              {language === "sql" ? (
+              {language === "sql" && isDataAnalyst ? (
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
                   <span className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
@@ -690,7 +730,7 @@ export const AssessmentRound2: React.FC = () => {
                   <span className="w-2.5 h-2.5 rounded-full bg-sky-400 animate-pulse" />
                   <span className="text-xs font-bold text-sky-400 flex items-center gap-1.5">
                     <Code2 className="w-3.5 h-3.5" />
-                    Python 3 Data Analytics Console
+                    {isDataAnalyst ? "Python 3 Data Analytics Console" : "Python 3 Algorithmic Environment"}
                   </span>
                 </div>
               ) : (
@@ -704,51 +744,82 @@ export const AssessmentRound2: React.FC = () => {
               )}
             </div>
 
-            {/* Quick Editor Mode Switcher for Data Analyst */}
+            {/* Quick Editor Mode Switcher */}
             <div className="flex items-center gap-2">
               <div className="flex items-center bg-slate-950 p-0.5 rounded-xl border border-slate-800">
-                <button
-                  onClick={() => setLanguage("sql")}
-                  className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
-                    language === "sql"
-                      ? "bg-amber-500 text-slate-950 shadow-sm"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  <Database className="w-3 h-3" />
-                  SQL Editor
-                </button>
-                <button
-                  onClick={() => setLanguage("python")}
-                  className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
-                    language === "python"
-                      ? "bg-sky-500 text-slate-950 shadow-sm"
-                      : "text-slate-400 hover:text-white"
-                  }`}
-                >
-                  <Code2 className="w-3 h-3" />
-                  Python Editor
-                </button>
+                {isDataAnalyst ? (
+                  <>
+                    <button
+                      onClick={() => setLanguage("sql")}
+                      className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                        language === "sql"
+                          ? "bg-amber-500 text-slate-950 shadow-sm"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      <Database className="w-3 h-3" />
+                      SQL Editor
+                    </button>
+                    <button
+                      onClick={() => setLanguage("python")}
+                      className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                        language === "python"
+                          ? "bg-sky-500 text-slate-950 shadow-sm"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      <Code2 className="w-3 h-3" />
+                      Python Editor
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => setLanguage("python")}
+                      className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                        language === "python"
+                          ? "bg-sky-500 text-slate-950 shadow-sm"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      <Code2 className="w-3 h-3" />
+                      Python
+                    </button>
+                    <button
+                      onClick={() => setLanguage("javascript")}
+                      className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                        language === "javascript"
+                          ? "bg-indigo-500 text-white shadow-sm"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      <Code2 className="w-3 h-3" />
+                      JavaScript
+                    </button>
+                  </>
+                )}
               </div>
 
-              {/* Table Schema / Dataset Reference Toggle */}
-              <button
-                onClick={() => setShowSchemaDrawer(!showSchemaDrawer)}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
-                  showSchemaDrawer
-                    ? "bg-slate-700 text-white"
-                    : "bg-slate-800 text-slate-400 hover:text-slate-200"
-                }`}
-                title="Toggle Database Schema & Dataset Reference"
-              >
-                <Table className="w-3 h-3" />
-                <span>{language === "sql" ? "Tables Schema" : "Dataset Schema"}</span>
-                {showSchemaDrawer ? (
-                  <ChevronUp className="w-3 h-3" />
-                ) : (
-                  <ChevronDown className="w-3 h-3" />
-                )}
-              </button>
+              {/* Table Schema / Dataset Reference Toggle (Only for Data Analyst) */}
+              {isDataAnalyst && (
+                <button
+                  onClick={() => setShowSchemaDrawer(!showSchemaDrawer)}
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+                    showSchemaDrawer
+                      ? "bg-slate-700 text-white"
+                      : "bg-slate-800 text-slate-400 hover:text-slate-200"
+                  }`}
+                  title="Toggle Database Schema & Dataset Reference"
+                >
+                  <Table className="w-3 h-3" />
+                  <span>{language === "sql" ? "Tables Schema" : "Dataset Schema"}</span>
+                  {showSchemaDrawer ? (
+                    <ChevronUp className="w-3 h-3" />
+                  ) : (
+                    <ChevronDown className="w-3 h-3" />
+                  )}
+                </button>
+              )}
 
               {/* Reset to starter code */}
               <button
