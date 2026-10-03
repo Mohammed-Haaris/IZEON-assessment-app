@@ -189,6 +189,21 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  // Permanently delete a single assessment attempt
+  const handleDeleteAttempt = async (attemptId: string, candidateName: string) => {
+    const isConfirmed = window.confirm(
+      `⚠️ DELETE ATTEMPT RECORD\n\nAre you sure you want to delete the attempt record for "${candidateName}"?\n\nThis will remove this specific test attempt, scores, submitted code, and proctoring violation logs.`
+    );
+    if (!isConfirmed) return;
+
+    try {
+      await apiRequest(`/admin/attempts/${attemptId}`, { method: "DELETE" });
+      await Promise.all([loadAttempts(), loadMalpracticeLogs()]);
+    } catch (err: any) {
+      alert(err.message || "Failed to delete attempt");
+    }
+  };
+
   // Student approval handler
   const handleUpdateStudentStatus = async (id: string, status: "APPROVED" | "REJECTED") => {
     try {
@@ -384,7 +399,9 @@ export const AdminDashboard: React.FC = () => {
             </div>
             <div>
               <div className="text-[11px] font-semibold text-slate-500">Submissions</div>
-              <div className="text-lg font-black text-slate-900">{attempts.length} Finished</div>
+              <div className="text-lg font-black text-slate-900">
+                {attempts.filter((a) => a.status === "COMPLETED").length} Finished
+              </div>
             </div>
           </div>
 
@@ -595,7 +612,7 @@ export const AdminDashboard: React.FC = () => {
                         <td className="py-3.5 px-6 whitespace-nowrap">
                           {student.position ? (
                             <span className="font-semibold text-slate-800 text-xs">
-                              {student.position === "Data Analyst" ? "📊 Data Analyst" : "💻 Software Dev"}
+                              {student.position === "Data Analyst" ? " Data Analyst" : " Software Dev"}
                             </span>
                           ) : (
                             <span className="text-slate-400">—</span>
@@ -1267,15 +1284,13 @@ export const AdminDashboard: React.FC = () => {
                                   <span>PDF</span>
                                 </button>
 
-                                {att.user?.id && (
-                                  <button
-                                    onClick={() => handleDeleteUser(att.user!.id, att.user?.name || "Candidate")}
-                                    className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition-all cursor-pointer"
-                                    title="Permanently Delete Candidate from Database"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                )}
+                                <button
+                                  onClick={() => handleDeleteAttempt(att.id, att.user?.name || "Candidate")}
+                                  className="p-1.5 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition-all cursor-pointer"
+                                  title="Permanently Delete This Attempt Record"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
                               </div>
                             </td>
                           </tr>
