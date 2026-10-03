@@ -17,6 +17,9 @@ interface AuthContextType {
     position?: string;
     dob?: string;
     mobileNumber?: string;
+    tenthMark?: string;
+    twelfthMark?: string;
+    cgpa?: string;
     role?: string;
   }) => Promise<void>;
   logout: () => void;
@@ -82,6 +85,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     position?: string;
     dob?: string;
     mobileNumber?: string;
+    tenthMark?: string;
+    twelfthMark?: string;
+    cgpa?: string;
     role?: string;
   }) => {
     const res = await apiRequest<{ user: User; token: string }>("/auth/register", {

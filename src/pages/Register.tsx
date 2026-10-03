@@ -17,6 +17,7 @@ import {
   Hash,
   Eye,
   EyeOff,
+  Percent,
 } from "lucide-react";
 import interviewLogo from "../assets/interview logo.png";
 
@@ -31,6 +32,9 @@ export const Register: React.FC = () => {
   const [position, setPosition] = useState<"Software Developer" | "Data Analyst">("Software Developer");
   const [dob, setDob] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
+  const [tenthMark, setTenthMark] = useState("");
+  const [twelfthMark, setTwelfthMark] = useState("");
+  const [cgpa, setCgpa] = useState("");
 
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,6 +58,9 @@ export const Register: React.FC = () => {
         position,
         dob,
         mobileNumber,
+        tenthMark,
+        twelfthMark,
+        cgpa,
         role: "STUDENT",
       });
       navigate("/dashboard");
@@ -212,6 +219,60 @@ export const Register: React.FC = () => {
                   value={college}
                   onChange={(e) => setCollege(e.target.value)}
                   placeholder="e.g., National Engineering College"
+                  className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] transition-all"
+                />
+              </div>
+            </div>
+
+            {/* 10th Standard Marks */}
+            <div>
+              <label className="block text-sm font-semibold text-slate-800 mb-1.5">
+                10th Marks (%) <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <Percent className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <input
+                  type="text"
+                  required
+                  value={tenthMark}
+                  onChange={(e) => setTenthMark(e.target.value)}
+                  placeholder="e.g., 88% or 440/500"
+                  className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] transition-all"
+                />
+              </div>
+            </div>
+
+            {/* 12th / Diploma Marks */}
+            <div>
+              <label className="block text-sm font-semibold text-slate-800 mb-1.5">
+                12th / Diploma Marks (%) <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <Percent className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <input
+                  type="text"
+                  required
+                  value={twelfthMark}
+                  onChange={(e) => setTwelfthMark(e.target.value)}
+                  placeholder="e.g., 85% or 510/600"
+                  className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] transition-all"
+                />
+              </div>
+            </div>
+
+            {/* College CGPA */}
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-semibold text-slate-800 mb-1.5">
+                College / UG CGPA <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <GraduationCap className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <input
+                  type="text"
+                  required
+                  value={cgpa}
+                  onChange={(e) => setCgpa(e.target.value)}
+                  placeholder="e.g., 8.45 or 8.45 / 10"
                   className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] transition-all"
                 />
               </div>

@@ -27,6 +27,9 @@ export interface User {
   position?: string;
   dob?: string;
   mobileNumber?: string;
+  tenthMark?: string;
+  twelfthMark?: string;
+  cgpa?: string;
   role: Role;
   status: StudentStatus;
   createdAt?: string;

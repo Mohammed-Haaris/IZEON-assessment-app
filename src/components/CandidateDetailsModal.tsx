@@ -16,6 +16,7 @@ import {
   Download,
   CheckCircle2,
   XCircle,
+  Percent,
 } from "lucide-react";
 
 interface CandidateDetailsModalProps {
@@ -49,19 +50,18 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-bold">{attempt.user?.name}</h3>
                 <span
-                  className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                    isPass
+                  className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isPass
                       ? "bg-[#16499c]/20 text-[#93c5fd] border border-[#16499c]/30"
                       : attempt.status === "COMPLETED"
-                      ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
-                      : "bg-[#16499c]/20 text-[#93c5fd] border border-[#16499c]/30"
-                  }`}
+                        ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                        : "bg-[#16499c]/20 text-[#93c5fd] border border-[#16499c]/30"
+                    }`}
                 >
                   {isPass
                     ? "QUALIFIED / PASSED"
                     : attempt.status === "COMPLETED"
-                    ? "NOT QUALIFIED"
-                    : attempt.status.replace(/_/g, " ")}
+                      ? "NOT QUALIFIED"
+                      : attempt.status.replace(/_/g, " ")}
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-0.5">{attempt.user?.email}</p>
@@ -148,9 +148,8 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                 Tab Switch Violations
               </span>
               <p
-                className={`font-bold mt-1 text-sm ${
-                  (attempt.tabSwitchCount || 0) > 1 ? "text-rose-600" : "text-slate-800"
-                }`}
+                className={`font-bold mt-1 text-sm ${(attempt.tabSwitchCount || 0) > 1 ? "text-rose-600" : "text-slate-800"
+                  }`}
               >
                 {attempt.tabSwitchCount || 0} times
               </p>
@@ -162,6 +161,36 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
               </span>
               <p className="text-slate-800 font-medium mt-1 text-sm">
                 {attempt.startedAt ? new Date(attempt.startedAt).toLocaleTimeString() : "—"}
+              </p>
+            </div>
+
+            <div>
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <Percent className="w-3.5 h-3.5 text-[#16499c]" />
+                10th Std Marks
+              </span>
+              <p className="font-bold text-slate-900 mt-1 text-sm">
+                {attempt.user?.tenthMark || "—"}
+              </p>
+            </div>
+
+            <div>
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <Percent className="w-3.5 h-3.5 text-[#16499c]" />
+                12th Std Marks
+              </span>
+              <p className="font-bold text-slate-900 mt-1 text-sm">
+                {attempt.user?.twelfthMark || "—"}
+              </p>
+            </div>
+
+            <div>
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <GraduationCap className="w-3.5 h-3.5 text-[#16499c]" />
+                College CGPA
+              </span>
+              <p className="font-bold text-slate-900 mt-1 text-sm">
+                {attempt.user?.cgpa || "—"}
               </p>
             </div>
           </div>
@@ -197,11 +226,10 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
             </div>
 
             <div
-              className={`p-4 rounded-2xl border flex items-center justify-between ${
-                isPass
+              className={`p-4 rounded-2xl border flex items-center justify-between ${isPass
                   ? "bg-[#eff5ff] border-[#16499c]/30"
                   : "bg-slate-50 border-slate-200"
-              }`}
+                }`}
             >
               <div>
                 <span className="text-[11px] font-bold uppercase text-slate-500">
