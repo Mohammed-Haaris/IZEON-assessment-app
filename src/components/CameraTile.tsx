@@ -2,27 +2,47 @@ import React, { useEffect, useRef, useState } from "react";
 import { CameraOff } from "lucide-react";
 
 interface CameraTileProps {
+  stream?: MediaStream | null;
   onPermissionChange?: (hasPermission: boolean) => void;
   className?: string;
 }
 
-export const CameraTile: React.FC<CameraTileProps> = ({ onPermissionChange, className = "" }) => {
+export const CameraTile: React.FC<CameraTileProps> = ({ stream: externalStream, onPermissionChange, className = "" }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [errorMsg, setErrorMsg] = useState<string>("");
 
   useEffect(() => {
-    let stream: MediaStream | null = null;
+    // If an external stream is provided from CameraGuard
+    if (externalStream !== undefined) {
+      if (videoRef.current && externalStream) {
+        videoRef.current.srcObject = externalStream;
+      }
+      const isLive = Boolean(
+        externalStream &&
+          externalStream.active &&
+          externalStream.getVideoTracks().some((t) => t.readyState === "live")
+      );
+      setHasPermission(isLive);
+      if (!isLive) {
+        setErrorMsg("Webcam feed inactive.");
+      }
+      onPermissionChange?.(isLive);
+      return;
+    }
+
+    // Fallback: self-managed stream if no external stream is provided
+    let localStream: MediaStream | null = null;
 
     async function initCamera() {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
+        localStream = await navigator.mediaDevices.getUserMedia({
           video: { width: 320, height: 240, facingMode: "user" },
           audio: false,
         });
 
         if (videoRef.current) {
-          videoRef.current.srcObject = stream;
+          videoRef.current.srcObject = localStream;
         }
 
         setHasPermission(true);
@@ -30,7 +50,7 @@ export const CameraTile: React.FC<CameraTileProps> = ({ onPermissionChange, clas
       } catch (err: any) {
         console.error("Camera access error:", err);
         setHasPermission(false);
-        setErrorMsg("Camera permission denied. Camera is mandatory for Round 2.");
+        setErrorMsg("Camera permission denied. Camera is mandatory.");
         onPermissionChange?.(false);
       }
     }
@@ -38,11 +58,11 @@ export const CameraTile: React.FC<CameraTileProps> = ({ onPermissionChange, clas
     initCamera();
 
     return () => {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
+      if (localStream) {
+        localStream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, []);
+  }, [externalStream]);
 
   return (
     <div

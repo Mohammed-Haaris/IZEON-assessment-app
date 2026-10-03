@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Editor from "@monaco-editor/react";
 import { CameraTile } from "../components/CameraTile";
+import { CameraGuard } from "../components/CameraGuard";
 import { getSocket } from "../services/socket";
 import { apiRequest } from "../services/api";
 import type { Question } from "../types";
@@ -382,7 +383,9 @@ export const AssessmentRound2: React.FC = () => {
   }
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex flex-col bg-slate-950 text-slate-100 overflow-hidden relative">
+    <CameraGuard roundName="Round 2: Coding & SQL Technical Lab">
+      {(cameraStream) => (
+        <div className="h-[calc(100vh-4rem)] flex flex-col bg-slate-950 text-slate-100 overflow-hidden relative">
       {/* FULLSCREEN PROMPT OVERLAY */}
       {!isFullscreen && (
         <div className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-6 text-center">
@@ -611,7 +614,7 @@ export const AssessmentRound2: React.FC = () => {
         <div className="w-3/5 flex flex-col overflow-hidden relative bg-slate-950">
           {/* WEBCAM PROCTOR TILE FLOATING IN UPPER RIGHT */}
           <div className="absolute top-14 right-4 z-20 w-36 h-28 shadow-2xl">
-            <CameraTile />
+            <CameraTile stream={cameraStream} />
           </div>
 
           {/* DEDICATED EDITOR HEADER TOOLBAR */}
@@ -818,5 +821,7 @@ transactions = [
         </div>
       </div>
     </div>
+      )}
+    </CameraGuard>
   );
 };

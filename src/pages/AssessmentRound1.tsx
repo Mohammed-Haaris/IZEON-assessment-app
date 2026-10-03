@@ -10,6 +10,8 @@ import {
   ArrowLeft,
   Send,
 } from "lucide-react";
+import { CameraGuard } from "../components/CameraGuard";
+import { CameraTile } from "../components/CameraTile";
 
 export const AssessmentRound1: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -178,9 +180,11 @@ export const AssessmentRound1: React.FC = () => {
   const currentQ = questions[activeIdx];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-      {/* Top Header Bar */}
-      <div className="flex items-center justify-between bg-white px-6 py-4 rounded-2xl border border-slate-200 shadow-sm">
+    <CameraGuard roundName="Round 1: Aptitude & Grammar">
+      {(cameraStream) => (
+        <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+          {/* Top Header Bar */}
+          <div className="flex items-center justify-between bg-white px-6 py-4 rounded-2xl border border-slate-200 shadow-sm">
         <div>
           <span className="px-3 py-1 rounded-full bg-[#eff5ff] border border-[#16499c]/30 text-[11px] font-extrabold text-[#16499c] uppercase tracking-wide">
             Round 1 of 2
@@ -391,8 +395,11 @@ export const AssessmentRound1: React.FC = () => {
           )}
         </div>
 
-        {/* Right Column: Question Palette */}
+        {/* Right Column: Proctor Camera + Question Palette */}
         <div className="space-y-4">
+          {/* Live Proctor Camera Feed */}
+          <CameraTile stream={cameraStream} className="w-full h-36 shadow-sm" />
+
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
             <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">
               Question Navigator
@@ -473,5 +480,7 @@ export const AssessmentRound1: React.FC = () => {
         </div>
       </div>
     </div>
+      )}
+    </CameraGuard>
   );
 };
