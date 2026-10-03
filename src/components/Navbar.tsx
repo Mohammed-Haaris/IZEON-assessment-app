@@ -54,8 +54,8 @@ export const Navbar: React.FC = () => {
             {/* Role Badge */}
             <span
               className={`px-2.5 py-1 rounded-lg text-[11px] font-bold tracking-wider uppercase ${user.role === "ADMIN"
-                  ? "bg-[#eff5ff] text-[#16499c] border border-[#16499c]/30 shadow-xs"
-                  : "bg-slate-100 text-slate-700 border border-slate-200"
+                ? "bg-[#eff5ff] text-[#16499c] border border-[#16499c]/30 shadow-xs"
+                : "bg-slate-100 text-slate-700 border border-slate-200"
                 }`}
             >
               {user.role}
