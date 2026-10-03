@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { LogIn, Lock, Mail, AlertCircle, ArrowRight } from "lucide-react";
+import { Lock, Mail, AlertCircle, ArrowRight } from "lucide-react";
+import interviewLogo from "../assets/interview logo.png";
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -40,31 +41,31 @@ export const Login: React.FC = () => {
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-200/90 p-8 md:p-10 space-y-6 relative overflow-hidden">
         {/* Decorative Top Accent Glow */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-600 via-teal-400 to-emerald-500" />
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-600 via-[#16499c] to-emerald-500" />
         
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 p-0.5 shadow-sm mb-2">
-            <div className="w-full h-full bg-white rounded-[14px] flex items-center justify-center text-emerald-700">
-              <LogIn className="w-6 h-6" />
-            </div>
+          <div className="inline-flex w-16 h-16 rounded-2xl bg-white border border-[#16499c]/25 p-1.5 shadow-sm mb-2 items-center justify-center">
+            <img src={interviewLogo} alt="IZEON Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">Sign in to IZEON</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">
+            Sign in to IZEON<span className="text-[#16499c]">Assessment</span>
+          </h1>
           <p className="text-sm text-slate-600 font-medium">
             Proctored Assessment & Verification Platform
           </p>
         </div>
 
         {/* Quick fill demo helper */}
-        <div className="p-3.5 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-sm flex items-center justify-between text-emerald-950 font-medium">
+        <div className="p-3.5 rounded-2xl bg-[#eff5ff] border border-[#16499c]/25 text-sm flex items-center justify-between text-slate-900 font-medium">
           <span className="flex items-center gap-1.5 text-xs sm:text-sm">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="w-2 h-2 rounded-full bg-[#16499c]" />
             Admin Demo Access:
           </span>
           <button
             type="button"
             onClick={handleQuickFillAdmin}
-            className="text-xs sm:text-sm font-bold text-emerald-800 hover:text-emerald-950 bg-white px-3 py-1 rounded-lg border border-emerald-200 shadow-xs cursor-pointer transition-all hover:bg-emerald-50"
+            className="text-xs sm:text-sm font-bold text-[#16499c] hover:text-[#123c80] bg-white px-3 py-1 rounded-lg border border-[#16499c]/30 shadow-xs cursor-pointer transition-all hover:bg-white/80"
           >
             Auto-fill Admin
           </button>

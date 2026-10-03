@@ -1,7 +1,8 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { ShieldCheck, LogOut, CheckCircle2, AlertTriangle } from "lucide-react";
+import { LogOut, CheckCircle2, AlertTriangle } from "lucide-react";
+import interviewLogo from "../assets/interview logo.png";
 
 export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
@@ -17,12 +18,12 @@ export const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand */}
         <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-sm shadow-emerald-600/20 group-hover:scale-105 transition-transform">
-            <ShieldCheck className="w-5 h-5" />
+          <div className="w-10 h-10 rounded-xl bg-white border border-[#16499c]/25 p-1 flex items-center justify-center shadow-xs group-hover:scale-105 transition-transform">
+            <img src={interviewLogo} alt="IZEON Logo" className="w-full h-full object-contain" />
           </div>
           <div>
             <span className="text-lg font-extrabold tracking-tight text-slate-900">
-              IZEON<span className="text-emerald-600 font-black">Assessment</span>
+              IZEON<span className="text-[#16499c] font-black">Assessment</span>
             </span>
             <span className="block text-[10px] font-bold tracking-wider text-slate-400 uppercase -mt-0.5">
               Secure Proctoring Network
@@ -52,18 +53,17 @@ export const Navbar: React.FC = () => {
 
             {/* Role Badge */}
             <span
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold tracking-wider uppercase ${
-                user.role === "ADMIN"
+              className={`px-2.5 py-1 rounded-lg text-[11px] font-bold tracking-wider uppercase ${user.role === "ADMIN"
                   ? "bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-xs"
-                  : "bg-slate-100 text-slate-700 border border-slate-200"
-              }`}
+                  : "bg-[#eff5ff] text-[#16499c] border border-[#16499c]/30"
+                }`}
             >
               {user.role}
             </span>
 
             {/* User profile */}
             <div className="flex items-center gap-2 pl-3 border-l border-slate-200">
-              <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 font-bold text-xs shadow-xs">
+              <div className="w-8 h-8 rounded-lg bg-[#eff5ff] border border-[#16499c]/30 flex items-center justify-center text-[#16499c] font-bold text-xs shadow-xs">
                 {user.name.charAt(0).toUpperCase()}
               </div>
               <div className="hidden md:block text-left">
@@ -85,7 +85,7 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center gap-3">
             <Link
               to="/login"
-              className="text-xs font-bold text-slate-700 hover:text-emerald-600 px-3 py-1.5 rounded-xl hover:bg-slate-100 transition-colors"
+              className="text-xs font-bold text-[#16499c] hover:text-[#123c80] px-3.5 py-1.5 rounded-xl border border-[#16499c]/30 hover:border-[#16499c] hover:bg-[#eff5ff] transition-all"
             >
               Sign In
             </Link>

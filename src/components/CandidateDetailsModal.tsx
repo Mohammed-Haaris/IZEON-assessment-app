@@ -54,7 +54,7 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                       ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
                       : attempt.status === "COMPLETED"
                       ? "bg-rose-500/20 text-rose-300 border border-rose-500/30"
-                      : "bg-teal-500/20 text-teal-300 border border-teal-500/30"
+                      : "bg-[#16499c]/20 text-[#93c5fd] border border-[#16499c]/30"
                   }`}
                 >
                   {isPass
@@ -276,7 +276,7 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
           </span>
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold cursor-pointer transition-colors"
+            className="px-4 py-2 rounded-xl bg-white border border-[#16499c]/30 hover:border-[#16499c] hover:bg-[#eff5ff] text-[#16499c] font-semibold cursor-pointer transition-colors shadow-xs"
           >
             Close View
           </button>

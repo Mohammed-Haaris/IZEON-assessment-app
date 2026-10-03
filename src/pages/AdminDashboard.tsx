@@ -12,6 +12,7 @@ import {
   generateCandidateScorecardPDF,
 } from "../utils/pdfGenerator";
 import { exportStudentsToExcel } from "../utils/excelExporter";
+import interviewLogo from "../assets/interview logo.png";
 import type { User, Assessment, MalpracticeAlert, AssessmentAttempt } from "../types";
 import {
   Users,
@@ -150,7 +151,7 @@ export const AdminDashboard: React.FC = () => {
       loadAssessments();
       loadAdmins();
       const [logs, atts] = await Promise.all([loadMalpracticeLogs(), loadAttempts()]);
-      
+
       // Auto-popup if candidate is locked and admin just loaded dashboard
       if (atts && logs) {
         const lockedAttempt = atts.find(
@@ -295,20 +296,25 @@ export const AdminDashboard: React.FC = () => {
         />
       )}
 
-      {/* Header Banner - Executive Human-Designed Light Green Aesthetic */}
-      <div className="relative overflow-hidden bg-white p-7 rounded-3xl shadow-sm border border-emerald-100/80">
+      {/* Header Banner - Executive Human-Designed Light Green & Brand Blue Aesthetic */}
+      <div className="relative overflow-hidden bg-white p-7 rounded-3xl shadow-sm border border-[#16499c]/25">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 font-bold text-[10px] uppercase tracking-wider border border-emerald-200">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Administrative Command Center
+          <div className="flex items-start gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-white border border-[#16499c]/25 p-1 flex items-center justify-center shrink-0 shadow-xs">
+              <img src={interviewLogo} alt="IZEON Logo" className="w-full h-full object-contain" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              IZEON Assessment & Proctoring System
-            </h1>
-            <p className="text-xs text-slate-500 max-w-xl leading-relaxed">
-              Real-time candidate verification, supervised tab-switch security, dual-track assessment configuration, and official scorecard evaluation.
-            </p>
+            <div className="space-y-1.5">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#eff5ff] text-[#16499c] font-bold text-[10px] uppercase tracking-wider border border-[#16499c]/30">
+                <span className="w-2 h-2 rounded-full bg-[#16499c] animate-pulse" />
+                Administrative Command Center
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                IZEON<span className="text-[#16499c]">Assessment</span> & Proctoring System
+              </h1>
+              <p className="text-xs text-slate-500 max-w-xl leading-relaxed">
+                Real-time candidate verification, supervised tab-switch security, dual-track assessment configuration, and official scorecard evaluation.
+              </p>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">
@@ -320,15 +326,17 @@ export const AdminDashboard: React.FC = () => {
               Register New Admin
             </button>
 
+            {/* Secondary Button: Export to Excel */}
             <button
               onClick={() => exportStudentsToExcel(students, attempts)}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-sm shadow-teal-600/20 transition-all cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white text-xs font-bold shadow-sm shadow-[#16499c]/20 border border-[#16499c] transition-all cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
               title="Export all database candidate records and exam metrics to Excel spreadsheet"
             >
               <FileSpreadsheet className="w-3.5 h-3.5" />
               Export to Excel
             </button>
 
+            {/* Secondary Outline Button: Sync Real-time Data */}
             <button
               onClick={() => {
                 loadStudents();
@@ -336,7 +344,7 @@ export const AdminDashboard: React.FC = () => {
                 loadAttempts();
                 loadAdmins();
               }}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-200 shadow-xs transition-all cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#eff5ff] hover:bg-[#e0ecff] text-[#16499c] text-xs font-bold border border-[#16499c]/30 shadow-xs transition-all cursor-pointer"
             >
               <RotateCw className="w-3.5 h-3.5" />
               Sync Real-time Data
@@ -344,7 +352,7 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Real-time Human-Designed KPI Stats Strip */}
+        {/* Real-time KPI Stats Strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-100">
           <div className="p-3.5 rounded-2xl bg-emerald-50/40 border border-emerald-100/60 flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-white border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0 shadow-xs">
@@ -358,8 +366,8 @@ export const AdminDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-teal-50/40 border border-teal-100/60 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white border border-teal-200 text-teal-700 flex items-center justify-center shrink-0 shadow-xs">
+          <div className="p-3.5 rounded-2xl bg-[#eff5ff] border border-[#16499c]/25 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white border border-[#16499c]/30 text-[#16499c] flex items-center justify-center shrink-0 shadow-xs">
               <FileSpreadsheet className="w-5 h-5" />
             </div>
             <div>
@@ -380,13 +388,13 @@ export const AdminDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 text-emerald-600 flex items-center justify-center shrink-0 shadow-xs">
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-[#16499c]/20 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white border border-[#16499c]/30 text-[#16499c] flex items-center justify-center shrink-0 shadow-xs">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
               <div className="text-[11px] font-semibold text-slate-500">System Admins</div>
-              <div className="text-lg font-black text-emerald-700">{admins.length} Active</div>
+              <div className="text-lg font-black text-[#16499c]">{admins.length} Active</div>
             </div>
           </div>
         </div>
@@ -537,7 +545,7 @@ export const AdminDashboard: React.FC = () => {
                     `IZEON_Candidates_Directory_${new Date().toISOString().split("T")[0]}.csv`
                   )
                 }
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold transition-all cursor-pointer shadow-xs sm:ml-2"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white text-xs font-bold transition-all cursor-pointer shadow-xs sm:ml-2 border border-[#16499c]"
                 title="Export filtered candidate directory to Excel spreadsheet"
               >
                 <FileSpreadsheet className="w-3.5 h-3.5" />
@@ -1050,7 +1058,7 @@ export const AdminDashboard: React.FC = () => {
                     )
                   }
                   disabled={filteredAttempts.length === 0}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white font-bold text-xs shadow-md shadow-teal-600/20 cursor-pointer transition-all"
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] disabled:opacity-50 text-white font-bold text-xs shadow-md shadow-[#16499c]/20 border border-[#16499c] cursor-pointer transition-all"
                   title="Export candidate evaluated marks to Excel"
                 >
                   <FileSpreadsheet className="w-3.5 h-3.5" />
@@ -1353,7 +1361,7 @@ export const AdminDashboard: React.FC = () => {
                         </td>
                         <td className="py-4 px-6 text-center whitespace-nowrap">
                           <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-extrabold border border-emerald-200 uppercase tracking-wider">
-                            🛡️ {adm.role}
+                            {adm.role}
                           </span>
                         </td>
                         <td className="py-4 px-6 text-center whitespace-nowrap">

@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand-blue: #16499c;
+  --color-brand-blue-hover: #123c80;
+  --color-brand-blue-dark: #0e3066;
+  --color-brand-blue-light: #eff5ff;
+  --color-brand-blue-subtle: rgba(22, 73, 156, 0.12);
+  --color-secondary-border: rgba(22, 73, 156, 0.25);
+  --color-secondary-border-strong: #16499c;
+}
+
 @layer base {
   :root {
     --primary-emerald: #059669;
@@ -7,7 +17,45 @@
     --mint-accent: #10b981;
     --soft-green-bg: #f4fbf7;
     --pure-white: #ffffff;
+
+    /* Logo Brand Blue (Secondary Color) */
+    --brand-blue: #16499c;
+    --brand-blue-hover: #123c80;
+    --brand-blue-light: #eff5ff;
+    --brand-blue-border: rgba(22, 73, 156, 0.25);
   }
+}
+
+/* Secondary Button and Border Utilities using Logo Blue */
+.btn-secondary {
+  background-color: #16499c;
+  color: #ffffff;
+  border: 1px solid #16499c;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-secondary:hover {
+  background-color: #123c80;
+  border-color: #123c80;
+}
+
+.btn-secondary-outline {
+  background-color: #ffffff;
+  color: #16499c;
+  border: 1.5px solid rgba(22, 73, 156, 0.35);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-secondary-outline:hover {
+  background-color: #eff5ff;
+  border-color: #16499c;
+  color: #123c80;
+}
+
+.border-secondary {
+  border-color: rgba(22, 73, 156, 0.25) !important;
+}
+
+.border-secondary-strong {
+  border-color: #16499c !important;
 }
 
 html, body, #root {

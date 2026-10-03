@@ -13,6 +13,7 @@ import {
   Camera,
   ShieldCheck,
 } from "lucide-react";
+import interviewLogo from "../assets/interview logo.png";
 
 export const StudentDashboard: React.FC = () => {
   const { user, refreshUser } = useAuth();
@@ -81,14 +82,19 @@ export const StudentDashboard: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
       {/* 1. Header greeting */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-            Welcome, <span className="text-emerald-700">{user.name}</span> 👋
-          </h1>
-          <p className="text-sm text-slate-600 mt-1 font-medium">
-            {user.college ? `${user.college} • ` : ""}Candidate Assessment Examination Portal
-          </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-[#16499c]/25 shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-white border border-[#16499c]/25 p-1 flex items-center justify-center shrink-0 shadow-xs">
+            <img src={interviewLogo} alt="IZEON Logo" className="w-full h-full object-contain" />
+          </div>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+              Welcome, <span className="text-[#16499c]">{user.name}</span> 👋
+            </h1>
+            <p className="text-sm text-slate-600 mt-1 font-medium">
+              {user.college ? `${user.college} • ` : ""}Candidate Assessment Examination Portal
+            </p>
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
@@ -97,9 +103,9 @@ export const StudentDashboard: React.FC = () => {
               refreshUser();
               loadAssessment();
             }}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm font-semibold text-slate-700 cursor-pointer transition-all shadow-xs"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#16499c]/30 hover:border-[#16499c] bg-white hover:bg-[#eff5ff] text-sm font-semibold text-[#16499c] cursor-pointer transition-all shadow-xs"
           >
-            <RotateCw className="w-4 h-4 text-slate-500" />
+            <RotateCw className="w-4 h-4 text-[#16499c]" />
             Refresh Portal
           </button>
         </div>
@@ -245,12 +251,12 @@ export const StudentDashboard: React.FC = () => {
                 </div>
 
                 {/* Round 2 Card */}
-                <div className="bg-white p-7 rounded-2xl border border-slate-200 shadow-sm space-y-4 hover:border-emerald-300 transition-all">
+                <div className="bg-white p-7 rounded-2xl border border-slate-200 shadow-sm space-y-4 hover:border-[#16499c]/40 transition-all">
                   <div className="flex items-center justify-between">
-                    <div className="w-12 h-12 rounded-2xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-700 shadow-inner">
+                    <div className="w-12 h-12 rounded-2xl bg-[#eff5ff] border border-[#16499c]/30 flex items-center justify-center text-[#16499c] shadow-inner">
                       <Code2 className="w-6 h-6" />
                     </div>
-                    <span className="px-3.5 py-1.5 rounded-full bg-teal-50 border border-teal-200 text-xs sm:text-sm font-bold text-teal-800 font-mono">
+                    <span className="px-3.5 py-1.5 rounded-full bg-[#eff5ff] border border-[#16499c]/30 text-xs sm:text-sm font-bold text-[#16499c] font-mono">
                       ⏱ {assessment.durationR2} Minutes
                     </span>
                   </div>
