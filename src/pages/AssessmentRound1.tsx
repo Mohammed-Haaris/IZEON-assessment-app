@@ -9,9 +9,13 @@ import {
   ArrowRight,
   ArrowLeft,
   Send,
+  AlertTriangle,
+  Lock,
+  XCircle,
 } from "lucide-react";
 import { CameraGuard } from "../components/CameraGuard";
 import { CameraTile } from "../components/CameraTile";
+import { getSocket } from "../services/socket";
 
 export const AssessmentRound1: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -27,6 +31,12 @@ export const AssessmentRound1: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [round1Result, setRound1Result] = useState<{ score: number } | null>(null);
 
+  // Proctoring & Malpractice States (Identical to Round 2)
+  const [warningModal, setWarningModal] = useState<string | null>(null);
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockMessage, setLockMessage] = useState("");
+  const [isDisqualified, setIsDisqualified] = useState(false);
+
   useEffect(() => {
     async function loadQuestions() {
       try {
@@ -39,10 +49,19 @@ export const AssessmentRound1: React.FC = () => {
           body: JSON.stringify({ assessmentId: "" }), // will fetch active attempt questions
         });
 
-        if (data.attempt.status === "COMPLETED" || data.attempt.status === "DISQUALIFIED") {
+        if (data.attempt.status === "COMPLETED") {
           alert("You have already completed this assessment. Retakes or resuming are not permitted.");
           navigate("/dashboard");
           return;
+        }
+
+        if (data.attempt.status === "DISQUALIFIED") {
+          setIsDisqualified(true);
+          return;
+        }
+
+        if (data.attempt.status === "MALPRACTICE_LOCKED") {
+          setIsLocked(true);
         }
 
         if (data.attempt.currentRound === "ROUND_2_CODING") {
@@ -64,9 +83,130 @@ export const AssessmentRound1: React.FC = () => {
     loadQuestions();
   }, [attemptId]);
 
+  const socket = getSocket();
+
+  // Socket & Proctoring Setup (Identical to Round 2)
+  useEffect(() => {
+    if (!attemptId) return;
+
+    const handleConnect = () => {
+      socket.emit("join:attempt", attemptId);
+    };
+
+    if (socket.connected) {
+      socket.emit("join:attempt", attemptId);
+    }
+    socket.on("connect", handleConnect);
+
+    // Strike 1 Warning
+    socket.on("proctor:warning", (data: { count: number; message: string }) => {
+      setWarningModal(data.message);
+    });
+
+    // Strike 2 Malpractice Lock
+    socket.on("proctor:locked", (data: { count: number; message: string }) => {
+      setWarningModal(null);
+      setIsLocked(true);
+      setLockMessage(data.message);
+    });
+
+    // Admin decisions
+    socket.on("proctor:unlocked", (data: { attemptId?: string; message: string }) => {
+      if (!data.attemptId || data.attemptId === attemptId) {
+        setIsLocked(false);
+      }
+    });
+
+    socket.on("proctor:disqualified", (data: { attemptId?: string; message: string }) => {
+      if (!data.attemptId || data.attemptId === attemptId) {
+        setIsLocked(false);
+        setIsDisqualified(true);
+        setLockMessage(data.message);
+      }
+    });
+
+    return () => {
+      socket.off("connect", handleConnect);
+      socket.off("proctor:warning");
+      socket.off("proctor:locked");
+      socket.off("proctor:unlocked");
+      socket.off("proctor:disqualified");
+    };
+  }, [attemptId]);
+
+  // Fallback sync when locked to instantly detect admin unlock decision
+  useEffect(() => {
+    if (!isLocked) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await apiRequest<{ attempt?: any }>("/assessment/active");
+        if (res.attempt) {
+          if (res.attempt.status === "ROUND_1_IN_PROGRESS" || res.attempt.status === "IN_PROGRESS") {
+            setIsLocked(false);
+          } else if (res.attempt.status === "DISQUALIFIED") {
+            setIsLocked(false);
+            setIsDisqualified(true);
+          }
+        }
+      } catch (err) {
+        // silent
+      }
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, [isLocked]);
+
+  // Anti-Cheating: Real tab switch detection (Identical to Round 2)
+  useEffect(() => {
+    if (isLocked || isDisqualified || round1Result || isSubmitting || !attemptId) return;
+
+    let hideTimer: any = null;
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // Wait 1.5 seconds to ensure candidate actually left the tab and it's not an accidental click
+        hideTimer = setTimeout(() => {
+          if (document.hidden) {
+            socket.emit("student:tab_switch", {
+              attemptId,
+              violationType: "TAB_SWITCH",
+            });
+          }
+        }, 1500);
+      } else {
+        if (hideTimer) {
+          clearTimeout(hideTimer);
+          hideTimer = null;
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // Prevent context menu (right click) and copy-paste
+    const handleContextMenu = (e: MouseEvent) => e.preventDefault();
+    const handleCopyPaste = (e: ClipboardEvent) => {
+      e.preventDefault();
+      alert("⚠️ Copying and pasting are disabled in Round 1.");
+    };
+
+    document.addEventListener("contextmenu", handleContextMenu);
+    document.addEventListener("copy", handleCopyPaste);
+    document.addEventListener("paste", handleCopyPaste);
+
+    return () => {
+      if (hideTimer) clearTimeout(hideTimer);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener("contextmenu", handleContextMenu);
+      document.removeEventListener("copy", handleCopyPaste);
+      document.removeEventListener("paste", handleCopyPaste);
+    };
+  }, [isLocked, isDisqualified, round1Result, isSubmitting, attemptId]);
+
   // Timer countdown
   useEffect(() => {
-    if (round1Result || isSubmitting) return;
+    if (round1Result || isSubmitting || isLocked || isDisqualified) return;
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -80,7 +220,7 @@ export const AssessmentRound1: React.FC = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [round1Result, isSubmitting]);
+  }, [round1Result, isSubmitting, isLocked, isDisqualified]);
 
   const handleSelectOption = (questionId: string, option: string) => {
     setMcqAnswers((prev) => ({ ...prev, [questionId]: option }));
@@ -177,6 +317,29 @@ export const AssessmentRound1: React.FC = () => {
     );
   }
 
+  if (isDisqualified) {
+    return (
+      <div className="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-6 text-white text-center">
+        <div className="max-w-md space-y-4">
+          <div className="w-16 h-16 rounded-full bg-rose-600/20 border border-rose-500 flex items-center justify-center mx-auto text-rose-500">
+            <XCircle className="w-8 h-8" />
+          </div>
+          <h2 className="text-2xl font-bold tracking-tight text-rose-400">Test Disqualified</h2>
+          <p className="text-xs text-slate-300 leading-relaxed">
+            {lockMessage ||
+              "Your test session has been terminated by the administrator due to repeated tab switch violations."}
+          </p>
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="px-6 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold cursor-pointer"
+          >
+            Return to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const currentQ = questions[activeIdx];
 
   return (
@@ -187,6 +350,45 @@ export const AssessmentRound1: React.FC = () => {
           <div className="fixed top-20 right-6 z-30 w-36 h-28 shadow-2xl">
             <CameraTile stream={cameraStream} />
           </div>
+
+          {/* WARNING POPUP (Strike 1) */}
+          {warningModal && (
+            <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-amber-500 text-slate-950 px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border-2 border-white animate-bounce">
+              <AlertTriangle className="w-5 h-5 shrink-0" />
+              <div className="text-xs font-bold">{warningModal}</div>
+              <button
+                onClick={() => setWarningModal(null)}
+                className="px-2 py-0.5 rounded-md bg-slate-950 text-white text-[10px] font-bold cursor-pointer"
+              >
+                I Understand
+              </button>
+            </div>
+          )}
+
+          {/* MALPRACTICE LOCK SCREEN (Strike 2) */}
+          {isLocked && (
+            <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-lg flex items-center justify-center p-6 text-center">
+              <div className="max-w-md bg-slate-900 border-2 border-rose-500 p-8 rounded-3xl shadow-2xl shadow-rose-500/20 space-y-4">
+                <div className="w-16 h-16 rounded-full bg-rose-500/20 border border-rose-500 flex items-center justify-center mx-auto text-rose-500 animate-pulse">
+                  <Lock className="w-8 h-8" />
+                </div>
+                <div>
+                  <span className="px-3 py-1 rounded-full bg-rose-500/20 text-rose-400 text-[10px] font-bold uppercase tracking-wider border border-rose-500/30">
+                    Malpractice Strike 2/2
+                  </span>
+                  <h3 className="text-xl font-bold text-white mt-2">Assessment Screen Locked</h3>
+                  <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+                    You navigated away from the exam tab twice. Your session is suspended. An alert has
+                    been sent to the administrator to review your attempt.
+                  </p>
+                </div>
+                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-[11px] text-amber-400 flex items-center justify-center gap-2">
+                  <Clock className="w-4 h-4 animate-spin" />
+                  <span>Waiting for Admin Decision in real-time...</span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Top Header Bar */}
           <div className="flex items-center justify-between bg-white px-6 py-4 rounded-2xl border border-slate-200 shadow-sm">
