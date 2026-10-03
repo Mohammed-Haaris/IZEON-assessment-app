@@ -11,6 +11,7 @@ import {
   generateExamResultsPDF,
   generateCandidateScorecardPDF,
 } from "../utils/pdfGenerator";
+import { exportStudentsToExcel } from "../utils/excelExporter";
 import type { User, Assessment, MalpracticeAlert, AssessmentAttempt } from "../types";
 import {
   Users,
@@ -19,7 +20,6 @@ import {
   RotateCw,
   Search,
   Check,
-  X,
   Award,
   Plus,
   Eye,
@@ -27,7 +27,9 @@ import {
   CheckCircle2,
   Trash2,
   UserPlus,
-  ShieldCheck
+  ShieldCheck,
+  XCircle,
+  AlertOctagon,
 } from "lucide-react";
 
 export const AdminDashboard: React.FC = () => {
@@ -44,6 +46,7 @@ export const AdminDashboard: React.FC = () => {
 
   // Live Proctor & Malpractice Alerts
   const [activeAlert, setActiveAlert] = useState<MalpracticeAlert | null>(null);
+  const [dismissedAlerts, setDismissedAlerts] = useState<string[]>([]);
   const [malpracticeLogs, setMalpracticeLogs] = useState<any[]>([]);
 
   // Assessments & Question Modals
@@ -63,12 +66,20 @@ export const AdminDashboard: React.FC = () => {
   const socket = getSocket();
 
   useEffect(() => {
-    socket.emit("join:admin");
+    const handleConnect = () => {
+      socket.emit("join:admin");
+    };
+
+    if (socket.connected) {
+      socket.emit("join:admin");
+    }
+    socket.on("connect", handleConnect);
 
     // Real-time malpractice popup alert listener
     socket.on("admin:malpractice_alert", (alert: MalpracticeAlert) => {
       setActiveAlert(alert);
       loadMalpracticeLogs();
+      loadAttempts();
     });
 
     socket.on("admin:action_resolved", () => {
@@ -78,6 +89,7 @@ export const AdminDashboard: React.FC = () => {
     });
 
     return () => {
+      socket.off("connect", handleConnect);
       socket.off("admin:malpractice_alert");
       socket.off("admin:action_resolved");
     };
@@ -96,8 +108,10 @@ export const AdminDashboard: React.FC = () => {
     try {
       const data = await apiRequest<{ logs: any[] }>("/admin/malpractice-logs");
       setMalpracticeLogs(data.logs);
+      return data.logs;
     } catch (err) {
       console.error("Load logs error:", err);
+      return [];
     }
   };
 
@@ -114,8 +128,10 @@ export const AdminDashboard: React.FC = () => {
     try {
       const data = await apiRequest<{ attempts: any[] }>("/admin/attempts");
       setAttempts(data.attempts);
+      return data.attempts;
     } catch (err) {
       console.error("Load attempts error:", err);
+      return [];
     }
   };
 
@@ -129,11 +145,32 @@ export const AdminDashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    loadStudents();
-    loadMalpracticeLogs();
-    loadAssessments();
-    loadAttempts();
-    loadAdmins();
+    async function loadAllInitialData() {
+      loadStudents();
+      loadAssessments();
+      loadAdmins();
+      const [logs, atts] = await Promise.all([loadMalpracticeLogs(), loadAttempts()]);
+      
+      // Auto-popup if candidate is locked and admin just loaded dashboard
+      if (atts && logs) {
+        const lockedAttempt = atts.find(
+          (a: any) => a.status === "MALPRACTICE_LOCKED" && !dismissedAlerts.includes(a.id)
+        );
+        if (lockedAttempt && lockedAttempt.user) {
+          setActiveAlert({
+            attemptId: lockedAttempt.id,
+            studentId: lockedAttempt.user.id,
+            studentName: lockedAttempt.user.name,
+            studentEmail: lockedAttempt.user.email,
+            assessmentTitle: lockedAttempt.assessment?.title || "Round 2 Assessment",
+            violationType: "TAB_SWITCH",
+            violationCount: lockedAttempt.tabSwitchCount || 2,
+            timestamp: new Date().toISOString(),
+          });
+        }
+      }
+    }
+    loadAllInitialData();
   }, []);
 
   // Permanently delete user from entire database
@@ -164,15 +201,67 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  const [processingLogId, setProcessingLogId] = useState<string | null>(null);
+
   // Malpractice decision handlers
-  const handleGiveChance = (attemptId: string, remarks: string) => {
-    socket.emit("admin:give_chance", { attemptId, remarks });
+  const handleGiveChance = async (attemptId: string, remarks: string = "Admin granted candidate another chance", logId?: string) => {
+    if (logId) {
+      setProcessingLogId(logId);
+      setMalpracticeLogs((prev) =>
+        prev.map((l) => (l.id === logId ? { ...l, adminDecision: "GIVEN_CHANCE" } : l))
+      );
+    }
+    try {
+      if (logId) {
+        await apiRequest(`/admin/malpractice-logs/${logId}/decision`, {
+          method: "POST",
+          body: JSON.stringify({ decision: "GIVEN_CHANCE", remarks }),
+        });
+      } else {
+        await apiRequest(`/admin/attempts/${attemptId}/give-chance`, {
+          method: "POST",
+          body: JSON.stringify({ remarks }),
+        });
+      }
+    } catch (err: any) {
+      console.error("Give chance REST error:", err);
+      alert(err.message || "Failed to give chance");
+    }
+    socket.emit("admin:give_chance", { attemptId, remarks, logId });
     setActiveAlert(null);
+    setDismissedAlerts((prev) => [...prev, attemptId]);
+    await Promise.all([loadMalpracticeLogs(), loadAttempts()]);
+    setProcessingLogId(null);
   };
 
-  const handleRejectCandidate = (attemptId: string, remarks: string) => {
-    socket.emit("admin:reject_student", { attemptId, remarks });
+  const handleRejectCandidate = async (attemptId: string, remarks: string = "Disqualified for repeated tab-switching malpractice", logId?: string) => {
+    if (logId) {
+      setProcessingLogId(logId);
+      setMalpracticeLogs((prev) =>
+        prev.map((l) => (l.id === logId ? { ...l, adminDecision: "REJECTED" } : l))
+      );
+    }
+    try {
+      if (logId) {
+        await apiRequest(`/admin/malpractice-logs/${logId}/decision`, {
+          method: "POST",
+          body: JSON.stringify({ decision: "REJECTED", remarks }),
+        });
+      } else {
+        await apiRequest(`/admin/attempts/${attemptId}/reject`, {
+          method: "POST",
+          body: JSON.stringify({ remarks }),
+        });
+      }
+    } catch (err: any) {
+      console.error("Reject candidate REST error:", err);
+      alert(err.message || "Failed to reject candidate");
+    }
+    socket.emit("admin:reject_student", { attemptId, remarks, logId });
     setActiveAlert(null);
+    setDismissedAlerts((prev) => [...prev, attemptId]);
+    await Promise.all([loadMalpracticeLogs(), loadAttempts()]);
+    setProcessingLogId(null);
   };
 
   const filteredStudents = students.filter((s) => {
@@ -189,8 +278,6 @@ export const AdminDashboard: React.FC = () => {
     return matchesStatus && matchesSearch;
   });
 
-  const pendingCount = students.filter((s) => s.status === "PENDING_APPROVAL").length;
-
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
       {/* REAL-TIME MALPRACTICE MODAL ALERT */}
@@ -199,6 +286,12 @@ export const AdminDashboard: React.FC = () => {
           alert={activeAlert}
           onGiveChance={handleGiveChance}
           onReject={handleRejectCandidate}
+          onClose={() => {
+            if (activeAlert) {
+              setDismissedAlerts((prev) => [...prev, activeAlert.attemptId]);
+            }
+            setActiveAlert(null);
+          }}
         />
       )}
 
@@ -228,6 +321,15 @@ export const AdminDashboard: React.FC = () => {
             </button>
 
             <button
+              onClick={() => exportStudentsToExcel(students, attempts)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-sm shadow-teal-600/20 transition-all cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
+              title="Export all database candidate records and exam metrics to Excel spreadsheet"
+            >
+              <FileSpreadsheet className="w-3.5 h-3.5" />
+              Export to Excel
+            </button>
+
+            <button
               onClick={() => {
                 loadStudents();
                 loadMalpracticeLogs();
@@ -249,14 +351,9 @@ export const AdminDashboard: React.FC = () => {
               <Users className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-[11px] font-semibold text-slate-500">Registered Candidates</div>
+              <div className="text-[11px] font-semibold text-slate-500">Enrolled Candidates</div>
               <div className="text-lg font-black text-slate-900 flex items-center gap-1.5">
-                {students.length}
-                {pendingCount > 0 && (
-                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-100 text-amber-800 font-bold">
-                    {pendingCount} new
-                  </span>
-                )}
+                {students.length} Total
               </div>
             </div>
           </div>
@@ -295,10 +392,79 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* CANDIDATE EXAM LOCKED URGENT ACTION BANNER */}
+      {attempts.filter((a) => a.status === "MALPRACTICE_LOCKED").length > 0 && (
+        <div className="bg-gradient-to-r from-rose-50 via-red-50 to-amber-50 border-2 border-rose-300 rounded-3xl p-6 shadow-md space-y-4 animate-in fade-in duration-300">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-rose-200/60 pb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-rose-600 text-white flex items-center justify-center shrink-0 shadow-sm shadow-rose-600/30">
+                <AlertOctagon className="w-5 h-5 animate-pulse" />
+              </div>
+              <div>
+                <h2 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                  Action Required: Candidate Exam Suspended ({attempts.filter((a) => a.status === "MALPRACTICE_LOCKED").length} Candidate{attempts.filter((a) => a.status === "MALPRACTICE_LOCKED").length > 1 ? "s" : ""})
+                  <span className="px-2.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-black uppercase tracking-wider">
+                    Locked
+                  </span>
+                </h2>
+                <p className="text-xs text-slate-600">
+                  The candidate reached the tab switch limit during Round 2. Please review and authorize whether to grant another chance or disqualify.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3">
+            {attempts
+              .filter((a) => a.status === "MALPRACTICE_LOCKED")
+              .map((attempt) => (
+                <div
+                  key={attempt.id}
+                  className="bg-white p-4 rounded-2xl border border-rose-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-extrabold text-slate-900 text-sm">{attempt.user?.name}</span>
+                      <span className="text-xs font-mono text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                        {attempt.user?.email}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-md bg-rose-100 text-rose-800 text-[10px] font-black uppercase">
+                        {attempt.tabSwitchCount}/2 Tab Switches
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-600 flex items-center gap-2">
+                      <span className="font-semibold text-slate-700">{attempt.assessment?.title || "Assessment"}</span>
+                      <span>•</span>
+                      <span className="text-slate-500 font-mono text-[11px]">ID: {attempt.id}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => handleGiveChance(attempt.id, "Admin authorized candidate to resume assessment")}
+                      className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-sm shadow-emerald-600/20 transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      Give Another Chance
+                    </button>
+                    <button
+                      onClick={() => handleRejectCandidate(attempt.id, "Candidate disqualified by admin")}
+                      className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-sm shadow-rose-600/20 transition-all cursor-pointer flex items-center gap-1.5"
+                    >
+                      <XCircle className="w-4 h-4" />
+                      Disqualify Candidate
+                    </button>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
       {/* Modern Floating Pill Navigation Tabs */}
       <div className="bg-white p-1.5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap gap-1">
         {[
-          { id: "approvals", label: "Student Approvals", icon: Users, badge: pendingCount },
+          { id: "approvals", label: "Candidate Directory", icon: Users, badge: students.length },
           { id: "proctor", label: "Live Proctoring & Logs", icon: ShieldAlert },
           { id: "exams", label: "Assessment & Question Bank", icon: FileSpreadsheet },
           { id: "results", label: "Candidate Scores & Master Marks", icon: Award, badge: attempts.length },
@@ -332,7 +498,7 @@ export const AdminDashboard: React.FC = () => {
         })}
       </div>
 
-      {/* TAB 1: STUDENT APPROVALS */}
+      {/* TAB 1: CANDIDATE DIRECTORY */}
       {activeTab === "approvals" && (
         <div className="space-y-4">
           {/* Filter Bar */}
@@ -350,7 +516,7 @@ export const AdminDashboard: React.FC = () => {
 
             <div className="flex items-center gap-1.5 w-full sm:w-auto">
               <span className="text-xs text-slate-500 font-bold">Filter:</span>
-              {(["ALL", "PENDING_APPROVAL", "APPROVED", "REJECTED"] as const).map((status) => (
+              {(["ALL", "APPROVED", "REJECTED"] as const).map((status) => (
                 <button
                   key={status}
                   onClick={() => setStatusFilter(status)}
@@ -359,9 +525,24 @@ export const AdminDashboard: React.FC = () => {
                     : "bg-slate-100 text-slate-600 hover:bg-emerald-50/60 hover:text-emerald-900"
                     }`}
                 >
-                  {status === "ALL" ? "All" : status.replace("_", " ")}
+                  {status === "ALL" ? "All" : status === "APPROVED" ? "Active" : "Restricted"}
                 </button>
               ))}
+
+              <button
+                onClick={() =>
+                  exportStudentsToExcel(
+                    filteredStudents,
+                    attempts,
+                    `IZEON_Candidates_Directory_${new Date().toISOString().split("T")[0]}.csv`
+                  )
+                }
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold transition-all cursor-pointer shadow-xs sm:ml-2"
+                title="Export filtered candidate directory to Excel spreadsheet"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5" />
+                <span>Export ({filteredStudents.length})</span>
+              </button>
             </div>
           </div>
 
@@ -378,14 +559,14 @@ export const AdminDashboard: React.FC = () => {
                     <th className="py-3.5 px-6">College / Org</th>
                     <th className="py-3.5 px-6">Status</th>
                     <th className="py-3.5 px-6">Registered On</th>
-                    <th className="py-3.5 px-6 text-right">Approval Action</th>
+                    <th className="py-3.5 px-6 text-right">Access Control</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs">
                   {filteredStudents.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="py-8 text-center text-slate-400 font-medium">
-                        No students found matching your filter criteria.
+                        No candidates found matching your filter criteria.
                       </td>
                     </tr>
                   ) : (
@@ -430,7 +611,7 @@ export const AdminDashboard: React.FC = () => {
                                 : "bg-rose-100 text-rose-800"
                               }`}
                           >
-                            {student.status.replace("_", " ")}
+                            {student.status === "APPROVED" ? "ACTIVE" : student.status === "REJECTED" ? "RESTRICTED" : student.status.replace("_", " ")}
                           </span>
                         </td>
                         <td className="py-3.5 px-6 text-slate-400 text-[11px] font-medium">
@@ -439,35 +620,26 @@ export const AdminDashboard: React.FC = () => {
                         <td className="py-3.5 px-6 text-right">
                           <div className="inline-flex items-center justify-end gap-2">
                             {student.status === "PENDING_APPROVAL" ? (
-                              <div className="inline-flex gap-2">
-                                <button
-                                  onClick={() => handleUpdateStudentStatus(student.id, "APPROVED")}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs cursor-pointer transition-all"
-                                >
-                                  <Check className="w-3.5 h-3.5" />
-                                  Approve
-                                </button>
-                                <button
-                                  onClick={() => handleUpdateStudentStatus(student.id, "REJECTED")}
-                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs border border-rose-200 cursor-pointer transition-all"
-                                >
-                                  <X className="w-3.5 h-3.5" />
-                                  Reject
-                                </button>
-                              </div>
+                              <button
+                                onClick={() => handleUpdateStudentStatus(student.id, "APPROVED")}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs cursor-pointer transition-all"
+                              >
+                                <Check className="w-3.5 h-3.5" />
+                                Activate
+                              </button>
                             ) : student.status === "APPROVED" ? (
                               <button
                                 onClick={() => handleUpdateStudentStatus(student.id, "REJECTED")}
-                                className="text-[11px] font-bold text-rose-600 hover:underline cursor-pointer"
+                                className="text-[11px] font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer"
                               >
-                                Revoke Approval
+                                Restrict Access
                               </button>
                             ) : (
                               <button
                                 onClick={() => handleUpdateStudentStatus(student.id, "APPROVED")}
-                                className="text-[11px] font-bold text-emerald-600 hover:underline cursor-pointer"
+                                className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer"
                               >
-                                Re-Approve
+                                Restore Access
                               </button>
                             )}
 
@@ -522,12 +694,13 @@ export const AdminDashboard: React.FC = () => {
                   <th className="py-3.5 px-6">Strikes</th>
                   <th className="py-3.5 px-6">Admin Decision</th>
                   <th className="py-3.5 px-6">Timestamp</th>
+                  <th className="py-3.5 px-6 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs">
                 {malpracticeLogs.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-8 text-center text-slate-400 font-medium">
+                    <td colSpan={6} className="py-8 text-center text-slate-400 font-medium">
                       No malpractice incidents recorded yet. Clean exam environment!
                     </td>
                   </tr>
@@ -560,6 +733,51 @@ export const AdminDashboard: React.FC = () => {
                       </td>
                       <td className="py-3.5 px-6 text-slate-500 text-[11px] font-medium">
                         {new Date(log.timestamp).toLocaleString()}
+                      </td>
+                      <td className="py-3.5 px-6 text-right whitespace-nowrap">
+                        {log.adminDecision === "PENDING" || !log.adminDecision || log.attempt?.status === "MALPRACTICE_LOCKED" ? (
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => handleGiveChance(log.attemptId, "Admin authorized candidate to resume", log.id)}
+                              disabled={processingLogId === log.id}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
+                              title="Give candidate another chance and unlock assessment"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>{processingLogId === log.id ? "Updating..." : "Give Chance"}</span>
+                            </button>
+                            <button
+                              onClick={() => handleRejectCandidate(log.attemptId, "Disqualified for repeated tab switching", log.id)}
+                              disabled={processingLogId === log.id}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
+                              title="Disqualify candidate"
+                            >
+                              <XCircle className="w-3.5 h-3.5" />
+                              <span>{processingLogId === log.id ? "Updating..." : "Disqualify"}</span>
+                            </button>
+                          </div>
+                        ) : log.adminDecision === "GIVEN_CHANCE" ? (
+                          <div className="flex items-center justify-end gap-2">
+                            <span className="inline-flex items-center gap-1 text-emerald-700 font-bold text-xs">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              Chance Granted
+                            </span>
+                            {log.attempt?.status === "MALPRACTICE_LOCKED" && (
+                              <button
+                                onClick={() => handleGiveChance(log.attemptId, "Admin re-unlocked exam", log.id)}
+                                disabled={processingLogId === log.id}
+                                className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white text-[11px] font-bold cursor-pointer transition-all"
+                              >
+                                {processingLogId === log.id ? "Updating..." : "Re-Unlock"}
+                              </button>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-rose-600 font-bold text-xs">
+                            <XCircle className="w-3.5 h-3.5" />
+                            Disqualified
+                          </span>
+                        )}
                       </td>
                     </tr>
                   ))
@@ -821,17 +1039,36 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* Master PDF Export Button */}
-              <button
-                onClick={() =>
-                  generateExamResultsPDF(filteredAttempts, assessments[0]?.title || "IZEON Assessment 2026")
-                }
-                disabled={filteredAttempts.length === 0}
-                className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs shadow-md shadow-slate-900/20 cursor-pointer transition-all shrink-0"
-              >
-                <Download className="w-4 h-4 text-emerald-400" />
-                Export Full Exam Report (PDF)
-              </button>
+              <div className="flex items-center gap-2.5 shrink-0">
+                {/* Master Excel Export Button */}
+                <button
+                  onClick={() =>
+                    exportStudentsToExcel(
+                      students.filter((s) => filteredAttempts.some((att) => att.userId === s.id)),
+                      filteredAttempts,
+                      `IZEON_Evaluated_Marks_Report_${new Date().toISOString().split("T")[0]}.csv`
+                    )
+                  }
+                  disabled={filteredAttempts.length === 0}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white font-bold text-xs shadow-md shadow-teal-600/20 cursor-pointer transition-all"
+                  title="Export candidate evaluated marks to Excel"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5" />
+                  Export Marks (Excel)
+                </button>
+
+                {/* Master PDF Export Button */}
+                <button
+                  onClick={() =>
+                    generateExamResultsPDF(filteredAttempts, assessments[0]?.title || "IZEON Assessment 2026")
+                  }
+                  disabled={filteredAttempts.length === 0}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white font-bold text-xs shadow-md shadow-slate-900/20 cursor-pointer transition-all"
+                >
+                  <Download className="w-4 h-4 text-emerald-400" />
+                  Export Report (PDF)
+                </button>
+              </div>
             </div>
 
             {/* Master Marks & Candidate Submissions Table */}
@@ -993,6 +1230,17 @@ export const AdminDashboard: React.FC = () => {
                             {/* Actions */}
                             <td className="py-3.5 px-5 text-right whitespace-nowrap">
                               <div className="flex items-center justify-end gap-1.5">
+                                {att.status === "MALPRACTICE_LOCKED" && (
+                                  <button
+                                    onClick={() => handleGiveChance(att.id, "Admin granted chance from scores table")}
+                                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold cursor-pointer transition-colors shadow-xs"
+                                    title="Give candidate another chance and unlock assessment"
+                                  >
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                    <span>Unlock</span>
+                                  </button>
+                                )}
+
                                 <button
                                   onClick={() => setSelectedAttemptForDetails(att)}
                                   className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold cursor-pointer transition-colors"

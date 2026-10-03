@@ -50,28 +50,28 @@ export const Login: React.FC = () => {
             </div>
           </div>
           <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">Sign in to IZEON</h1>
-          <p className="text-xs text-slate-500 font-medium">
+          <p className="text-sm text-slate-600 font-medium">
             Proctored Assessment & Verification Platform
           </p>
         </div>
 
         {/* Quick fill demo helper */}
-        <div className="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 text-xs flex items-center justify-between text-emerald-950 font-medium">
-          <span className="flex items-center gap-1.5">
+        <div className="p-3.5 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-sm flex items-center justify-between text-emerald-950 font-medium">
+          <span className="flex items-center gap-1.5 text-xs sm:text-sm">
             <span className="w-2 h-2 rounded-full bg-emerald-500" />
             Admin Demo Access:
           </span>
           <button
             type="button"
             onClick={handleQuickFillAdmin}
-            className="text-xs font-bold text-emerald-800 hover:text-emerald-950 bg-white px-3 py-1 rounded-lg border border-emerald-200 shadow-xs cursor-pointer transition-all hover:bg-emerald-50"
+            className="text-xs sm:text-sm font-bold text-emerald-800 hover:text-emerald-950 bg-white px-3 py-1 rounded-lg border border-emerald-200 shadow-xs cursor-pointer transition-all hover:bg-emerald-50"
           >
             Auto-fill Admin
           </button>
         </div>
 
         {error && (
-          <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-medium">
+          <div className="flex items-start gap-2.5 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-sm text-rose-700 font-medium">
             <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
             <p>{error}</p>
           </div>
@@ -79,7 +79,7 @@ export const Login: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-slate-900 mb-1.5">Email Address</label>
+            <label className="block text-sm font-semibold text-slate-800 mb-1.5">Email Address</label>
             <div className="relative">
               <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
               <input
@@ -88,13 +88,13 @@ export const Login: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
-                className="w-full text-xs pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium"
+                className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium placeholder:text-slate-400"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-900 mb-1.5">Password</label>
+            <label className="block text-sm font-semibold text-slate-800 mb-1.5">Password</label>
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
               <input
@@ -103,7 +103,7 @@ export const Login: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full text-xs pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium"
+                className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium placeholder:text-slate-400"
               />
             </div>
           </div>
@@ -111,7 +111,7 @@ export const Login: React.FC = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-extrabold text-xs transition-all shadow-md shadow-emerald-600/25 cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-sm transition-all shadow-md shadow-emerald-600/25 cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
           >
             {isSubmitting ? "Signing in..." : "Sign In to Portal"}
             <ArrowRight className="w-4 h-4" />
@@ -119,7 +119,7 @@ export const Login: React.FC = () => {
         </form>
 
         {/* Footer */}
-        <div className="text-center text-xs text-slate-500 pt-4 border-t border-slate-100 font-medium">
+        <div className="text-center text-sm text-slate-600 pt-4 border-t border-slate-100 font-medium">
           New student candidate?{" "}
           <Link to="/register" className="font-bold text-emerald-700 hover:text-emerald-800 hover:underline">
             Register for Assessment

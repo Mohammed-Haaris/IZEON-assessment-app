@@ -6,12 +6,14 @@ interface MalpracticeAlertModalProps {
   alert: MalpracticeAlert;
   onGiveChance: (attemptId: string, remarks: string) => void;
   onReject: (attemptId: string, remarks: string) => void;
+  onClose?: () => void;
 }
 
 export const MalpracticeAlertModal: React.FC<MalpracticeAlertModalProps> = ({
   alert,
   onGiveChance,
   onReject,
+  onClose,
 }) => {
   const [remarks, setRemarks] = useState<string>("");
 
@@ -19,14 +21,25 @@ export const MalpracticeAlertModal: React.FC<MalpracticeAlertModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-rose-200 overflow-hidden">
         {/* Header Banner */}
-        <div className="bg-gradient-to-r from-rose-600 to-red-600 px-6 py-4 flex items-center gap-3 text-white">
-          <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-            <AlertOctagon className="w-6 h-6 animate-pulse" />
+        <div className="bg-gradient-to-r from-rose-600 to-red-600 px-6 py-4 flex items-center justify-between text-white">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+              <AlertOctagon className="w-6 h-6 animate-pulse" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold tracking-tight">Malpractice Strike 2 Detected!</h3>
+              <p className="text-xs text-rose-100">Immediate Proctoring Action Required</p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-lg font-bold tracking-tight">Malpractice Strike 2 Detected!</h3>
-            <p className="text-xs text-rose-100">Immediate Proctoring Action Required</p>
-          </div>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="p-1 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+              title="Close modal"
+            >
+              ✕
+            </button>
+          )}
         </div>
 
         {/* Candidate Information Card */}

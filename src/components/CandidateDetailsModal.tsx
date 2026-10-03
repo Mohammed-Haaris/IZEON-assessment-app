@@ -88,79 +88,79 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
         {/* Scrollable Body */}
         <div className="p-6 overflow-y-auto space-y-6">
           {/* Candidate Bio Info Grid */}
-          <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+          <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
             <div>
-              <span className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1">
-                <Briefcase className="w-3 h-3 text-emerald-600" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <Briefcase className="w-3.5 h-3.5 text-emerald-600" />
                 Target Track / Role
               </span>
-              <p className="font-bold text-slate-800 mt-1">
+              <p className="font-bold text-slate-900 mt-1 text-sm">
                 {attempt.user?.position || "Software Developer"}
               </p>
             </div>
             <div>
-              <span className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1">
-                <User className="w-3 h-3 text-emerald-600" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-emerald-600" />
                 Roll Number
               </span>
-              <p className="font-mono font-bold text-slate-800 mt-1">
+              <p className="font-mono font-bold text-slate-900 mt-1 text-sm">
                 {attempt.user?.rollNumber || "Not Provided"}
               </p>
             </div>
             <div>
-              <span className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1">
-                <GraduationCap className="w-3 h-3 text-emerald-600" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <GraduationCap className="w-3.5 h-3.5 text-emerald-600" />
                 Department
               </span>
-              <p className="font-semibold text-slate-800 mt-1">
+              <p className="font-semibold text-slate-900 mt-1 text-sm">
                 {attempt.user?.department || "—"}
               </p>
             </div>
             <div>
-              <span className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1">
-                <GraduationCap className="w-3 h-3 text-emerald-600" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <GraduationCap className="w-3.5 h-3.5 text-emerald-600" />
                 College / Institution
               </span>
-              <p className="font-semibold text-slate-800 mt-1">
+              <p className="font-semibold text-slate-900 mt-1 text-sm">
                 {attempt.user?.college || "—"}
               </p>
             </div>
 
             <div>
-              <span className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1">
-                <Phone className="w-3 h-3 text-emerald-600" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <Phone className="w-3.5 h-3.5 text-emerald-600" />
                 Mobile Number
               </span>
-              <p className="font-mono text-slate-700 mt-1">
+              <p className="font-mono font-semibold text-slate-800 mt-1 text-sm">
                 {attempt.user?.mobileNumber || "—"}
               </p>
             </div>
             <div>
-              <span className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1">
-                <Calendar className="w-3 h-3 text-emerald-600" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-emerald-600" />
                 Date of Birth (DOB)
               </span>
-              <p className="text-slate-700 mt-1">{attempt.user?.dob || "—"}</p>
+              <p className="text-slate-800 font-medium mt-1 text-sm">{attempt.user?.dob || "—"}</p>
             </div>
             <div>
-              <span className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1">
-                <ShieldAlert className="w-3 h-3 text-emerald-600" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <ShieldAlert className="w-3.5 h-3.5 text-emerald-600" />
                 Tab Switch Violations
               </span>
               <p
-                className={`font-bold mt-1 ${
-                  (attempt.tabSwitchCount || 0) > 1 ? "text-rose-600" : "text-slate-700"
+                className={`font-bold mt-1 text-sm ${
+                  (attempt.tabSwitchCount || 0) > 1 ? "text-rose-600" : "text-slate-800"
                 }`}
               >
                 {attempt.tabSwitchCount || 0} times
               </p>
             </div>
             <div>
-              <span className="text-[10px] font-bold uppercase text-slate-400 flex items-center gap-1">
-                <Calendar className="w-3 h-3 text-emerald-600" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-emerald-600" />
                 Attempt Started
               </span>
-              <p className="text-slate-700 mt-1">
+              <p className="text-slate-800 font-medium mt-1 text-sm">
                 {attempt.startedAt ? new Date(attempt.startedAt).toLocaleTimeString() : "—"}
               </p>
             </div>

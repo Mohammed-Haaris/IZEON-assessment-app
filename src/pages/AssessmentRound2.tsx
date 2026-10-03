@@ -52,7 +52,14 @@ export const AssessmentRound2: React.FC = () => {
   useEffect(() => {
     async function loadRound2() {
       try {
-        const res = await apiRequest<{ assessment?: any; attempt?: any }>("/assessment/active");
+        const res = await apiRequest<{ assessment?: any; existingAttempt?: any; attempt?: any }>("/assessment/active");
+        const currentAttempt = res.existingAttempt || res.attempt;
+        if (currentAttempt && (currentAttempt.status === "COMPLETED" || currentAttempt.status === "DISQUALIFIED")) {
+          alert("You have already completed this assessment. Resuming or retaking is strictly not permitted.");
+          navigate("/dashboard");
+          return;
+        }
+
         if (res.assessment?.questions) {
           const r2 = res.assessment.questions.filter((q: any) => q.round === "ROUND_2_CODING");
           setQuestions(r2);
@@ -101,9 +108,14 @@ export const AssessmentRound2: React.FC = () => {
 
   // Socket & Proctoring Setup
   useEffect(() => {
-    if (!attemptId) return;
+    const handleConnect = () => {
+      socket.emit("join:attempt", attemptId);
+    };
 
-    socket.emit("join:attempt", attemptId);
+    if (socket.connected) {
+      socket.emit("join:attempt", attemptId);
+    }
+    socket.on("connect", handleConnect);
 
     // Strike 1 Warning
     socket.on("proctor:warning", (data: { count: number; message: string }) => {
@@ -118,18 +130,22 @@ export const AssessmentRound2: React.FC = () => {
     });
 
     // Admin decisions
-    socket.on("proctor:unlocked", (data: { message: string }) => {
-      setIsLocked(false);
-      alert("✅ " + data.message);
+    socket.on("proctor:unlocked", (data: { attemptId?: string; message: string }) => {
+      if (!data.attemptId || data.attemptId === attemptId) {
+        setIsLocked(false);
+      }
     });
 
-    socket.on("proctor:disqualified", (data: { message: string }) => {
-      setIsLocked(false);
-      setIsDisqualified(true);
-      setLockMessage(data.message);
+    socket.on("proctor:disqualified", (data: { attemptId?: string; message: string }) => {
+      if (!data.attemptId || data.attemptId === attemptId) {
+        setIsLocked(false);
+        setIsDisqualified(true);
+        setLockMessage(data.message);
+      }
     });
 
     return () => {
+      socket.off("connect", handleConnect);
       socket.off("proctor:warning");
       socket.off("proctor:locked");
       socket.off("proctor:unlocked");
@@ -137,29 +153,55 @@ export const AssessmentRound2: React.FC = () => {
     };
   }, [attemptId]);
 
-  // Tab switch & Window Blur Anti-Cheating Event Listeners
+  // Fallback sync when locked to instantly detect admin unlock decision
+  useEffect(() => {
+    if (!isLocked) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await apiRequest<{ attempt?: any }>("/assessment/active");
+        if (res.attempt) {
+          if (res.attempt.status === "ROUND_2_IN_PROGRESS" || res.attempt.status === "IN_PROGRESS") {
+            setIsLocked(false);
+          } else if (res.attempt.status === "DISQUALIFIED") {
+            setIsLocked(false);
+            setIsDisqualified(true);
+          }
+        }
+      } catch (err) {
+        // silent
+      }
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, [isLocked]);
+
+  // Anti-Cheating: Real tab switch detection only (NO accidental window blur)
   useEffect(() => {
     if (isLocked || isDisqualified || isCompleted) return;
 
+    let hideTimer: any = null;
+
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        // Candidate switched tab or minimized window
-        socket.emit("student:tab_switch", {
-          attemptId,
-          violationType: "TAB_SWITCH",
-        });
+        // Wait 1.5 seconds to ensure candidate actually left the tab and it's not an accidental click or popup
+        hideTimer = setTimeout(() => {
+          if (document.hidden) {
+            socket.emit("student:tab_switch", {
+              attemptId,
+              violationType: "TAB_SWITCH",
+            });
+          }
+        }, 1500);
+      } else {
+        if (hideTimer) {
+          clearTimeout(hideTimer);
+          hideTimer = null;
+        }
       }
     };
 
-    const handleBlur = () => {
-      socket.emit("student:tab_switch", {
-        attemptId,
-        violationType: "WINDOW_BLUR",
-      });
-    };
-
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("blur", handleBlur);
 
     // Prevent context menu (right click) and copy-paste
     const handleContextMenu = (e: MouseEvent) => e.preventDefault();
@@ -173,8 +215,8 @@ export const AssessmentRound2: React.FC = () => {
     document.addEventListener("paste", handleCopyPaste);
 
     return () => {
+      if (hideTimer) clearTimeout(hideTimer);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("blur", handleBlur);
       document.removeEventListener("contextmenu", handleContextMenu);
       document.removeEventListener("copy", handleCopyPaste);
       document.removeEventListener("paste", handleCopyPaste);
@@ -503,33 +545,35 @@ export const AssessmentRound2: React.FC = () => {
           {currentQ && (
             <>
               <div>
-                <div className="flex justify-between items-center text-xs text-slate-400 mb-1">
-                  <span>Coding Question</span>
-                  <span className="text-emerald-400 font-bold">{currentQ.points} Points</span>
+                <div className="flex justify-between items-center text-sm text-slate-400 mb-1.5">
+                  <span className="font-semibold text-emerald-400 uppercase tracking-wider text-xs">
+                    {currentQ.category} Challenge
+                  </span>
+                  <span className="text-emerald-400 font-extrabold text-sm">{currentQ.points} Points</span>
                 </div>
-                <h2 className="text-lg font-bold text-white">{currentQ.title}</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">{currentQ.title}</h2>
               </div>
 
-              <div className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+              <div className="text-sm sm:text-[15px] text-slate-200 leading-relaxed whitespace-pre-wrap bg-slate-900/90 p-5 rounded-2xl border border-slate-700/80 font-normal">
                 {currentQ.content}
               </div>
 
               {/* Sample test cases */}
               {Array.isArray(currentQ.testCases) && (
                 <div className="space-y-3">
-                  <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                  <h4 className="text-sm font-bold text-slate-200 uppercase tracking-wider">
                     Sample Test Cases
                   </h4>
                   {currentQ.testCases.map((tc, idx) => (
                     <div
                       key={idx}
-                      className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-[11px] font-mono space-y-1"
+                      className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-xs sm:text-sm font-mono space-y-1.5"
                     >
                       <div className="text-slate-400">
-                        Input: <span className="text-slate-200">{tc.input}</span>
+                        Input: <span className="text-slate-100 font-semibold">{tc.input}</span>
                       </div>
                       <div className="text-slate-400">
-                        Output: <span className="text-emerald-400">{tc.output}</span>
+                        Output: <span className="text-emerald-400 font-bold">{tc.output}</span>
                       </div>
                     </div>
                   ))}
@@ -537,7 +581,7 @@ export const AssessmentRound2: React.FC = () => {
               )}
 
               {/* Problem Switcher */}
-              <div className="pt-4 border-t border-slate-800 flex gap-2">
+              <div className="pt-4 border-t border-slate-800 flex flex-wrap gap-2">
                 {questions.map((q, idx) => (
                   <button
                     key={q.id}
@@ -549,13 +593,13 @@ export const AssessmentRound2: React.FC = () => {
                         setLanguage("python");
                       }
                     }}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${
+                    className={`px-4 py-2 rounded-xl text-sm font-bold cursor-pointer transition-all ${
                       activeIdx === idx
-                        ? "bg-indigo-600 text-white"
-                        : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                        ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/30"
+                        : "bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white border border-slate-700"
                     }`}
                   >
-                    Problem {idx + 1}
+                    Task {idx + 1}
                   </button>
                 ))}
               </div>

@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { ShieldCheck, LogOut, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
+import { ShieldCheck, LogOut, CheckCircle2, AlertTriangle } from "lucide-react";
 
 export const Navbar: React.FC = () => {
   const { user, logout } = useAuth();
@@ -36,20 +36,15 @@ export const Navbar: React.FC = () => {
             {/* Status indicator for students */}
             {user.role === "STUDENT" && (
               <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium">
-                {user.status === "APPROVED" ? (
-                  <span className="flex items-center gap-1 text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full font-semibold">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                    Approved for Assessment
-                  </span>
-                ) : user.status === "PENDING_APPROVAL" ? (
-                  <span className="flex items-center gap-1 text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full font-semibold">
-                    <Clock className="w-3.5 h-3.5 text-amber-600" />
-                    Pending Admin Approval
-                  </span>
-                ) : (
+                {user.status === "REJECTED" ? (
                   <span className="flex items-center gap-1 text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full font-semibold">
                     <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
-                    Registration Rejected
+                    Account Restricted
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full font-semibold">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    Assessment Ready
                   </span>
                 )}
               </div>

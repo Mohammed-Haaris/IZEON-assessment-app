@@ -4,7 +4,6 @@ import { useAuth } from "../context/AuthContext";
 import { apiRequest } from "../services/api";
 import type { Assessment, AssessmentAttempt } from "../types";
 import {
-  Clock,
   CheckCircle2,
   AlertTriangle,
   Play,
@@ -13,7 +12,6 @@ import {
   FileText,
   Camera,
   ShieldCheck,
-  Check,
 } from "lucide-react";
 
 export const StudentDashboard: React.FC = () => {
@@ -27,7 +25,7 @@ export const StudentDashboard: React.FC = () => {
   const [error, setError] = useState("");
 
   const loadAssessment = async () => {
-    if (user?.status !== "APPROVED") {
+    if (user?.status === "REJECTED") {
       setIsLoading(false);
       return;
     }
@@ -53,6 +51,11 @@ export const StudentDashboard: React.FC = () => {
 
   const handleStartAssessment = async () => {
     if (!assessment) return;
+    if (existingAttempt?.status === "COMPLETED" || existingAttempt?.status === "DISQUALIFIED") {
+      setError("You have already completed this assessment. Retakes or resuming are not permitted.");
+      return;
+    }
+
     setIsStarting(true);
     setError("");
 
@@ -78,76 +81,54 @@ export const StudentDashboard: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
       {/* 1. Header greeting */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/90 shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
             Welcome, <span className="text-emerald-700">{user.name}</span> 👋
           </h1>
-          <p className="text-xs text-slate-500 mt-1 font-medium">
-            {user.college ? `${user.college} • ` : ""}Candidate Assessment Portal
+          <p className="text-sm text-slate-600 mt-1 font-medium">
+            {user.college ? `${user.college} • ` : ""}Candidate Assessment Examination Portal
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => refreshUser()}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 cursor-pointer transition-all shadow-xs"
+            onClick={() => {
+              refreshUser();
+              loadAssessment();
+            }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-sm font-semibold text-slate-700 cursor-pointer transition-all shadow-xs"
           >
-            <RotateCw className="w-3.5 h-3.5 text-slate-500" />
-            Refresh Status
+            <RotateCw className="w-4 h-4 text-slate-500" />
+            Refresh Portal
           </button>
         </div>
       </div>
 
-      {/* 2. State: PENDING APPROVAL */}
-      {user.status === "PENDING_APPROVAL" && (
-        <div className="bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-white border border-amber-200 rounded-3xl p-8 text-center space-y-4 shadow-sm">
-          <div className="w-16 h-16 rounded-2xl bg-amber-100 border border-amber-200 text-amber-700 flex items-center justify-center mx-auto shadow-inner">
-            <Clock className="w-8 h-8 animate-pulse" />
-          </div>
-          <div className="max-w-md mx-auto space-y-2">
-            <h2 className="text-xl font-bold text-slate-900">Awaiting Administrator Approval</h2>
-            <p className="text-xs text-slate-600 leading-relaxed">
-              Your profile has been registered and is pending verification by the exam admin. Once
-              approved, your assessment unlock button will become active immediately.
-            </p>
-          </div>
-
-          <div className="pt-2">
-            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold">
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
-              Status: In Review Queue
-            </span>
-          </div>
-        </div>
-      )}
-
-      {/* 3. State: REJECTED */}
-      {user.status === "REJECTED" && (
+      {/* 2. State: REJECTED */}
+      {user.status === "REJECTED" ? (
         <div className="bg-rose-50 border border-rose-200 rounded-3xl p-8 text-center space-y-3">
           <AlertTriangle className="w-12 h-12 text-rose-600 mx-auto" />
           <h2 className="text-xl font-bold text-rose-900">Registration Not Approved</h2>
-          <p className="text-xs text-rose-700 max-w-md mx-auto">
-            Unfortunately, your request to take this assessment has been rejected by the
+          <p className="text-sm text-rose-700 max-w-md mx-auto leading-relaxed">
+            Unfortunately, your access to take this assessment has been restricted by the
             administrator. Please contact your coordinator for clarification.
           </p>
         </div>
-      )}
-
-      {/* 4. State: APPROVED */}
-      {user.status === "APPROVED" && (
+      ) : (
+        /* 3. State: DIRECT ACCESS FOR CANDIDATES */
         <div className="space-y-6">
           {error && (
-            <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700">
+            <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-sm text-rose-700">
               {error}
             </div>
           )}
 
           {isLoading ? (
-            <div className="p-12 text-center text-xs text-slate-400">Loading assessment...</div>
+            <div className="p-12 text-center text-sm text-slate-500 font-medium">Loading assessment...</div>
           ) : assessment ? (
             <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
-              {/* Header Banner - Executive Light Green / Mint Card with deep typography */}
+              {/* Header Banner */}
               <div className="bg-emerald-50/70 border-b border-emerald-100/80 p-8 relative overflow-hidden">
                 <div className="absolute right-0 top-0 -mt-10 -mr-10 w-64 h-64 bg-emerald-200/30 rounded-full blur-3xl pointer-events-none" />
                 <div className="relative z-10 flex flex-wrap items-center justify-between gap-6">
@@ -159,28 +140,75 @@ export const StudentDashboard: React.FC = () => {
                     <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">
                       {assessment.title}
                     </h2>
-                    <p className="text-xs text-slate-600 mt-1.5 max-w-2xl font-medium leading-relaxed">
+                    <p className="text-sm text-slate-700 mt-2 max-w-2xl font-normal leading-relaxed">
                       {assessment.description}
                     </p>
                   </div>
 
                   {existingAttempt?.status === "COMPLETED" ? (
-                    <div className="px-5 py-2.5 bg-emerald-100 border border-emerald-200 rounded-xl flex items-center gap-2 text-emerald-900 text-xs font-bold">
-                      <Check className="w-4 h-4 text-emerald-700" />
-                      Test Completed
+                    <div className="flex flex-col items-end gap-1.5">
+                      <div className="px-6 py-3.5 bg-emerald-600 text-white rounded-2xl flex items-center gap-2 text-sm font-extrabold shadow-md shadow-emerald-600/20">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-100" />
+                        Assessment Completed
+                      </div>
+                      <span className="text-[11px] font-semibold text-emerald-800">
+                        Both rounds submitted. Retakes disabled.
+                      </span>
+                    </div>
+                  ) : existingAttempt?.status === "DISQUALIFIED" ? (
+                    <div className="flex flex-col items-end gap-1.5">
+                      <div className="px-6 py-3.5 bg-rose-600 text-white rounded-2xl flex items-center gap-2 text-sm font-extrabold shadow-md shadow-rose-600/20">
+                        <AlertTriangle className="w-5 h-5 text-rose-100" />
+                        Assessment Disqualified
+                      </div>
+                      <span className="text-[11px] font-semibold text-rose-700">
+                        Access closed due to policy violations.
+                      </span>
+                    </div>
+                  ) : existingAttempt?.status === "MALPRACTICE_LOCKED" ? (
+                    <div className="flex flex-col items-end gap-1.5">
+                      <div className="px-6 py-3.5 bg-amber-500 text-white rounded-2xl flex items-center gap-2 text-sm font-extrabold shadow-md shadow-amber-500/20">
+                        <AlertTriangle className="w-5 h-5 text-amber-100" />
+                        Screen Locked by Proctor
+                      </div>
+                      <span className="text-[11px] font-semibold text-amber-800">
+                        Awaiting administrator authorization.
+                      </span>
                     </div>
                   ) : (
                     <button
                       onClick={handleStartAssessment}
                       disabled={isStarting}
-                      className="flex items-center gap-2.5 px-7 py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm transition-all shadow-lg shadow-emerald-600/25 cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
+                      className="flex items-center gap-2.5 px-8 py-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base transition-all shadow-lg shadow-emerald-600/25 cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
                     >
-                      <Play className="w-4 h-4 fill-white" />
+                      <Play className="w-5 h-5 fill-white" />
                       {existingAttempt ? "Resume Assessment" : "Start Assessment Now"}
                     </button>
                   )}
                 </div>
               </div>
+
+              {/* Completed Notice Strip */}
+              {existingAttempt?.status === "COMPLETED" && (
+                <div className="p-5 bg-emerald-50/90 border-b border-emerald-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                      <CheckCircle2 className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm">
+                        You have successfully completed both rounds of this assessment!
+                      </h3>
+                      <p className="text-[11px] text-slate-600 mt-0.5">
+                        Your MCQ questions, written prompt, and coding solutions are securely saved. Retaking or resuming is not permitted.
+                      </p>
+                    </div>
+                  </div>
+                  <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-extrabold text-[10px] uppercase tracking-wider shrink-0 border border-emerald-200">
+                    Submission Locked
+                  </span>
+                </div>
+              )}
 
               {/* Assessment Breakdown Cards */}
               <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/40">
@@ -190,28 +218,28 @@ export const StudentDashboard: React.FC = () => {
                     <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 shadow-inner">
                       <FileText className="w-6 h-6" />
                     </div>
-                    <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-800 font-mono">
-                      ⏱ {assessment.durationR1} Mins
+                    <span className="px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs sm:text-sm font-bold text-emerald-800 font-mono">
+                      ⏱ {assessment.durationR1} Minutes
                     </span>
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900 text-base">Round 1: Cognitive & Domain Analysis</h3>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                      Aptitude, Verbal Reasoning, Domain Questions, and written grammar analysis.
+                    <h3 className="font-bold text-slate-900 text-lg">Round 1: Aptitude, Reasoning & English</h3>
+                    <p className="text-sm text-slate-600 mt-1.5 leading-relaxed">
+                      Multiple-choice questions and a short written paragraph to test your problem-solving and communication.
                     </p>
                   </div>
-                  <ul className="text-xs text-slate-700 space-y-2 pt-3 border-t border-slate-100">
+                  <ul className="text-sm text-slate-800 space-y-2.5 pt-3 border-t border-slate-100">
                     <li className="flex items-center gap-2.5">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>Quantitative Aptitude & Logical Reasoning</span>
+                      <span>Maths, puzzles & logical thinking questions</span>
                     </li>
                     <li className="flex items-center gap-2.5">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>Role Track Evaluation (SQL & Python / Developer)</span>
+                      <span>Basic domain questions matching your selected role</span>
                     </li>
                     <li className="flex items-center gap-2.5">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>Grammar & Composition evaluation</span>
+                      <span>Short written English answer (minimum 100 words)</span>
                     </li>
                   </ul>
                 </div>
@@ -222,35 +250,35 @@ export const StudentDashboard: React.FC = () => {
                     <div className="w-12 h-12 rounded-2xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-700 shadow-inner">
                       <Code2 className="w-6 h-6" />
                     </div>
-                    <span className="px-3 py-1 rounded-full bg-teal-50 border border-teal-200 text-xs font-bold text-teal-800 font-mono">
-                      ⏱ {assessment.durationR2} Mins
+                    <span className="px-3.5 py-1.5 rounded-full bg-teal-50 border border-teal-200 text-xs sm:text-sm font-bold text-teal-800 font-mono">
+                      ⏱ {assessment.durationR2} Minutes
                     </span>
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-900 text-base">Round 2: Supervised Coding Laboratory</h3>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                      Live problem solving in specialized Monaco Code and SQL editors with proctoring.
+                    <h3 className="font-bold text-slate-900 text-lg">Round 2: Practical Coding Tasks</h3>
+                    <p className="text-sm text-slate-600 mt-1.5 leading-relaxed">
+                      Hands-on coding and query tasks directly in your browser based on your chosen track.
                     </p>
                   </div>
-                  <ul className="text-xs text-slate-700 space-y-2 pt-3 border-t border-slate-100">
+                  <ul className="text-sm text-slate-800 space-y-2.5 pt-3 border-t border-slate-100">
                     <li className="flex items-center gap-2.5">
                       <Camera className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>Mandatory live proctored camera verification</span>
+                      <span><strong>Webcam Required:</strong> Your camera must stay on throughout the test</span>
                     </li>
                     <li className="flex items-center gap-2.5">
                       <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>Multi-language execution engine (SQL & Python)</span>
+                      <span><strong>Write & Run Code:</strong> Python for Developers or SQL for Data Analysts</span>
                     </li>
-                    <li className="flex items-center gap-2.5 text-rose-600 font-semibold">
+                    <li className="flex items-center gap-2.5 text-rose-600 font-medium">
                       <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
-                      <span>Tab switch & anti-cheating audit trail</span>
+                      <span><strong>Important Rule:</strong> Do not switch tabs or copy-paste (test will lock automatically)</span>
                     </li>
                   </ul>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center text-slate-400 text-xs shadow-sm">
+            <div className="bg-white p-12 rounded-3xl border border-slate-200 text-center text-slate-500 text-sm shadow-sm font-medium">
               No active assessment is currently scheduled by the admin.
             </div>
           )}

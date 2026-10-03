@@ -37,10 +37,23 @@ export const AssessmentRound1: React.FC = () => {
           body: JSON.stringify({ assessmentId: "" }), // will fetch active attempt questions
         });
 
+        if (data.attempt.status === "COMPLETED" || data.attempt.status === "DISQUALIFIED") {
+          alert("You have already completed this assessment. Retakes or resuming are not permitted.");
+          navigate("/dashboard");
+          return;
+        }
+
+        if (data.attempt.currentRound === "ROUND_2_CODING") {
+          navigate(`/assessment/round2?attemptId=${data.attempt.id}`);
+          return;
+        }
+
         setQuestions(data.round1Questions);
         setTimeLeft((data.durationR1 || 25) * 60);
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to load questions:", err);
+        alert(err.message || "Cannot access assessment. Returning to dashboard.");
+        navigate("/dashboard");
       } finally {
         setIsLoading(false);
       }
@@ -270,22 +283,22 @@ export const AssessmentRound1: React.FC = () => {
               {/* Question metadata badge */}
               <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                 <div className="flex items-center gap-2.5">
-                  <span className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-extrabold text-xs flex items-center justify-center shadow-xs">
+                  <span className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 font-extrabold text-sm flex items-center justify-center shadow-xs">
                     {activeIdx + 1}
                   </span>
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-600">
                     Section: {currentQ.category.replace("_", " ")}
                   </span>
                 </div>
-                <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-xs font-extrabold text-emerald-800">
+                <span className="px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-xs sm:text-sm font-extrabold text-emerald-800">
                   {currentQ.points} Points
                 </span>
               </div>
 
               {/* Title & Description */}
               <div className="space-y-3">
-                <h3 className="text-lg font-extrabold text-slate-900">{currentQ.title}</h3>
-                <div className="text-xs text-slate-800 leading-relaxed whitespace-pre-line bg-slate-50 p-5 rounded-2xl border border-slate-200 font-medium">
+                <h3 className="text-xl font-bold text-slate-900">{currentQ.title}</h3>
+                <div className="text-sm sm:text-base text-slate-800 leading-relaxed whitespace-pre-line bg-slate-50 p-6 rounded-2xl border border-slate-200 font-normal">
                   {currentQ.content}
                 </div>
               </div>
@@ -293,13 +306,13 @@ export const AssessmentRound1: React.FC = () => {
               {/* Interaction: MCQs vs Written Essay */}
               {currentQ.category === "WRITTEN_PROMPT" ? (
                 <div className="space-y-3 pt-2">
-                  <div className="flex justify-between items-center text-xs text-slate-600">
+                  <div className="flex justify-between items-center text-sm text-slate-700">
                     <span className="font-bold text-slate-900">Compose your analytical response:</span>
-                    <span className="font-mono">
+                    <span className="font-mono text-xs sm:text-sm">
                       Word Count:{" "}
                       <strong
                         className={
-                          countWords(writtenEssay) >= 100 ? "text-emerald-600 font-bold" : "text-amber-600 font-bold"
+                          countWords(writtenEssay) >= 100 ? "text-emerald-700 font-bold" : "text-amber-700 font-bold"
                         }
                       >
                         {countWords(writtenEssay)}
@@ -313,14 +326,14 @@ export const AssessmentRound1: React.FC = () => {
                     value={writtenEssay}
                     onChange={(e) => setWrittenEssay(e.target.value)}
                     placeholder="Type your response here... It will be evaluated for grammar, clarity, spelling, and sentence construction."
-                    className="w-full text-xs p-4 rounded-2xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-sans leading-relaxed text-slate-900 transition-all"
+                    className="w-full text-sm p-4 rounded-2xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 font-sans leading-relaxed text-slate-900 transition-all placeholder:text-slate-400"
                   />
                 </div>
               ) : (
                 /* MCQs Options */
                 <div className="space-y-3 pt-2">
-                  <p className="text-xs font-bold text-slate-900">Select the correct option:</p>
-                  <div className="space-y-2.5">
+                  <p className="text-sm font-bold text-slate-900">Select the correct option:</p>
+                  <div className="space-y-3">
                     {Array.isArray(currentQ.options) &&
                       currentQ.options.map((option, idx) => {
                         const isSelected = mcqAnswers[currentQ.id] === option;
@@ -329,22 +342,22 @@ export const AssessmentRound1: React.FC = () => {
                             key={idx}
                             type="button"
                             onClick={() => handleSelectOption(currentQ.id, option)}
-                            className={`w-full text-left p-4 rounded-xl border text-xs font-semibold transition-all flex items-center gap-3.5 cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0 ${
+                            className={`w-full text-left p-4 sm:p-4.5 rounded-xl border text-sm font-medium transition-all flex items-center gap-3.5 cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0 ${
                               isSelected
-                                ? "bg-emerald-50 border-emerald-600 text-emerald-950 shadow-sm ring-2 ring-emerald-500/20"
-                                : "bg-white border-slate-200 text-slate-700 hover:bg-emerald-50/30 hover:border-emerald-300"
+                                ? "bg-emerald-50/90 border-emerald-600 text-emerald-950 shadow-sm ring-2 ring-emerald-500/20"
+                                : "bg-white border-slate-300 text-slate-800 hover:bg-emerald-50/40 hover:border-emerald-400"
                             }`}
                           >
                             <span
-                              className={`w-6 h-6 rounded-full border flex items-center justify-center text-[11px] font-extrabold ${
+                              className={`w-7 h-7 rounded-full border flex items-center justify-center text-xs font-bold shrink-0 ${
                                 isSelected
                                   ? "border-emerald-600 bg-emerald-600 text-white shadow-sm"
-                                  : "border-slate-300 bg-slate-50 text-slate-600"
+                                  : "border-slate-300 bg-slate-100 text-slate-700"
                               }`}
                             >
                               {String.fromCharCode(65 + idx)}
                             </span>
-                            <span className="flex-1">{option}</span>
+                            <span className="flex-1 leading-normal">{option}</span>
                           </button>
                         );
                       })}
@@ -358,9 +371,9 @@ export const AssessmentRound1: React.FC = () => {
                   type="button"
                   disabled={activeIdx === 0}
                   onClick={() => setActiveIdx((prev) => prev - 1)}
-                  className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl border border-slate-200 bg-white disabled:opacity-40 text-xs font-bold text-slate-700 hover:bg-slate-50 cursor-pointer transition-all shadow-xs"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-300 bg-white disabled:opacity-40 text-sm font-bold text-slate-700 hover:bg-slate-50 cursor-pointer transition-all shadow-xs"
                 >
-                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <ArrowLeft className="w-4 h-4" />
                   Previous
                 </button>
 
