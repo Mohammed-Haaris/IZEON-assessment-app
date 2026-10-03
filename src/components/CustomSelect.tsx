@@ -52,8 +52,8 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
           disabled
             ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
             : isOpen
-            ? "bg-white border-emerald-500 ring-2 ring-emerald-500/15 shadow-sm"
-            : "bg-white border-slate-200 hover:border-emerald-300 text-slate-800 hover:bg-emerald-50/20 shadow-xs"
+            ? "bg-white border-[#16499c] ring-2 ring-[#16499c]/20 shadow-sm"
+            : "bg-white border-slate-200 hover:border-[#16499c]/40 text-slate-800 hover:bg-[#eff5ff]/20 shadow-xs"
         }`}
       >
         <div className="flex items-center gap-2 truncate">
@@ -62,7 +62,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
             {selectedOption ? selectedOption.label : placeholder}
           </span>
           {selectedOption?.badge && (
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#eff5ff] text-[#16499c] border border-[#16499c]/30">
               {selectedOption.badge}
             </span>
           )}
@@ -70,7 +70,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
 
         <ChevronDown
           className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200 ${
-            isOpen ? "transform rotate-180 text-emerald-600" : ""
+            isOpen ? "transform rotate-180 text-[#16499c]" : ""
           }`}
         />
       </button>
@@ -92,8 +92,8 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
                   }}
                   className={`flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-xs cursor-pointer transition-all ${
                     isSelected
-                      ? "bg-emerald-50 text-emerald-950 font-bold"
-                      : "text-slate-700 hover:bg-emerald-50/50 hover:text-emerald-900"
+                      ? "bg-[#eff5ff] text-slate-900 font-bold"
+                      : "text-slate-700 hover:bg-[#eff5ff]/50 hover:text-[#16499c]"
                   }`}
                 >
                   <div className="flex items-center gap-2.5 truncate">
@@ -102,7 +102,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
                       <div className="truncate flex items-center gap-1.5">
                         <span>{opt.label}</span>
                         {opt.badge && (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-700">
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[#eff5ff] text-[#16499c]">
                             {opt.badge}
                           </span>
                         )}
@@ -115,7 +115,7 @@ export const CustomSelect: React.FC<CustomSelectProps> = ({
                     </div>
                   </div>
 
-                  {isSelected && <Check className="w-4 h-4 text-emerald-600 shrink-0" />}
+                  {isSelected && <Check className="w-4 h-4 text-[#16499c] shrink-0" />}
                 </div>
               );
             })

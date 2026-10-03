@@ -78,7 +78,7 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
   const renderRoleBadge = (role?: string | null) => {
     if (role === "Data Analyst") {
       return (
-        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px] border border-emerald-200">
+        <span className="px-2 py-0.5 rounded-full bg-[#eff5ff] text-[#16499c] font-bold text-[10px] border border-[#16499c]/30">
           Data Analyst (Python & SQL)
         </span>
       );
@@ -144,7 +144,7 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={onOpenAddQuestion}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-sm shadow-emerald-600/20 cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-semibold text-xs shadow-sm shadow-[#16499c]/20 cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               Add Question
@@ -164,20 +164,19 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
           {(
             [
               { id: "ALL", label: "All Questions" },
-              { id: "PYTHON", label: "🐍 Python Domain" },
-              { id: "SQL", label: "🗄️ SQL Domain" },
-              { id: "Software Developer", label: "💻 Software Dev (DSA)" },
-              { id: "APTITUDE_VERBAL", label: "🧠 Aptitude & Verbal" },
+              { id: "PYTHON", label: " Python Domain" },
+              { id: "SQL", label: "SQL Domain" },
+              { id: "Software Developer", label: " Software Dev (DSA)" },
+              { id: "APTITUDE_VERBAL", label: " Aptitude & Verbal" },
             ] as const
           ).map((item) => (
             <button
               key={item.id}
               onClick={() => setActiveFilter(item.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-all ${
-                activeFilter === item.id
-                  ? "bg-slate-900 text-white shadow-sm"
-                  : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
-              }`}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-all ${activeFilter === item.id
+                ? "bg-slate-900 text-white shadow-sm"
+                : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+                }`}
             >
               {item.label}
             </button>
@@ -193,7 +192,7 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
               <p>No questions found for the selected domain filter.</p>
               <button
                 onClick={onOpenAddQuestion}
-                className="px-4 py-2 rounded-xl bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200 cursor-pointer hover:bg-emerald-100 transition-colors"
+                className="px-4 py-2 rounded-xl bg-[#eff5ff] text-[#16499c] font-semibold border border-[#16499c]/30 cursor-pointer hover:bg-[#eff5ff] transition-colors"
               >
                 + Add a Question
               </button>
@@ -245,18 +244,17 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
                         {q.options.map((opt, optIdx) => (
                           <div
                             key={optIdx}
-                            className={`p-2 rounded-lg text-[11px] flex items-center gap-1.5 ${
-                              opt === q.correctAnswer
-                                ? "bg-emerald-50 text-emerald-800 border border-emerald-300 font-semibold"
-                                : "bg-white text-slate-600 border border-slate-200"
-                            }`}
+                            className={`p-2 rounded-lg text-[11px] flex items-center gap-1.5 ${opt === q.correctAnswer
+                              ? "bg-[#eff5ff] text-[#16499c] border border-[#16499c]/30 font-semibold"
+                              : "bg-white text-slate-600 border border-slate-200"
+                              }`}
                           >
                             <span className="w-4 font-bold text-slate-400">
                               {String.fromCharCode(65 + optIdx)}.
                             </span>
                             <span className="truncate">{opt}</span>
                             {opt === q.correctAnswer && (
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 ml-auto shrink-0" />
+                              <CheckCircle2 className="w-3.5 h-3.5 text-[#16499c] ml-auto shrink-0" />
                             )}
                           </div>
                         ))}

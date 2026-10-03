@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { LogIn, Lock, Mail, AlertCircle, ArrowRight } from "lucide-react";
+import { Lock, Mail, AlertCircle, ArrowRight, Eye, EyeOff } from "lucide-react";
+import interviewLogo from "../assets/interview logo.png";
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -40,31 +42,31 @@ export const Login: React.FC = () => {
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-200/90 p-8 md:p-10 space-y-6 relative overflow-hidden">
         {/* Decorative Top Accent Glow */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-600 via-teal-400 to-emerald-500" />
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#16499c] via-[#2563eb] to-[#123c80]" />
         
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex w-14 h-14 rounded-2xl bg-emerald-50 border border-emerald-200 p-0.5 shadow-sm mb-2">
-            <div className="w-full h-full bg-white rounded-[14px] flex items-center justify-center text-emerald-700">
-              <LogIn className="w-6 h-6" />
-            </div>
+          <div className="inline-flex w-16 h-16 rounded-2xl bg-white border border-[#16499c]/25 p-1.5 shadow-sm mb-2 items-center justify-center">
+            <img src={interviewLogo} alt="IZEON Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">Sign in to IZEON</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">
+            Sign in to IZEON<span className="text-[#16499c]">Assessment</span>
+          </h1>
           <p className="text-sm text-slate-600 font-medium">
             Proctored Assessment & Verification Platform
           </p>
         </div>
 
         {/* Quick fill demo helper */}
-        <div className="p-3.5 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-sm flex items-center justify-between text-emerald-950 font-medium">
+        <div className="p-3.5 rounded-2xl bg-[#eff5ff] border border-[#16499c]/25 text-sm flex items-center justify-between text-slate-900 font-medium">
           <span className="flex items-center gap-1.5 text-xs sm:text-sm">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="w-2 h-2 rounded-full bg-[#16499c]" />
             Admin Demo Access:
           </span>
           <button
             type="button"
             onClick={handleQuickFillAdmin}
-            className="text-xs sm:text-sm font-bold text-emerald-800 hover:text-emerald-950 bg-white px-3 py-1 rounded-lg border border-emerald-200 shadow-xs cursor-pointer transition-all hover:bg-emerald-50"
+            className="text-xs sm:text-sm font-bold text-[#16499c] hover:text-[#123c80] bg-white px-3 py-1 rounded-lg border border-[#16499c]/30 shadow-xs cursor-pointer transition-all hover:bg-white/80"
           >
             Auto-fill Admin
           </button>
@@ -88,7 +90,7 @@ export const Login: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
-                className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium placeholder:text-slate-400"
+                className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] transition-all font-medium placeholder:text-slate-400"
               />
             </div>
           </div>
@@ -96,22 +98,31 @@ export const Login: React.FC = () => {
           <div>
             <label className="block text-sm font-semibold text-slate-800 mb-1.5">Password</label>
             <div className="relative">
-              <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+              <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all font-medium placeholder:text-slate-400"
+                className="w-full text-sm pl-10 pr-10 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] transition-all font-medium placeholder:text-slate-400"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-2.5 p-1 text-slate-400 hover:text-[#16499c] focus:outline-none transition-colors cursor-pointer"
+                title={showPassword ? "Hide password" : "Show password"}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
           </div>
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-sm transition-all shadow-md shadow-emerald-600/25 cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#16499c] hover:bg-[#123c80] disabled:opacity-50 text-white font-bold text-sm transition-all shadow-md shadow-[#16499c]/25 cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
           >
             {isSubmitting ? "Signing in..." : "Sign In to Portal"}
             <ArrowRight className="w-4 h-4" />
@@ -121,7 +132,7 @@ export const Login: React.FC = () => {
         {/* Footer */}
         <div className="text-center text-sm text-slate-600 pt-4 border-t border-slate-100 font-medium">
           New student candidate?{" "}
-          <Link to="/register" className="font-bold text-emerald-700 hover:text-emerald-800 hover:underline">
+          <Link to="/register" className="font-bold text-[#16499c] hover:text-[#123c80] hover:underline">
             Register for Assessment
           </Link>
         </div>

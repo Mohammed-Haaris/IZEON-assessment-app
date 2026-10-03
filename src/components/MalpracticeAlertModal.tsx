@@ -99,7 +99,7 @@ export const MalpracticeAlertModal: React.FC<MalpracticeAlertModalProps> = ({
           <div className="pt-2 flex flex-col sm:flex-row gap-3">
             <button
               onClick={() => onGiveChance(alert.attemptId, remarks)}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs transition-colors shadow-md shadow-emerald-600/20 cursor-pointer"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-semibold text-xs transition-colors shadow-md shadow-[#16499c]/20 cursor-pointer"
             >
               <CheckCircle2 className="w-4 h-4" />
               Give Another Chance
