@@ -28,7 +28,7 @@ export const MalpracticeAlertModal: React.FC<MalpracticeAlertModalProps> = ({
             </div>
             <div>
               <h3 className="text-lg font-bold tracking-tight">Malpractice Strike 2 Detected!</h3>
-              <p className="text-xs text-rose-100">Immediate Proctoring Action Required</p>
+              <p className="text-xs text-rose-100">Immediate Action Required</p>
             </div>
           </div>
           {onClose && (

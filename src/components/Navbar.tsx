@@ -26,7 +26,7 @@ export const Navbar: React.FC = () => {
               IZEON<span className="text-[#16499c] font-black">Assessment</span>
             </span>
             <span className="block text-[10px] font-bold tracking-wider text-slate-400 uppercase -mt-0.5">
-              Secure Proctoring Network
+              Secure Assessment Network
             </span>
           </div>
         </Link>

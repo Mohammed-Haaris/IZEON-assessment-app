@@ -324,7 +324,7 @@ export const AdminDashboard: React.FC = () => {
                 Administrative Command Center
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                IZEON<span className="text-[#16499c]">Assessment</span> & Proctoring System
+                IZEON<span className="text-[#16499c]">Assessment</span> System
               </h1>
               <p className="text-xs text-slate-500 max-w-xl leading-relaxed">
                 Real-time candidate verification, supervised tab-switch security, dual-track assessment configuration, and official scorecard evaluation.
@@ -490,7 +490,7 @@ export const AdminDashboard: React.FC = () => {
       <div className="bg-white p-1.5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap gap-1">
         {[
           { id: "approvals", label: "Candidate Directory", icon: Users, badge: students.length },
-          { id: "proctor", label: "Live Proctoring & Logs", icon: ShieldAlert },
+          { id: "proctor", label: "Live Monitoring & Logs", icon: ShieldAlert },
           { id: "exams", label: "Assessment & Question Bank", icon: FileSpreadsheet },
           { id: "results", label: "Candidate Scores & Master Marks", icon: Award, badge: attempts.length },
           { id: "admins", label: "Administrators", icon: ShieldCheck, badge: admins.length },
