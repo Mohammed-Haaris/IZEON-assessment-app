@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { apiRequest } from "../services/api";
-import { X, ShieldCheck, Mail, Lock, User, CheckCircle2, AlertCircle } from "lucide-react";
+import { X, ShieldCheck, Mail, Lock, User, CheckCircle2, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 interface CreateAdminModalProps {
   onClose: () => void;
@@ -12,6 +12,8 @@ export const CreateAdminModal: React.FC<CreateAdminModalProps> = ({ onClose, onS
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -130,14 +132,25 @@ export const CreateAdminModal: React.FC<CreateAdminModalProps> = ({ onClose, onS
               <Lock className="w-3.5 h-3.5 text-slate-400" />
               Password
             </label>
-            <input
-              type="password"
-              required
-              placeholder="At least 6 characters"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-xs text-slate-900 focus:outline-none focus:border-[#16499c] focus:ring-2 focus:ring-[#16499c]/20 font-medium transition-all"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                placeholder="At least 6 characters"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-xs text-slate-900 focus:outline-none focus:border-[#16499c] focus:ring-2 focus:ring-[#16499c]/20 font-medium transition-all"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-2.5 p-0.5 text-slate-400 hover:text-[#16499c] focus:outline-none transition-colors cursor-pointer"
+                title={showPassword ? "Hide password" : "Show password"}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+              </button>
+            </div>
           </div>
 
           <div className="space-y-1.5">
@@ -145,14 +158,25 @@ export const CreateAdminModal: React.FC<CreateAdminModalProps> = ({ onClose, onS
               <Lock className="w-3.5 h-3.5 text-slate-400" />
               Confirm Password
             </label>
-            <input
-              type="password"
-              required
-              placeholder="Re-enter password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-xs text-slate-900 focus:outline-none focus:border-[#16499c] focus:ring-2 focus:ring-[#16499c]/20 font-medium transition-all"
-            />
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                required
+                placeholder="Re-enter password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-xs text-slate-900 focus:outline-none focus:border-[#16499c] focus:ring-2 focus:ring-[#16499c]/20 font-medium transition-all"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-2.5 p-0.5 text-slate-400 hover:text-[#16499c] focus:outline-none transition-colors cursor-pointer"
+                title={showConfirmPassword ? "Hide password" : "Show password"}
+                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+              >
+                {showConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+              </button>
+            </div>
           </div>
 
           <div className="pt-3 flex items-center justify-end gap-2.5">
