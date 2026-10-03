@@ -20,6 +20,8 @@ import { getSocket } from "../services/socket";
 export const AssessmentRound1: React.FC = () => {
   const [searchParams] = useSearchParams();
   const attemptId = searchParams.get("attemptId");
+  const [activeAttemptId, setActiveAttemptId] = useState<string | null>(attemptId);
+  const effectiveAttemptId = attemptId || activeAttemptId;
   const navigate = useNavigate();
 
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -31,10 +33,14 @@ export const AssessmentRound1: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [round1Result, setRound1Result] = useState<{ score: number } | null>(null);
 
-  // Proctoring & Malpractice States (Identical to Round 2)
+  // Proctoring & Malpractice States (Persistent across page refreshes)
   const [warningModal, setWarningModal] = useState<string | null>(null);
-  const [isLocked, setIsLocked] = useState(false);
-  const [lockMessage, setLockMessage] = useState("");
+  const [isLocked, setIsLocked] = useState<boolean>(() => {
+    return localStorage.getItem("izeon_locked_round1") === "true";
+  });
+  const [lockMessage, setLockMessage] = useState(
+    "Assessment locked due to multiple malpractice violations. Administrator has been notified to review your session."
+  );
   const [isDisqualified, setIsDisqualified] = useState(false);
 
   useEffect(() => {
@@ -42,6 +48,8 @@ export const AssessmentRound1: React.FC = () => {
       try {
         const data = await apiRequest<{
           attempt: AssessmentAttempt;
+          isLocked?: boolean;
+          lockMessage?: string;
           round1Questions: Question[];
           durationR1: number;
         }>("/assessment/start", {
@@ -49,19 +57,38 @@ export const AssessmentRound1: React.FC = () => {
           body: JSON.stringify({ assessmentId: "" }), // will fetch active attempt questions
         });
 
+        if (data.attempt?.id) {
+          setActiveAttemptId(data.attempt.id);
+        }
+
         if (data.attempt.status === "COMPLETED") {
+          localStorage.removeItem("izeon_locked_round1");
           alert("You have already completed this assessment. Retakes or resuming are not permitted.");
           navigate("/dashboard");
           return;
         }
 
         if (data.attempt.status === "DISQUALIFIED") {
+          localStorage.removeItem("izeon_locked_round1");
           setIsDisqualified(true);
+          setLockMessage("Your assessment has been disqualified by the administrator due to malpractice violations.");
           return;
         }
 
-        if (data.attempt.status === "MALPRACTICE_LOCKED") {
+        if (
+          data.isLocked ||
+          data.attempt.status === "MALPRACTICE_LOCKED" ||
+          (data.attempt.tabSwitchCount && data.attempt.tabSwitchCount >= 2)
+        ) {
           setIsLocked(true);
+          localStorage.setItem("izeon_locked_round1", "true");
+          setLockMessage(
+            data.lockMessage ||
+              "Assessment locked due to multiple malpractice violations. Administrator has been notified to review your session."
+          );
+        } else {
+          setIsLocked(false);
+          localStorage.removeItem("izeon_locked_round1");
         }
 
         if (data.attempt.currentRound === "ROUND_2_CODING") {
@@ -87,14 +114,14 @@ export const AssessmentRound1: React.FC = () => {
 
   // Socket & Proctoring Setup (Identical to Round 2)
   useEffect(() => {
-    if (!attemptId) return;
+    if (!effectiveAttemptId) return;
 
     const handleConnect = () => {
-      socket.emit("join:attempt", attemptId);
+      socket.emit("join:attempt", effectiveAttemptId);
     };
 
     if (socket.connected) {
-      socket.emit("join:attempt", attemptId);
+      socket.emit("join:attempt", effectiveAttemptId);
     }
     socket.on("connect", handleConnect);
 
@@ -107,19 +134,22 @@ export const AssessmentRound1: React.FC = () => {
     socket.on("proctor:locked", (data: { count: number; message: string }) => {
       setWarningModal(null);
       setIsLocked(true);
+      localStorage.setItem("izeon_locked_round1", "true");
       setLockMessage(data.message);
     });
 
     // Admin decisions
     socket.on("proctor:unlocked", (data: { attemptId?: string; message: string }) => {
-      if (!data.attemptId || data.attemptId === attemptId) {
+      if (!data.attemptId || data.attemptId === effectiveAttemptId) {
         setIsLocked(false);
+        localStorage.removeItem("izeon_locked_round1");
       }
     });
 
     socket.on("proctor:disqualified", (data: { attemptId?: string; message: string }) => {
-      if (!data.attemptId || data.attemptId === attemptId) {
+      if (!data.attemptId || data.attemptId === effectiveAttemptId) {
         setIsLocked(false);
+        localStorage.removeItem("izeon_locked_round1");
         setIsDisqualified(true);
         setLockMessage(data.message);
       }
@@ -132,7 +162,7 @@ export const AssessmentRound1: React.FC = () => {
       socket.off("proctor:unlocked");
       socket.off("proctor:disqualified");
     };
-  }, [attemptId]);
+  }, [effectiveAttemptId]);
 
   // Fallback sync when locked to instantly detect admin unlock decision
   useEffect(() => {
@@ -140,13 +170,21 @@ export const AssessmentRound1: React.FC = () => {
 
     const interval = setInterval(async () => {
       try {
-        const res = await apiRequest<{ attempt?: any }>("/assessment/active");
-        if (res.attempt) {
-          if (res.attempt.status === "ROUND_1_IN_PROGRESS" || res.attempt.status === "IN_PROGRESS") {
+        const res = await apiRequest<{ attempt?: any; existingAttempt?: any }>("/assessment/active");
+        const currentAttempt = res.attempt || res.existingAttempt;
+        if (currentAttempt) {
+          if (
+            currentAttempt.status === "ROUND_1_IN_PROGRESS" ||
+            currentAttempt.status === "ROUND_2_IN_PROGRESS" ||
+            currentAttempt.status === "IN_PROGRESS"
+          ) {
             setIsLocked(false);
-          } else if (res.attempt.status === "DISQUALIFIED") {
+            localStorage.removeItem("izeon_locked_round1");
+          } else if (currentAttempt.status === "DISQUALIFIED") {
             setIsLocked(false);
+            localStorage.removeItem("izeon_locked_round1");
             setIsDisqualified(true);
+            setLockMessage(currentAttempt.adminRemarks || "Disqualified by administrator.");
           }
         }
       } catch (err) {
@@ -159,7 +197,7 @@ export const AssessmentRound1: React.FC = () => {
 
   // Anti-Cheating: Real tab switch detection (Identical to Round 2)
   useEffect(() => {
-    if (isLocked || isDisqualified || round1Result || isSubmitting || !attemptId) return;
+    if (isLocked || isDisqualified || round1Result || isSubmitting || !effectiveAttemptId) return;
 
     let hideTimer: any = null;
 
@@ -169,7 +207,7 @@ export const AssessmentRound1: React.FC = () => {
         hideTimer = setTimeout(() => {
           if (document.hidden) {
             socket.emit("student:tab_switch", {
-              attemptId,
+              attemptId: effectiveAttemptId,
               violationType: "TAB_SWITCH",
             });
           }
@@ -340,6 +378,35 @@ export const AssessmentRound1: React.FC = () => {
     );
   }
 
+  if (isLocked) {
+    return (
+      <div className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-lg flex items-center justify-center p-6 text-center text-white">
+        <div className="max-w-md bg-slate-900 border-2 border-rose-500 p-8 rounded-3xl shadow-2xl shadow-rose-500/20 space-y-4">
+          <div className="w-16 h-16 rounded-full bg-rose-500/20 border border-rose-500 flex items-center justify-center mx-auto text-rose-500 animate-pulse">
+            <Lock className="w-8 h-8" />
+          </div>
+          <div>
+            <span className="px-3 py-1 rounded-full bg-rose-500/20 text-rose-400 text-[10px] font-bold uppercase tracking-wider border border-rose-500/30">
+              Malpractice Strike 2/2
+            </span>
+            <h3 className="text-xl font-bold text-white mt-2">Assessment Screen Locked</h3>
+            <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+              {lockMessage ||
+                "You navigated away from the exam tab twice. Your session is suspended. An alert has been sent to the administrator to review your attempt."}
+            </p>
+          </div>
+          <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-[11px] text-amber-400 flex items-center justify-center gap-2">
+            <Clock className="w-4 h-4 animate-spin" />
+            <span>Waiting for Admin Decision in real-time...</span>
+          </div>
+          <p className="text-[10px] text-slate-500">
+            Do not close or attempt to bypass this screen. If granted another chance by the administrator, this screen will automatically unlock.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   const currentQ = questions[activeIdx];
 
   return (
@@ -362,31 +429,6 @@ export const AssessmentRound1: React.FC = () => {
               >
                 I Understand
               </button>
-            </div>
-          )}
-
-          {/* MALPRACTICE LOCK SCREEN (Strike 2) */}
-          {isLocked && (
-            <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-lg flex items-center justify-center p-6 text-center">
-              <div className="max-w-md bg-slate-900 border-2 border-rose-500 p-8 rounded-3xl shadow-2xl shadow-rose-500/20 space-y-4">
-                <div className="w-16 h-16 rounded-full bg-rose-500/20 border border-rose-500 flex items-center justify-center mx-auto text-rose-500 animate-pulse">
-                  <Lock className="w-8 h-8" />
-                </div>
-                <div>
-                  <span className="px-3 py-1 rounded-full bg-rose-500/20 text-rose-400 text-[10px] font-bold uppercase tracking-wider border border-rose-500/30">
-                    Malpractice Strike 2/2
-                  </span>
-                  <h3 className="text-xl font-bold text-white mt-2">Assessment Screen Locked</h3>
-                  <p className="text-xs text-slate-300 mt-2 leading-relaxed">
-                    You navigated away from the exam tab twice. Your session is suspended. An alert has
-                    been sent to the administrator to review your attempt.
-                  </p>
-                </div>
-                <div className="p-3 bg-slate-950 rounded-xl border border-slate-800 text-[11px] text-amber-400 flex items-center justify-center gap-2">
-                  <Clock className="w-4 h-4 animate-spin" />
-                  <span>Waiting for Admin Decision in real-time...</span>
-                </div>
-              </div>
             </div>
           )}
 

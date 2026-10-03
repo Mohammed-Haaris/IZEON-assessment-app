@@ -12,6 +12,7 @@ import {
   FileText,
   Camera,
   ShieldCheck,
+  Lock,
 } from "lucide-react";
 import interviewLogo from "../assets/interview logo.png";
 
@@ -54,6 +55,18 @@ export const StudentDashboard: React.FC = () => {
     if (!assessment) return;
     if (existingAttempt?.status === "COMPLETED" || existingAttempt?.status === "DISQUALIFIED") {
       setError("You have already completed this assessment. Retakes or resuming are not permitted.");
+      return;
+    }
+
+    if (
+      existingAttempt?.status === "MALPRACTICE_LOCKED" ||
+      (existingAttempt?.tabSwitchCount && existingAttempt.tabSwitchCount >= 2)
+    ) {
+      if (existingAttempt.currentRound === "ROUND_2_CODING") {
+        navigate(`/assessment/round2?attemptId=${existingAttempt.id}`);
+      } else {
+        navigate(`/assessment/round1?attemptId=${existingAttempt.id}`);
+      }
       return;
     }
 
@@ -171,14 +184,18 @@ export const StudentDashboard: React.FC = () => {
                         Access closed due to policy violations.
                       </span>
                     </div>
-                  ) : existingAttempt?.status === "MALPRACTICE_LOCKED" ? (
+                  ) : existingAttempt?.status === "MALPRACTICE_LOCKED" ||
+                    (existingAttempt?.tabSwitchCount && existingAttempt.tabSwitchCount >= 2) ? (
                     <div className="flex flex-col items-end gap-1.5">
-                      <div className="px-6 py-3.5 bg-amber-500 text-white rounded-2xl flex items-center gap-2 text-sm font-extrabold shadow-md shadow-amber-500/20">
-                        <AlertTriangle className="w-5 h-5 text-amber-100" />
-                        Screen Locked by Proctor
-                      </div>
-                      <span className="text-[11px] font-semibold text-amber-800">
-                        Awaiting administrator authorization.
+                      <button
+                        onClick={handleStartAssessment}
+                        className="px-6 py-3.5 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl flex items-center gap-2 text-sm font-extrabold shadow-md shadow-rose-600/20 cursor-pointer transition-all"
+                      >
+                        <Lock className="w-5 h-5 text-rose-100" />
+                        Screen Locked (View Session)
+                      </button>
+                      <span className="text-[11px] font-semibold text-rose-700">
+                        Suspended due to malpractice. Awaiting administrator review.
                       </span>
                     </div>
                   ) : (
