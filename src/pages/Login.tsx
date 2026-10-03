@@ -33,11 +33,6 @@ export const Login: React.FC = () => {
     }
   };
 
-  const handleQuickFillAdmin = () => {
-    setEmail("admin@izeon.com");
-    setPassword("admin123");
-  };
-
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-200/90 p-8 md:p-10 space-y-6 relative overflow-hidden">
@@ -55,21 +50,6 @@ export const Login: React.FC = () => {
           <p className="text-sm text-slate-600 font-medium">
             Proctored Assessment & Verification Platform
           </p>
-        </div>
-
-        {/* Quick fill demo helper */}
-        <div className="p-3.5 rounded-2xl bg-[#eff5ff] border border-[#16499c]/25 text-sm flex items-center justify-between text-slate-900 font-medium">
-          <span className="flex items-center gap-1.5 text-xs sm:text-sm">
-            <span className="w-2 h-2 rounded-full bg-[#16499c]" />
-            Admin Demo Access:
-          </span>
-          <button
-            type="button"
-            onClick={handleQuickFillAdmin}
-            className="text-xs sm:text-sm font-bold text-[#16499c] hover:text-[#123c80] bg-white px-3 py-1 rounded-lg border border-[#16499c]/30 shadow-xs cursor-pointer transition-all hover:bg-white/80"
-          >
-            Auto-fill Admin
-          </button>
         </div>
 
         {error && (

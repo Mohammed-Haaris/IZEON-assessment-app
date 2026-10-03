@@ -182,7 +182,12 @@ export const AssessmentRound1: React.FC = () => {
   return (
     <CameraGuard roundName="Round 1: Aptitude & Grammar">
       {(cameraStream) => (
-        <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+        <div className="max-w-6xl mx-auto px-4 py-6 space-y-6 relative">
+          {/* WEBCAM PROCTOR TILE FLOATING IN UPPER RIGHT (Identical to Round 2) */}
+          <div className="fixed top-20 right-6 z-30 w-36 h-28 shadow-2xl">
+            <CameraTile stream={cameraStream} />
+          </div>
+
           {/* Top Header Bar */}
           <div className="flex items-center justify-between bg-white px-6 py-4 rounded-2xl border border-slate-200 shadow-sm">
         <div>
@@ -395,11 +400,8 @@ export const AssessmentRound1: React.FC = () => {
           )}
         </div>
 
-        {/* Right Column: Proctor Camera + Question Palette */}
+        {/* Right Column: Question Palette */}
         <div className="space-y-4">
-          {/* Live Proctor Camera Feed */}
-          <CameraTile stream={cameraStream} className="w-full h-36 shadow-sm" />
-
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
             <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">
               Question Navigator
