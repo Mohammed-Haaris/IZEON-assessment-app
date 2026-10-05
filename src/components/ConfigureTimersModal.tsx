@@ -33,10 +33,10 @@ export const ConfigureTimersModal: React.FC<ConfigureTimersModalProps> = ({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const presets = [
-    { label: "⚡ Quick (15m • 30m)", r1: 15, r2: 30 },
-    { label: "🎯 Standard (25m • 40m)", r1: 25, r2: 40 },
-    { label: "⏱ Moderate (30m • 45m)", r1: 30, r2: 45 },
-    { label: "💼 Extended (45m • 60m)", r1: 45, r2: 60 },
+    { label: " Quick (15m • 30m)", r1: 15, r2: 30 },
+    { label: " Standard (25m • 40m)", r1: 25, r2: 40 },
+    { label: " Moderate (30m • 45m)", r1: 30, r2: 45 },
+    { label: " Extended (45m • 60m)", r1: 45, r2: 60 },
   ];
 
   const applyPreset = (r1: number, r2: number) => {
@@ -133,11 +133,10 @@ export const ConfigureTimersModal: React.FC<ConfigureTimersModalProps> = ({
                     key={p.label}
                     type="button"
                     onClick={() => applyPreset(p.r1, p.r2)}
-                    className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer border text-left ${
-                      isSelected
-                        ? "bg-[#16499c] text-white border-[#16499c] shadow-xs"
-                        : "bg-slate-50 hover:bg-[#eff5ff] text-slate-700 border-slate-200"
-                    }`}
+                    className={`py-2 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer border text-left ${isSelected
+                      ? "bg-[#16499c] text-white border-[#16499c] shadow-xs"
+                      : "bg-slate-50 hover:bg-[#eff5ff] text-slate-700 border-slate-200"
+                      }`}
                   >
                     {p.label}
                   </button>
