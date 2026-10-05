@@ -34,6 +34,7 @@ export const AssessmentRound1: React.FC = () => {
   const [round1Result, setRound1Result] = useState<{ score: number } | null>(null);
 
   // Proctoring & Malpractice States (Persistent across page refreshes)
+  const [tabSwitchCount, setTabSwitchCount] = useState<number>(0);
   const [warningModal, setWarningModal] = useState<string | null>(null);
   const [isLocked, setIsLocked] = useState<boolean>(() => {
     return localStorage.getItem("izeon_locked_round1") === "true";
@@ -59,6 +60,10 @@ export const AssessmentRound1: React.FC = () => {
 
         if (data.attempt?.id) {
           setActiveAttemptId(data.attempt.id);
+        }
+
+        if (typeof data.attempt?.tabSwitchCount === "number") {
+          setTabSwitchCount(data.attempt.tabSwitchCount);
         }
 
         if (data.attempt.status === "COMPLETED") {
@@ -143,6 +148,8 @@ export const AssessmentRound1: React.FC = () => {
       if (!data.attemptId || data.attemptId === effectiveAttemptId) {
         setIsLocked(false);
         localStorage.removeItem("izeon_locked_round1");
+        setTabSwitchCount(1);
+        setWarningModal(null);
       }
     });
 
@@ -195,28 +202,43 @@ export const AssessmentRound1: React.FC = () => {
     return () => clearInterval(interval);
   }, [isLocked]);
 
-  // Anti-Cheating: Real tab switch detection (Identical to Round 2)
+  // Anti-Cheating: Immediate tab switch detection (Strike 1 and Strike 2 marked instantly without waiting)
   useEffect(() => {
     if (isLocked || isDisqualified || round1Result || isSubmitting || !effectiveAttemptId) return;
 
-    let hideTimer: any = null;
-
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        // Wait 1.5 seconds to ensure candidate actually left the tab and it's not an accidental click
-        hideTimer = setTimeout(() => {
-          if (document.hidden) {
-            socket.emit("student:tab_switch", {
-              attemptId: effectiveAttemptId,
-              violationType: "TAB_SWITCH",
-            });
+        // Immediately mark Strike 1 and Strike 2 without waiting for any event
+        setTabSwitchCount((prev) => {
+          const nextCount = prev + 1;
+          if (nextCount === 1) {
+            setWarningModal(
+              "Warning 1 of 2: Tab switch detected! One more tab switch will flag you for malpractice and lock your test."
+            );
+          } else if (nextCount >= 2) {
+            setWarningModal(null);
+            setIsLocked(true);
+            localStorage.setItem("izeon_locked_round1", "true");
+            setLockMessage(
+              "Assessment locked due to multiple malpractice violations. Administrator has been notified to review your session."
+            );
           }
-        }, 1500);
-      } else {
-        if (hideTimer) {
-          clearTimeout(hideTimer);
-          hideTimer = null;
-        }
+          return nextCount;
+        });
+
+        // Notify server immediately via Socket & REST API fallback
+        socket.emit("student:tab_switch", {
+          attemptId: effectiveAttemptId,
+          violationType: "TAB_SWITCH",
+        });
+
+        apiRequest("/assessment/report-malpractice", {
+          method: "POST",
+          body: JSON.stringify({
+            attemptId: effectiveAttemptId,
+            violationType: "TAB_SWITCH",
+          }),
+        }).catch((err) => console.error("Report malpractice error:", err));
       }
     };
 
@@ -234,13 +256,12 @@ export const AssessmentRound1: React.FC = () => {
     document.addEventListener("paste", handleCopyPaste);
 
     return () => {
-      if (hideTimer) clearTimeout(hideTimer);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       document.removeEventListener("contextmenu", handleContextMenu);
       document.removeEventListener("copy", handleCopyPaste);
       document.removeEventListener("paste", handleCopyPaste);
     };
-  }, [isLocked, isDisqualified, round1Result, isSubmitting, attemptId]);
+  }, [isLocked, isDisqualified, round1Result, isSubmitting, effectiveAttemptId]);
 
   // Timer countdown
   useEffect(() => {
@@ -265,14 +286,14 @@ export const AssessmentRound1: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (isSubmitting || !attemptId) return;
+    if (isSubmitting || !effectiveAttemptId) return;
     setIsSubmitting(true);
 
     try {
       const res = await apiRequest<{ round1Score: number }>("/assessment/submit-round1", {
         method: "POST",
         body: JSON.stringify({
-          attemptId,
+          attemptId: effectiveAttemptId,
           mcqAnswers,
           writtenEssay,
         }),
@@ -345,7 +366,7 @@ export const AssessmentRound1: React.FC = () => {
         </div>
 
         <button
-          onClick={() => navigate(`/assessment/round2?attemptId=${attemptId}`)}
+          onClick={() => navigate(`/assessment/round2?attemptId=${effectiveAttemptId}`)}
           className="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-extrabold text-sm shadow-lg shadow-[#16499c]/25 cursor-pointer transition-all transform hover:-translate-y-0.5 active:translate-y-0"
         >
           Proceed to Round 2 (Coding & SQL Test)
@@ -443,7 +464,15 @@ export const AssessmentRound1: React.FC = () => {
           </h2>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          {/* Tab strike indicator */}
+          {tabSwitchCount > 0 && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-800 text-xs font-bold shadow-xs">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+              <span>Strike {tabSwitchCount}/2</span>
+            </div>
+          )}
+
           {/* Countdown timer */}
           <div
             className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-mono font-bold shadow-xs ${
@@ -710,7 +739,7 @@ export const AssessmentRound1: React.FC = () => {
 
             <div className="pt-4 border-t border-slate-100 text-[11px] text-slate-600 space-y-2 font-medium">
               <div className="flex items-center gap-2.5">
-                <span className="w-3 h-3 rounded-full bg-[#eff5ff]0" />
+                <span className="w-3 h-3 rounded-full bg-[#eff5ff] border border-[#16499c]/40" />
                 <span>Answered</span>
               </div>
               <div className="flex items-center gap-2.5">

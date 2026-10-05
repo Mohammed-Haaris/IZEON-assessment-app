@@ -35,7 +35,9 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
   const isPass = totalScore >= passingScore && attempt.status === "COMPLETED";
 
   const codingAnswers = attempt.answers?.codingAnswers || {};
-  const codingEntries = Object.entries(codingAnswers);
+  const codingEntries = Object.entries(codingAnswers).filter(
+    ([key]) => !key.endsWith("_sql") && !key.endsWith("_python") && !key.endsWith("_javascript")
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">

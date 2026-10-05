@@ -47,6 +47,7 @@ export const AssessmentRound2: React.FC = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Malpractice states (Persistent across page refreshes)
+  const [tabSwitchCount, setTabSwitchCount] = useState<number>(0);
   const [warningModal, setWarningModal] = useState<string | null>(null);
   const [isLocked, setIsLocked] = useState<boolean>(() => {
     return localStorage.getItem("izeon_locked_round2") === "true";
@@ -61,6 +62,32 @@ export const AssessmentRound2: React.FC = () => {
 
   const [showSchemaDrawer, setShowSchemaDrawer] = useState(false);
 
+  // Clean starter code templates (NEVER expose answers directly in assessment)
+  const getCleanTemplate = (lang: string, isDATrack: boolean) => {
+    if (lang === "sql") {
+      return "-- Write your SQL query here\n";
+    }
+    if (lang === "python") {
+      return isDATrack
+        ? "def analyze_transactions(transactions, threshold):\n    # Write your solution here\n    pass\n"
+        : "# Write your Python solution here\n";
+    }
+    return "function solution(input) {\n  // Write solution here\n  \n}\n";
+  };
+
+  const sanitizeStarter = (code: string | undefined | null, lang: string, isDATrack: boolean) => {
+    if (!code) return getCleanTemplate(lang, isDATrack);
+    if (
+      code.includes("SELECT department") ||
+      code.includes("AVG(salary)") ||
+      code.includes("total_volume = sum") ||
+      code.includes("outlier_count =")
+    ) {
+      return getCleanTemplate(lang, isDATrack);
+    }
+    return code;
+  };
+
   // Helper to maintain separate code for SQL vs Python per question
   const getAnswerKey = (qId: string, lang: string) => `${qId}_${lang}`;
 
@@ -74,6 +101,10 @@ export const AssessmentRound2: React.FC = () => {
         if (currentAttempt) {
           if (currentAttempt.id) {
             setActiveAttemptId(currentAttempt.id);
+          }
+
+          if (typeof currentAttempt.tabSwitchCount === "number") {
+            setTabSwitchCount(currentAttempt.tabSwitchCount);
           }
 
           if (currentAttempt.status === "COMPLETED") {
@@ -124,18 +155,12 @@ export const AssessmentRound2: React.FC = () => {
 
           setQuestions(r2);
 
-          // Populate initial starter codes
+          // Populate initial starter codes (clean templates with no solutions)
           const initialCodes: Record<string, string> = {};
           r2.forEach((q: any) => {
-            const sqlStarter =
-              q.starterCode?.sql ||
-              "-- Write your SQL query here\nSELECT department, AVG(salary) AS avg_salary\nFROM employees\nGROUP BY department\nHAVING AVG(salary) > 60000;\n";
-            const pyStarter =
-              q.starterCode?.python ||
-              "# Write your Python data analysis code here\ndef process_data(transactions):\n    \"\"\"Analyze transactions dataset and return metrics dict\"\"\"\n    total = sum(t.get('amount', 0) for t in transactions)\n    return {'total_amount': total, 'count': len(transactions)}\n";
-            const jsStarter =
-              q.starterCode?.javascript ||
-              "function solution(input) {\n  // Write solution here\n  return input;\n}\n";
+            const sqlStarter = sanitizeStarter(q.starterCode?.sql, "sql", isDataAnalyst);
+            const pyStarter = sanitizeStarter(q.starterCode?.python, "python", isDataAnalyst);
+            const jsStarter = sanitizeStarter(q.starterCode?.javascript, "javascript", isDataAnalyst);
 
             initialCodes[`${q.id}_sql`] = sqlStarter;
             initialCodes[`${q.id}_python`] = pyStarter;
@@ -205,6 +230,8 @@ export const AssessmentRound2: React.FC = () => {
       if (!data.attemptId || data.attemptId === effectiveAttemptId) {
         setIsLocked(false);
         localStorage.removeItem("izeon_locked_round2");
+        setTabSwitchCount(1);
+        setWarningModal(null);
       }
     });
 
@@ -256,28 +283,43 @@ export const AssessmentRound2: React.FC = () => {
     return () => clearInterval(interval);
   }, [isLocked]);
 
-  // Anti-Cheating: Real tab switch detection only (NO accidental window blur)
+  // Anti-Cheating: Immediate tab switch detection (Strike 1 and Strike 2 marked instantly without waiting)
   useEffect(() => {
     if (isLocked || isDisqualified || isCompleted || !effectiveAttemptId) return;
 
-    let hideTimer: any = null;
-
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        // Wait 1.5 seconds to ensure candidate actually left the tab and it's not an accidental click or popup
-        hideTimer = setTimeout(() => {
-          if (document.hidden) {
-            socket.emit("student:tab_switch", {
-              attemptId: effectiveAttemptId,
-              violationType: "TAB_SWITCH",
-            });
+        // Immediately mark Strike 1 and Strike 2 without waiting for any event
+        setTabSwitchCount((prev) => {
+          const nextCount = prev + 1;
+          if (nextCount === 1) {
+            setWarningModal(
+              "Warning 1 of 2: Tab switch detected! One more tab switch will flag you for malpractice and lock your test."
+            );
+          } else if (nextCount >= 2) {
+            setWarningModal(null);
+            setIsLocked(true);
+            localStorage.setItem("izeon_locked_round2", "true");
+            setLockMessage(
+              "Assessment locked due to multiple malpractice violations. Administrator has been notified to review your session."
+            );
           }
-        }, 1500);
-      } else {
-        if (hideTimer) {
-          clearTimeout(hideTimer);
-          hideTimer = null;
-        }
+          return nextCount;
+        });
+
+        // Notify server immediately via Socket & REST API fallback
+        socket.emit("student:tab_switch", {
+          attemptId: effectiveAttemptId,
+          violationType: "TAB_SWITCH",
+        });
+
+        apiRequest("/assessment/report-malpractice", {
+          method: "POST",
+          body: JSON.stringify({
+            attemptId: effectiveAttemptId,
+            violationType: "TAB_SWITCH",
+          }),
+        }).catch((err) => console.error("Report malpractice error:", err));
       }
     };
 
@@ -295,7 +337,6 @@ export const AssessmentRound2: React.FC = () => {
     document.addEventListener("paste", handleCopyPaste);
 
     return () => {
-      if (hideTimer) clearTimeout(hideTimer);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       document.removeEventListener("contextmenu", handleContextMenu);
       document.removeEventListener("copy", handleCopyPaste);
@@ -325,13 +366,11 @@ export const AssessmentRound2: React.FC = () => {
   const handleResetCode = () => {
     if (!currentQ) return;
     if (!confirm(`Reset ${language.toUpperCase()} editor to default starter template?`)) return;
-    const defaultTemplate =
-      currentQ.starterCode?.[language] ||
-      (language === "sql"
-        ? "-- Write your SQL query here\nSELECT department, AVG(salary) AS avg_salary\nFROM employees\nGROUP BY department\nHAVING AVG(salary) > 60000;\n"
-        : language === "python"
-        ? "# Write your Python data analysis code here\ndef process_data(transactions):\n    \"\"\"Analyze transactions dataset and return metrics dict\"\"\"\n    total = sum(t.get('amount', 0) for t in transactions)\n    return {'total_amount': total, 'count': len(transactions)}\n"
-        : "function solution(input) {\n  return input;\n}\n");
+    const defaultTemplate = sanitizeStarter(
+      currentQ.starterCode?.[language],
+      language,
+      isDataAnalyst
+    );
 
     handleCodeChange(defaultTemplate);
   };
@@ -408,12 +447,7 @@ export const AssessmentRound2: React.FC = () => {
   const currentCode = currentQ
     ? codeAnswers[getAnswerKey(currentQ.id, language)] ??
       codeAnswers[currentQ.id] ??
-      (currentQ.starterCode?.[language] ||
-        (language === "sql"
-          ? "-- Write your SQL query here\nSELECT department, AVG(salary) AS avg_salary\nFROM employees\nGROUP BY department\nHAVING AVG(salary) > 60000;\n"
-          : language === "python"
-          ? "# Write your Python data analysis code here\ndef process_data(transactions):\n    \"\"\"Analyze transactions dataset and return metrics dict\"\"\"\n    total = sum(t.get('amount', 0) for t in transactions)\n    return {'total_amount': total, 'count': len(transactions)}\n"
-          : "function solution(input) {\n  return input;\n}\n"))
+      sanitizeStarter(currentQ.starterCode?.[language], language, isDataAnalyst)
     : "";
 
   // 1. Disqualified Screen
@@ -580,7 +614,15 @@ export const AssessmentRound2: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          {/* Tab strike indicator */}
+          {tabSwitchCount > 0 && (
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold">
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+              <span>Strike {tabSwitchCount}/2</span>
+            </div>
+          )}
+
           {/* Language selector pill group */}
           <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
             <button
@@ -610,7 +652,7 @@ export const AssessmentRound2: React.FC = () => {
               onClick={() => setLanguage("javascript")}
               className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
                 language === "javascript"
-                  ? "bg-[#eff5ff]0 text-slate-950 shadow-xs"
+                  ? "bg-indigo-500 text-white shadow-xs"
                   : "text-slate-400 hover:text-white"
               }`}
             >
