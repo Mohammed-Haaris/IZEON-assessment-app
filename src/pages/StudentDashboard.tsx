@@ -102,7 +102,7 @@ export const StudentDashboard: React.FC = () => {
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-              Welcome, <span className="text-[#16499c]">{user.name}</span> 👋
+              Welcome, <span className="text-[#16499c]">{user.name}</span>
             </h1>
             <p className="text-sm text-slate-600 mt-1 font-medium">
               {user.college ? `${user.college} • ` : ""}Candidate Assessment Examination Portal

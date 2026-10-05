@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Lock, Mail, AlertCircle, ArrowRight, Eye, EyeOff } from "lucide-react";
+import { Lock, Mail, AlertCircle, ArrowRight, Eye, EyeOff, KeyRound } from "lucide-react";
 import interviewLogo from "../assets/interview logo.png";
 
 export const Login: React.FC = () => {
@@ -76,7 +76,17 @@ export const Login: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-slate-800 mb-1.5">Password</label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-sm font-semibold text-slate-800">Password</label>
+              <Link
+                to="/forgot-password"
+                className="text-xs font-semibold text-[#16499c] hover:text-[#123c80] hover:underline inline-flex items-center gap-1 transition-colors"
+                title="Strictly for Administrator account password recovery"
+              >
+                <KeyRound className="w-3 h-3" />
+                Forgot Admin Password?
+              </Link>
+            </div>
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
               <input

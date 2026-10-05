@@ -8,6 +8,7 @@ import { StudentDashboard } from "./pages/StudentDashboard";
 import { AssessmentRound1 } from "./pages/AssessmentRound1";
 import { AssessmentRound2 } from "./pages/AssessmentRound2";
 import { AdminDashboard } from "./pages/AdminDashboard";
+import { AdminForgotPassword } from "./pages/AdminForgotPassword";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode; adminOnly?: boolean }> = ({
   children,
@@ -54,6 +55,8 @@ export function App() {
               <Route path="/" element={<RootRedirect />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<AdminForgotPassword />} />
+              <Route path="/admin/forgot-password" element={<AdminForgotPassword />} />
 
               {/* Student Routes */}
               <Route
