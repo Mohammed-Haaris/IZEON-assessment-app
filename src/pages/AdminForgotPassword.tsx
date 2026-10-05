@@ -194,23 +194,20 @@ export const AdminForgotPassword: React.FC = () => {
         <div className="flex items-center justify-between relative px-6 py-2">
           <div className="absolute left-10 right-10 top-1/2 -translate-y-1/2 h-0.5 bg-slate-200 -z-0" />
           <div
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold z-10 transition-colors ${
-              step >= 1 ? "bg-[#16499c] text-white shadow-md shadow-[#16499c]/30" : "bg-slate-200 text-slate-500"
-            }`}
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold z-10 transition-colors ${step >= 1 ? "bg-[#16499c] text-white shadow-md shadow-[#16499c]/30" : "bg-slate-200 text-slate-500"
+              }`}
           >
             1
           </div>
           <div
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold z-10 transition-colors ${
-              step >= 2 ? "bg-[#16499c] text-white shadow-md shadow-[#16499c]/30" : "bg-slate-200 text-slate-500"
-            }`}
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold z-10 transition-colors ${step >= 2 ? "bg-[#16499c] text-white shadow-md shadow-[#16499c]/30" : "bg-slate-200 text-slate-500"
+              }`}
           >
             2
           </div>
           <div
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold z-10 transition-colors ${
-              step === 3 ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/30" : "bg-slate-200 text-slate-500"
-            }`}
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold z-10 transition-colors ${step === 3 ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/30" : "bg-slate-200 text-slate-500"
+              }`}
           >
             ✓
           </div>
@@ -234,9 +231,6 @@ export const AdminForgotPassword: React.FC = () => {
           </div>
         )}
 
-        {/* ======================================================== */}
-        {/* STEP 1: Enter Administrator Email & Check Access         */}
-        {/* ======================================================== */}
         {step === 1 && (
           <form onSubmit={handleRequestPasscode} className="space-y-4">
             <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs text-slate-600 space-y-1">
@@ -297,9 +291,6 @@ export const AdminForgotPassword: React.FC = () => {
           </form>
         )}
 
-        {/* ======================================================== */}
-        {/* STEP 2: Enter Verification Code / Master Key & New Pass  */}
-        {/* ======================================================== */}
         {step === 2 && (
           <form onSubmit={handleResetPassword} className="space-y-4">
             {/* Account Info Pill */}
@@ -359,11 +350,10 @@ export const AdminForgotPassword: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setMethod("PASSCODE")}
-                  className={`py-1.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                    method === "PASSCODE"
-                      ? "bg-white text-[#16499c] shadow-sm"
-                      : "text-slate-600 hover:text-slate-900"
-                  }`}
+                  className={`py-1.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${method === "PASSCODE"
+                    ? "bg-white text-[#16499c] shadow-sm"
+                    : "text-slate-600 hover:text-slate-900"
+                    }`}
                 >
                   <KeyRound className="w-3.5 h-3.5" />
                   6-Digit Passcode
@@ -371,11 +361,10 @@ export const AdminForgotPassword: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setMethod("MASTER_KEY")}
-                  className={`py-1.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                    method === "MASTER_KEY"
-                      ? "bg-white text-[#16499c] shadow-sm"
-                      : "text-slate-600 hover:text-slate-900"
-                  }`}
+                  className={`py-1.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${method === "MASTER_KEY"
+                    ? "bg-white text-[#16499c] shadow-sm"
+                    : "text-slate-600 hover:text-slate-900"
+                    }`}
                 >
                   <Key className="w-3.5 h-3.5" />
                   Master Recovery Key
@@ -483,11 +472,10 @@ export const AdminForgotPassword: React.FC = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="Repeat new password"
-                  className={`w-full text-sm pl-10 pr-10 py-2.5 rounded-xl border bg-white text-slate-900 focus:outline-none focus:ring-2 transition-all ${
-                    confirmPassword && confirmPassword !== newPassword
-                      ? "border-rose-400 focus:ring-rose-200"
-                      : "border-slate-300 focus:ring-[#16499c]/20 focus:border-[#16499c]"
-                  }`}
+                  className={`w-full text-sm pl-10 pr-10 py-2.5 rounded-xl border bg-white text-slate-900 focus:outline-none focus:ring-2 transition-all ${confirmPassword && confirmPassword !== newPassword
+                    ? "border-rose-400 focus:ring-rose-200"
+                    : "border-slate-300 focus:ring-[#16499c]/20 focus:border-[#16499c]"
+                    }`}
                 />
                 <button
                   type="button"
@@ -560,7 +548,7 @@ export const AdminForgotPassword: React.FC = () => {
 
             <button
               onClick={() => navigate("/login")}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-all shadow-md shadow-emerald-600/25 cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-bold text-sm transition-all shadow-md shadow-emerald-600/25 cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
             >
               Sign In with New Password
               <ArrowRight className="w-4 h-4" />
