@@ -45,6 +45,7 @@ export const AssessmentRound2: React.FC = () => {
   const [codeAnswers, setCodeAnswers] = useState<Record<string, string>>({});
   const [testOutput, setTestOutput] = useState<string>("");
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<number>(40 * 60); // In seconds
 
   // Malpractice states (Persistent across page refreshes)
   const [tabSwitchCount, setTabSwitchCount] = useState<number>(0);
@@ -154,6 +155,11 @@ export const AssessmentRound2: React.FC = () => {
           }
 
           setQuestions(r2);
+
+          // Sync Round 2 duration configured by Admin
+          if (res.assessment?.durationR2) {
+            setTimeLeft(Number(res.assessment.durationR2) * 60);
+          }
 
           // Populate initial starter codes (clean templates with no solutions)
           const initialCodes: Record<string, string> = {};
@@ -282,6 +288,30 @@ export const AssessmentRound2: React.FC = () => {
 
     return () => clearInterval(interval);
   }, [isLocked]);
+
+  // Round 2 Live Countdown Timer
+  useEffect(() => {
+    if (isLocked || isDisqualified || isCompleted) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          handleSubmitAssessment();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isLocked, isDisqualified, isCompleted]);
+
+  const formatTime = (secs: number) => {
+    const mins = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${mins.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  };
 
   // Anti-Cheating: Immediate tab switch detection (Strike 1 and Strike 2 marked instantly without waiting)
   useEffect(() => {
@@ -658,6 +688,18 @@ export const AssessmentRound2: React.FC = () => {
             >
               JavaScript
             </button>
+          </div>
+
+          {/* Round 2 Live Countdown timer */}
+          <div
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono font-bold shadow-xs ${
+              timeLeft < 300
+                ? "bg-rose-500/20 border-rose-500/40 text-rose-300 animate-pulse"
+                : "bg-slate-900 border-slate-800 text-slate-200"
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5 text-amber-400" />
+            <span>{formatTime(timeLeft)}</span>
           </div>
 
           <button

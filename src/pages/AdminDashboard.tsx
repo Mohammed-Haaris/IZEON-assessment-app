@@ -6,6 +6,7 @@ import { AddQuestionModal } from "../components/AddQuestionModal";
 import { QuestionListModal } from "../components/QuestionListModal";
 import { CandidateDetailsModal } from "../components/CandidateDetailsModal";
 import { CreateAdminModal } from "../components/CreateAdminModal";
+import { ConfigureTimersModal } from "../components/ConfigureTimersModal";
 import { CustomSelect } from "../components/CustomSelect";
 import {
   generateExamResultsPDF,
@@ -31,6 +32,8 @@ import {
   ShieldCheck,
   XCircle,
   AlertOctagon,
+  Clock,
+  Settings,
 } from "lucide-react";
 
 export const AdminDashboard: React.FC = () => {
@@ -56,6 +59,7 @@ export const AdminDashboard: React.FC = () => {
   const [isAddQuestionOpen, setIsAddQuestionOpen] = useState(false);
   const [selectedAssessmentForAdd, setSelectedAssessmentForAdd] = useState<string>("");
   const [viewQuestionsAssessment, setViewQuestionsAssessment] = useState<Assessment | null>(null);
+  const [configuringTimersAssessment, setConfiguringTimersAssessment] = useState<Assessment | null>(null);
 
   // Results & Candidate Inspection Modal
   const [selectedAttemptForDetails, setSelectedAttemptForDetails] = useState<AssessmentAttempt | null>(null);
@@ -822,20 +826,34 @@ export const AdminDashboard: React.FC = () => {
                 Configured Assessments & Question Bank
               </h3>
               <p className="text-[11px] text-slate-500 font-medium">
-                Create new assessments or add questions to existing exams
+                Set manual timer durations for Round 1 & Round 2, or manage questions
               </p>
             </div>
 
-            <button
-              onClick={() => {
-                setSelectedAssessmentForAdd(assessments[0]?.id || "");
-                setIsAddQuestionOpen(true);
-              }}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-extrabold text-xs shadow-md shadow-[#16499c]/20 cursor-pointer transition-all transform hover:-translate-y-0.5 active:translate-y-0"
-            >
-              <Plus className="w-4 h-4" />
-              Add New Question
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  if (assessments[0]) {
+                    setConfiguringTimersAssessment(assessments[0]);
+                  }
+                }}
+                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-[#16499c]/30 bg-white hover:bg-[#eff5ff] text-[#16499c] font-extrabold text-xs shadow-xs cursor-pointer transition-all"
+              >
+                <Clock className="w-4 h-4 text-[#16499c]" />
+                Configure Exam Timers
+              </button>
+
+              <button
+                onClick={() => {
+                  setSelectedAssessmentForAdd(assessments[0]?.id || "");
+                  setIsAddQuestionOpen(true);
+                }}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-extrabold text-xs shadow-md shadow-[#16499c]/20 cursor-pointer transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+              >
+                <Plus className="w-4 h-4" />
+                Add New Question
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -860,25 +878,48 @@ export const AdminDashboard: React.FC = () => {
                   <p className="text-xs text-slate-600 font-medium leading-relaxed">{a.description}</p>
 
                   <div className="grid grid-cols-2 gap-3 pt-2 text-xs">
-                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
-                      <span className="text-[10px] uppercase font-bold text-slate-400">Round 1</span>
+                    <div
+                      onClick={() => setConfiguringTimersAssessment(a)}
+                      className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-[#16499c]/40 hover:bg-[#eff5ff]/40 cursor-pointer transition-all group"
+                      title="Click to edit Round 1 timer"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] uppercase font-bold text-slate-400">Round 1</span>
+                        <Settings className="w-3 h-3 text-slate-400 group-hover:text-[#16499c]" />
+                      </div>
                       <p className="font-extrabold text-slate-900 mt-0.5">{a.durationR1} Minutes</p>
                     </div>
-                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
-                      <span className="text-[10px] uppercase font-bold text-slate-400">Round 2</span>
+                    <div
+                      onClick={() => setConfiguringTimersAssessment(a)}
+                      className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-[#16499c]/40 hover:bg-[#eff5ff]/40 cursor-pointer transition-all group"
+                      title="Click to edit Round 2 timer"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] uppercase font-bold text-slate-400">Round 2</span>
+                        <Settings className="w-3 h-3 text-slate-400 group-hover:text-[#16499c]" />
+                      </div>
                       <p className="font-extrabold text-slate-900 mt-0.5">{a.durationR2} Minutes</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Card Actions */}
-                <div className="pt-4 border-t border-slate-100 flex gap-2">
+                <div className="pt-4 border-t border-slate-100 flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setConfiguringTimersAssessment(a)}
+                    className="flex items-center gap-1.5 py-2.5 px-3 rounded-xl border border-slate-200 bg-white hover:bg-[#eff5ff] hover:border-[#16499c]/30 text-xs font-bold text-[#16499c] cursor-pointer transition-all shadow-xs"
+                    title="Set manual timers for Round 1 & Round 2"
+                  >
+                    <Clock className="w-3.5 h-3.5" />
+                    Set Timers
+                  </button>
+
                   <button
                     onClick={() => setViewQuestionsAssessment(a)}
                     className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl border border-slate-200 bg-white hover:bg-[#eff5ff]/50 hover:border-[#16499c]/30 text-xs font-bold text-slate-700 hover:text-[#16499c] cursor-pointer transition-all shadow-xs"
                   >
                     <Eye className="w-3.5 h-3.5 text-[#16499c]" />
-                    View & Manage Questions
+                    Questions ({a._count?.questions || 0})
                   </button>
 
                   <button
@@ -1449,6 +1490,17 @@ export const AdminDashboard: React.FC = () => {
           onClose={() => setIsCreateAdminOpen(false)}
           onSuccess={() => {
             loadAdmins();
+          }}
+        />
+      )}
+
+      {/* CONFIGURE EXAM TIMERS MODAL */}
+      {configuringTimersAssessment && (
+        <ConfigureTimersModal
+          assessment={configuringTimersAssessment}
+          onClose={() => setConfiguringTimersAssessment(null)}
+          onSuccess={() => {
+            loadAssessments();
           }}
         />
       )}
