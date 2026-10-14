@@ -60,6 +60,17 @@ export const AssessmentRound1: React.FC = () => {
 
         if (data.attempt?.id) {
           setActiveAttemptId(data.attempt.id);
+          const id = data.attempt.id;
+          const savedMcq = localStorage.getItem(`izeon_r1_mcq_${id}`);
+          if (savedMcq) {
+            try {
+              setMcqAnswers(JSON.parse(savedMcq));
+            } catch {}
+          }
+          const savedEssay = localStorage.getItem(`izeon_r1_essay_${id}`);
+          if (savedEssay) {
+            setWrittenEssay(savedEssay);
+          }
         }
 
         if (typeof data.attempt?.tabSwitchCount === "number") {
@@ -282,7 +293,22 @@ export const AssessmentRound1: React.FC = () => {
   }, [round1Result, isSubmitting, isLocked, isDisqualified]);
 
   const handleSelectOption = (questionId: string, option: string) => {
-    setMcqAnswers((prev) => ({ ...prev, [questionId]: option }));
+    setMcqAnswers((prev) => {
+      const updated = { ...prev, [questionId]: option };
+      const id = effectiveAttemptId || activeAttemptId;
+      if (id) {
+        localStorage.setItem(`izeon_r1_mcq_${id}`, JSON.stringify(updated));
+      }
+      return updated;
+    });
+  };
+
+  const handleEssayChange = (text: string) => {
+    setWrittenEssay(text);
+    const id = effectiveAttemptId || activeAttemptId;
+    if (id) {
+      localStorage.setItem(`izeon_r1_essay_${id}`, text);
+    }
   };
 
   const handleSubmit = async () => {
@@ -298,6 +324,13 @@ export const AssessmentRound1: React.FC = () => {
           writtenEssay,
         }),
       });
+
+      // Clear local cache once safely stored in server
+      const id = effectiveAttemptId || activeAttemptId;
+      if (id) {
+        localStorage.removeItem(`izeon_r1_mcq_${id}`);
+        localStorage.removeItem(`izeon_r1_essay_${id}`);
+      }
 
       setRound1Result({ score: res.round1Score });
     } catch (err: any) {
@@ -606,7 +639,7 @@ export const AssessmentRound1: React.FC = () => {
                   <textarea
                     rows={8}
                     value={writtenEssay}
-                    onChange={(e) => setWrittenEssay(e.target.value)}
+                    onChange={(e) => handleEssayChange(e.target.value)}
                     placeholder="Type your response here... It will be evaluated for grammar, clarity, spelling, and sentence construction."
                     className="w-full text-sm p-4 rounded-2xl border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] font-sans leading-relaxed text-slate-900 transition-all placeholder:text-slate-400"
                   />

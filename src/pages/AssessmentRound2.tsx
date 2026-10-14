@@ -58,6 +58,7 @@ export const AssessmentRound2: React.FC = () => {
     "Assessment locked due to multiple malpractice violations. Administrator has been notified to review your session."
   );
   const [isCompleted, setIsCompleted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const socket = getSocket();
 
@@ -181,6 +182,19 @@ export const AssessmentRound2: React.FC = () => {
               initialCodes[q.id] = jsStarter;
             }
           });
+
+          // Restore any locally cached draft code in case student reloaded
+          const targetId = currentAttempt?.id || effectiveAttemptId;
+          if (targetId) {
+            const savedDraft = localStorage.getItem(`izeon_r2_codes_${targetId}`);
+            if (savedDraft) {
+              try {
+                const parsed = JSON.parse(savedDraft);
+                Object.assign(initialCodes, parsed);
+              } catch {}
+            }
+          }
+
           setCodeAnswers(initialCodes);
 
           // Auto-select language for first question:
@@ -386,11 +400,18 @@ export const AssessmentRound2: React.FC = () => {
   const handleCodeChange = (value?: string) => {
     if (!currentQ) return;
     const val = value || "";
-    setCodeAnswers((prev) => ({
-      ...prev,
-      [currentQ.id]: val,
-      [getAnswerKey(currentQ.id, language)]: val,
-    }));
+    setCodeAnswers((prev) => {
+      const updated = {
+        ...prev,
+        [currentQ.id]: val,
+        [getAnswerKey(currentQ.id, language)]: val,
+      };
+      const id = effectiveAttemptId || activeAttemptId;
+      if (id) {
+        localStorage.setItem(`izeon_r2_codes_${id}`, JSON.stringify(updated));
+      }
+      return updated;
+    });
   };
 
   const handleResetCode = () => {
@@ -452,9 +473,10 @@ export const AssessmentRound2: React.FC = () => {
 
   const handleSubmitAssessment = async () => {
     const targetAttemptId = effectiveAttemptId || attemptId;
-    if (!targetAttemptId) return;
+    if (!targetAttemptId || isSubmitting) return;
     if (!confirm("Are you sure you want to finish and submit your coding assessment?")) return;
 
+    setIsSubmitting(true);
     try {
       await apiRequest("/assessment/submit-round2", {
         method: "POST",
@@ -464,12 +486,16 @@ export const AssessmentRound2: React.FC = () => {
         }),
       });
 
+      // Clear local backup upon successful server receipt
+      localStorage.removeItem(`izeon_r2_codes_${targetAttemptId}`);
+
       setIsCompleted(true);
       if (document.fullscreenElement) {
         document.exitFullscreen();
       }
     } catch (err: any) {
       alert(err.message || "Failed to submit assessment");
+      setIsSubmitting(false);
     }
   };
 
@@ -704,10 +730,11 @@ export const AssessmentRound2: React.FC = () => {
 
           <button
             onClick={handleSubmitAssessment}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#16499c] hover:bg-[#123c80] text-white font-semibold text-xs shadow-md shadow-[#16499c]/20 cursor-pointer transition-all"
+            disabled={isSubmitting}
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#16499c] hover:bg-[#123c80] text-white font-semibold text-xs shadow-md shadow-[#16499c]/20 cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send className="w-3.5 h-3.5" />
-            Submit Test
+            {isSubmitting ? "Submitting..." : "Submit Test"}
           </button>
         </div>
       </div>

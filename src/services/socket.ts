@@ -10,8 +10,12 @@ export const getSocket = (): Socket => {
     socket = io(SOCKET_SERVER_URL, {
       autoConnect: true,
       reconnection: true,
-      reconnectionAttempts: 10,
+      reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      randomizationFactor: 0.5, // adds jitter so 1000 clients don't reconnect at the same millisecond
+      timeout: 20000,
+      transports: ["websocket", "polling"],
     });
   }
   return socket;
