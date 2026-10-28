@@ -525,7 +525,7 @@ export const AdminForgotPassword: React.FC = () => {
         )}
 
         {/* ======================================================== */}
-        {/* STEP 3: Success Screen                                   */}
+        {/* STEP 3: Success Screen                                    */}
         {/* ======================================================== */}
         {step === 3 && (
           <div className="text-center space-y-5 py-4 animate-fadeIn">

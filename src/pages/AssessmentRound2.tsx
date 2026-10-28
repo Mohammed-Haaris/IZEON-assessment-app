@@ -116,6 +116,26 @@ export const AssessmentRound2: React.FC = () => {
             return;
           }
 
+          if (
+            currentAttempt.status === "NOT_STARTED" ||
+            currentAttempt.status === "ROUND_1_IN_PROGRESS"
+          ) {
+            alert("You must complete and qualify in Round 1 before accessing Round 2.");
+            navigate("/assessment/round1");
+            return;
+          }
+
+          const cutoff = res.assessment?.cutoffRound1 ?? 12;
+          if (
+            currentAttempt.round1Score !== null &&
+            currentAttempt.round1Score !== undefined &&
+            currentAttempt.round1Score < cutoff
+          ) {
+            alert(`You did not meet the qualifying score to unlock Round 2 (Your Round 1 Score: ${currentAttempt.round1Score} pts, Required Cutoff: ${cutoff} pts).`);
+            navigate("/dashboard");
+            return;
+          }
+
           if (currentAttempt.status === "DISQUALIFIED") {
             localStorage.removeItem("izeon_locked_round2");
             setIsDisqualified(true);

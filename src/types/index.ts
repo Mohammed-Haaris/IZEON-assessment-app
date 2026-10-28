@@ -57,6 +57,7 @@ export interface Assessment {
   durationR1: number;
   durationR2: number;
   passingScore?: number;
+  cutoffRound1?: number;
   isActive: boolean;
   questions?: Question[];
   _count?: {

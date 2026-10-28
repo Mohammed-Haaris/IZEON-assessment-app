@@ -204,10 +204,17 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                 <span className="text-[11px] font-bold uppercase text-[#16499c]">
                   Round 1: Cognitive
                 </span>
-                <p className="text-2xl font-black text-slate-900 mt-0.5">
-                  {attempt.round1Score !== null && attempt.round1Score !== undefined
-                    ? `${attempt.round1Score} Pts`
-                    : "—"}
+                <p className="text-2xl font-black text-slate-900 mt-0.5 flex items-baseline gap-1.5">
+                  <span>
+                    {attempt.round1Score !== null && attempt.round1Score !== undefined
+                      ? `${attempt.round1Score} Pts`
+                      : "—"}
+                  </span>
+                  {attempt.assessment?.cutoffRound1 !== undefined && (
+                    <span className="text-xs font-semibold text-slate-400">
+                      (Cutoff: {attempt.assessment.cutoffRound1})
+                    </span>
+                  )}
                 </p>
               </div>
               <Award className="w-8 h-8 text-[#93c5fd]" />

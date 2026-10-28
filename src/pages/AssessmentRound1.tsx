@@ -31,7 +31,12 @@ export const AssessmentRound1: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState<number>(25 * 60); // 25 mins in seconds
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [round1Result, setRound1Result] = useState<{ score: number } | null>(null);
+  const [round1Result, setRound1Result] = useState<{
+    score: number;
+    isQualified: boolean;
+    cutoff: number;
+    message?: string;
+  } | null>(null);
 
   // Proctoring & Malpractice States (Persistent across page refreshes)
   const [tabSwitchCount, setTabSwitchCount] = useState<number>(0);
@@ -316,7 +321,13 @@ export const AssessmentRound1: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const res = await apiRequest<{ round1Score: number }>("/assessment/submit-round1", {
+      const res = await apiRequest<{
+        success: boolean;
+        isQualified: boolean;
+        round1Score: number;
+        cutoffRound1: number;
+        message: string;
+      }>("/assessment/submit-round1", {
         method: "POST",
         body: JSON.stringify({
           attemptId: effectiveAttemptId,
@@ -332,7 +343,12 @@ export const AssessmentRound1: React.FC = () => {
         localStorage.removeItem(`izeon_r1_essay_${id}`);
       }
 
-      setRound1Result({ score: res.round1Score });
+      setRound1Result({
+        score: res.round1Score,
+        isQualified: res.isQualified ?? (res.round1Score >= (res.cutoffRound1 ?? 12)),
+        cutoff: res.cutoffRound1 ?? 12,
+        message: res.message,
+      });
     } catch (err: any) {
       alert(err.message || "Failed to submit Round 1");
       setIsSubmitting(false);
@@ -362,49 +378,127 @@ export const AssessmentRound1: React.FC = () => {
   if (round1Result) {
     return (
       <div className="max-w-xl mx-auto my-12 p-8 bg-white rounded-3xl border border-slate-200 shadow-xl text-center space-y-6">
-        <div className="w-20 h-20 rounded-3xl bg-[#eff5ff] border border-[#16499c]/30 text-[#16499c] flex items-center justify-center mx-auto shadow-inner">
-          <CheckCircle2 className="w-10 h-10" />
-        </div>
-        <div>
-          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">
-            Round 1 Completed!
-          </h2>
-          <p className="text-xs text-slate-500 mt-1 font-medium">
-            Cognitive & English Grammar Assessment Submitted Successfully
-          </p>
-        </div>
+        {round1Result.isQualified ? (
+          <>
+            <div className="w-20 h-20 rounded-3xl bg-[#eff5ff] border border-[#16499c]/30 text-[#16499c] flex items-center justify-center mx-auto shadow-inner">
+              <CheckCircle2 className="w-10 h-10" />
+            </div>
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold mb-2">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                QUALIFIED FOR ROUND 2
+              </div>
+              <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">
+                Round 1 Passed!
+              </h2>
+              <p className="text-xs text-slate-500 mt-1 font-medium">
+                Cognitive & English Grammar Assessment Submitted Successfully
+              </p>
+            </div>
 
-        <div className="p-6 rounded-2xl bg-[#eff5ff] border border-[#16499c]/30 shadow-sm">
-          <span className="text-[11px] text-[#16499c] uppercase tracking-widest font-extrabold">
-            Verified Round 1 Score
-          </span>
-          <p className="text-4xl font-black text-[#16499c] mt-1">
-            {round1Result.score} Points
-          </p>
-        </div>
+            <div className="p-6 rounded-2xl bg-[#eff5ff] border border-[#16499c]/30 shadow-sm flex items-center justify-around">
+              <div>
+                <span className="text-[11px] text-[#16499c] uppercase tracking-widest font-extrabold">
+                  Your Score
+                </span>
+                <p className="text-4xl font-black text-[#16499c] mt-1">
+                  {round1Result.score} <span className="text-lg font-bold text-slate-400">Pts</span>
+                </p>
+              </div>
+              <div className="h-10 w-px bg-blue-200" />
+              <div>
+                <span className="text-[11px] text-slate-500 uppercase tracking-widest font-extrabold">
+                  Qualifying Cutoff
+                </span>
+                <p className="text-4xl font-black text-slate-700 mt-1">
+                  {round1Result.cutoff} <span className="text-lg font-bold text-slate-400">Pts</span>
+                </p>
+              </div>
+            </div>
 
-        <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-left text-xs text-slate-800 space-y-2.5">
-          <p className="font-bold flex items-center gap-2 text-slate-900">
-            <AlertCircle className="w-4 h-4 text-[#16499c] shrink-0" />
-            Mandatory Preparation for Round 2 (Coding Laboratory):
-          </p>
-          <ul className="list-disc pl-5 space-y-1 text-slate-600 text-[11px]">
-            <li>Live camera stream must stay granted and unblocked throughout the session.</li>
-            <li>Browser must remain in fullscreen mode without exiting.</li>
-            <li>
-              <strong>Anti-Cheating Policy:</strong> Navigating away from the browser tab twice will
-              trigger an immediate proctor lockout.
-            </li>
-          </ul>
-        </div>
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-left text-xs text-slate-800 space-y-2.5">
+              <p className="font-bold flex items-center gap-2 text-slate-900">
+                <AlertCircle className="w-4 h-4 text-[#16499c] shrink-0" />
+                Mandatory Preparation for Round 2 (Coding Laboratory):
+              </p>
+              <ul className="list-disc pl-5 space-y-1 text-slate-600 text-[11px]">
+                <li>Live camera stream must stay granted and unblocked throughout the session.</li>
+                <li>Browser must remain in fullscreen mode without exiting.</li>
+                <li>
+                  <strong>Anti-Cheating Policy:</strong> Navigating away from the browser tab twice will
+                  trigger an immediate proctor lockout.
+                </li>
+              </ul>
+            </div>
 
-        <button
-          onClick={() => navigate(`/assessment/round2?attemptId=${effectiveAttemptId}`)}
-          className="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-extrabold text-sm shadow-lg shadow-[#16499c]/25 cursor-pointer transition-all transform hover:-translate-y-0.5 active:translate-y-0"
-        >
-          Proceed to Round 2 (Coding & SQL Test)
-          <ArrowRight className="w-4 h-4" />
-        </button>
+            <button
+              onClick={() => navigate(`/assessment/round2?attemptId=${effectiveAttemptId}`)}
+              className="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-extrabold text-sm shadow-lg shadow-[#16499c]/25 cursor-pointer transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+            >
+              Proceed to Round 2 (Coding & SQL Test)
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="w-20 h-20 rounded-3xl bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center mx-auto shadow-inner">
+              <AlertCircle className="w-10 h-10" />
+            </div>
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 text-rose-800 text-xs font-bold mb-2">
+                NOT QUALIFIED FOR ROUND 2
+              </div>
+              <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">
+                Assessment Concluded
+              </h2>
+              <p className="text-xs text-slate-500 mt-1 font-medium">
+                Round 1 Cognitive Assessment Completed
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 shadow-sm flex items-center justify-around">
+              <div>
+                <span className="text-[11px] text-slate-500 uppercase tracking-widest font-extrabold">
+                  Your Score
+                </span>
+                <p className="text-4xl font-black text-rose-600 mt-1">
+                  {round1Result.score} <span className="text-lg font-bold text-slate-400">Pts</span>
+                </p>
+              </div>
+              <div className="h-10 w-px bg-slate-200" />
+              <div>
+                <span className="text-[11px] text-slate-500 uppercase tracking-widest font-extrabold">
+                  Required Cutoff
+                </span>
+                <p className="text-4xl font-black text-slate-700 mt-1">
+                  {round1Result.cutoff} <span className="text-lg font-bold text-slate-400">Pts</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-amber-50/70 border border-amber-200 text-left text-xs text-amber-900 space-y-2">
+              <p className="font-bold flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                Assessment Result Notice:
+              </p>
+              <p className="text-slate-600 text-xs leading-relaxed">
+                Thank you for participating in the IZEON Recruitment Assessment. You scored{" "}
+                <strong>{round1Result.score} points</strong>, which did not meet the qualifying cutoff benchmark of{" "}
+                <strong>{round1Result.cutoff} points</strong> required to unlock Round 2.
+              </p>
+              <p className="text-slate-500 text-[11px]">
+                Your responses have been recorded and saved. The recruitment team will review all submissions.
+              </p>
+            </div>
+
+            <button
+              onClick={() => navigate("/dashboard")}
+              className="w-full flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-sm shadow-md cursor-pointer transition-all"
+            >
+              Return to Candidate Dashboard
+            </button>
+          </>
+        )}
       </div>
     );
   }
