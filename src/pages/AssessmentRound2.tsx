@@ -24,6 +24,132 @@ import {
   ChevronUp,
 } from "lucide-react";
 
+
+// In-Memory Database Datasets for Client-Side SQL Sandbox
+const MOCK_DB_EMPLOYEES = [
+  { id: 101, name: "Rajesh Kumar", department_id: 101, department: "Engineering", salary: 92000, hire_date: "2021-03-15" },
+  { id: 102, name: "Pooja Sharma", department_id: 101, department: "Engineering", salary: 88000, hire_date: "2020-07-22" },
+  { id: 103, name: "Ananya Roy", department_id: 101, department: "Engineering", salary: 65000, hire_date: "2022-01-10" },
+  { id: 104, name: "Vikas Patel", department_id: 101, department: "Engineering", salary: 55000, hire_date: "2023-04-18" },
+  { id: 105, name: "Kavita Rao", department_id: 102, department: "Data Science", salary: 58000, hire_date: "2021-11-05" },
+  { id: 106, name: "Arjun Das", department_id: 102, department: "Data Science", salary: 54000, hire_date: "2022-08-14" },
+  { id: 107, name: "Deepa Menon", department_id: 102, department: "Data Science", salary: 50000, hire_date: "2023-02-01" },
+  { id: 108, name: "Suresh Nair", department_id: 103, department: "Cloud Platform", salary: 44000, hire_date: "2019-06-25" },
+  { id: 109, name: "Meera Joshi", department_id: 103, department: "Cloud Platform", salary: 46000, hire_date: "2020-09-12" },
+  { id: 110, name: "Karthik V", department_id: 104, department: "HR & Operations", salary: 38000, hire_date: "2024-01-08" },
+];
+
+const MOCK_DB_SALES = [
+  { id: 1, salesperson: "Alice", region: "North", amount: 55000, sale_date: "2026-01-15" },
+  { id: 2, salesperson: "Alice", region: "North", amount: 40000, sale_date: "2026-02-10" },
+  { id: 3, salesperson: "Bob", region: "North", amount: 42000, sale_date: "2026-01-18" },
+  { id: 4, salesperson: "Bob", region: "North", amount: 30000, sale_date: "2026-02-22" },
+  { id: 5, salesperson: "Carol", region: "South", amount: 48000, sale_date: "2026-01-20" },
+  { id: 6, salesperson: "Carol", region: "South", amount: 40000, sale_date: "2026-02-14" },
+  { id: 7, salesperson: "Dave", region: "South", amount: 34000, sale_date: "2026-01-22" },
+  { id: 8, salesperson: "Dave", region: "South", amount: 30000, sale_date: "2026-02-28" },
+  { id: 9, salesperson: "Eve", region: "East", amount: 25000, sale_date: "2026-01-25" },
+  { id: 10, salesperson: "Eve", region: "East", amount: 20000, sale_date: "2026-02-18" },
+];
+
+function executeMockSQL(query: string, questionTitle?: string) {
+  const clean = query.replace(/--.*$/gm, '').trim();
+  if (!clean || clean.length < 5) {
+    return {
+      columns: [],
+      rows: [],
+      rowCount: 0,
+      executionTimeMs: 0,
+      status: "INFO" as const,
+      message: "Please write your SQL statement in the editor and click 'Execute SQL Query' to see live results."
+    };
+  }
+
+  const qUpper = clean.toUpperCase();
+
+  // If querying sales
+  if (qUpper.includes("SALES")) {
+    if (qUpper.includes("GROUP BY") || qUpper.includes("DENSE_RANK") || qUpper.includes("SUM(")) {
+      return {
+        columns: ["salesperson", "region", "total_sales", "rank_in_region"],
+        rows: [
+          ["Alice", "North", 95000, 1],
+          ["Bob", "North", 72000, 2],
+          ["Carol", "South", 88000, 1],
+          ["Dave", "South", 64000, 2]
+        ],
+        rowCount: 4,
+        executionTimeMs: 2.1,
+        status: "SUCCESS" as const,
+        message: "Query executed successfully against PostgreSQL 16 engine. 4 aggregated rows returned."
+      };
+    } else {
+      return {
+        columns: ["id", "salesperson", "region", "amount", "sale_date"],
+        rows: MOCK_DB_SALES.map(s => [s.id, s.salesperson, s.region, s.amount, s.sale_date]),
+        rowCount: MOCK_DB_SALES.length,
+        executionTimeMs: 1.4,
+        status: "SUCCESS" as const,
+        message: `SELECT * FROM sales executed successfully. ${MOCK_DB_SALES.length} records returned.`
+      };
+    }
+  }
+
+  // If querying employees
+  if (qUpper.includes("EMPLOYEES")) {
+    if (qUpper.includes("GROUP BY") || qUpper.includes("AVG(") || qUpper.includes("COUNT(")) {
+      return {
+        columns: ["department_id", "total_employees", "avg_salary"],
+        rows: [
+          [101, 4, "75000.00"],
+          [102, 3, "54000.00"]
+        ],
+        rowCount: 2,
+        executionTimeMs: 1.8,
+        status: "SUCCESS" as const,
+        message: "Query executed successfully. 2 department groups returned where average salary exceeds 50,000."
+      };
+    } else {
+      return {
+        columns: ["id", "name", "department_id", "salary", "hire_date"],
+        rows: MOCK_DB_EMPLOYEES.map(e => [e.id, e.name, e.department_id, e.salary, e.hire_date]),
+        rowCount: MOCK_DB_EMPLOYEES.length,
+        executionTimeMs: 1.5,
+        status: "SUCCESS" as const,
+        message: `SELECT * FROM employees executed successfully. ${MOCK_DB_EMPLOYEES.length} records returned.`
+      };
+    }
+  }
+
+  // Title fallback
+  if (questionTitle && questionTitle.toLowerCase().includes("sales")) {
+    return {
+      columns: ["salesperson", "region", "total_sales", "rank_in_region"],
+      rows: [
+        ["Alice", "North", 95000, 1],
+        ["Bob", "North", 72000, 2],
+        ["Carol", "South", 88000, 1]
+      ],
+      rowCount: 3,
+      executionTimeMs: 2.3,
+      status: "SUCCESS" as const,
+      message: "Query executed successfully against PostgreSQL 16 engine."
+    };
+  }
+
+  return {
+    columns: ["department_id", "total_employees", "avg_salary"],
+    rows: [
+      [101, 4, "75000.00"],
+      [102, 3, "54000.00"]
+    ],
+    rowCount: 2,
+    executionTimeMs: 1.9,
+    status: "SUCCESS" as const,
+    message: "Query executed successfully against PostgreSQL 16 engine."
+  };
+}
+
 export const AssessmentRound2: React.FC = () => {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
@@ -46,6 +172,16 @@ export const AssessmentRound2: React.FC = () => {
   // MCQ answers for Network Engineer theoretical questions (category: NETWORKING)
   const [mcqAnswers, setMcqAnswers] = useState<Record<string, string>>({});
   const [testOutput, setTestOutput] = useState<string>("");
+  const [sqlTableResult, setSqlTableResult] = useState<{
+    columns: string[];
+    rows: (string | number)[][];
+    rowCount: number;
+    executionTimeMs: number;
+    status: "SUCCESS" | "ERROR" | "INFO";
+    message: string;
+  } | null>(null);
+  const [activeOutputTab, setActiveOutputTab] = useState<"table" | "dataset" | "console">("table");
+  const [isOutputExpanded, setIsOutputExpanded] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number>(40 * 60); // In seconds
 
@@ -463,20 +599,18 @@ export const AssessmentRound2: React.FC = () => {
 
     try {
       if (language === "sql") {
-        const testCase = currentQ.testCases?.[0];
+        const userQuery = currentCode || "";
+        const result = executeMockSQL(userQuery, currentQ.title);
+        setSqlTableResult(result);
+        setActiveOutputTab("table");
         setTestOutput(
-          `[Mock PostgreSQL 16.2 Engine] - Executing Query...\n` +
-            `Syntax & Constraint Validation: PASSED ✓\n\n` +
-            `+--------------------+--------------------+--------------------+\n` +
-            `| department         | avg_salary         | total_staff        |\n` +
-            `+--------------------+--------------------+--------------------+\n` +
-            `| Engineering        | $94,500.00         | 14                 |\n` +
-            `| Data Science       | $89,200.00         | 8                  |\n` +
-            `| Cloud Platform     | $78,600.00         | 6                  |\n` +
-            `+--------------------+--------------------+--------------------+\n\n` +
-            `Query Result: 3 rows returned in 1.9ms\n` +
-            `Test Assertions: ALL PASSED ✓ (${testCase?.output || "Returned expected dataset"})`
+          `[PostgreSQL 16.2 Client Engine]\n` +
+          `Status: ${result.status} ✓\n` +
+          `Execution Time: ${result.executionTimeMs}ms | Rows Returned: ${result.rowCount}\n` +
+          `${result.message}\n\n` +
+          (result.columns.length > 0 ? result.columns.join(" | ") + "\n" + result.rows.map(r => r.join(" | ")).join("\n") : "")
         );
+        return;
       } else if (language === "python") {
         const testCase = currentQ.testCases?.[0];
         setTestOutput(
@@ -1078,52 +1212,234 @@ transactions = [
             />
           </div>
 
-          {/* Test Runner Output Drawer */}
-          <div className="h-44 border-t border-slate-800 bg-slate-900/90 flex flex-col">
-            <div className="px-4 py-2 border-b border-slate-800 flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-400">
-                {language === "sql"
-                  ? "SQL Query Execution Results"
-                  : language === "python"
-                  ? "Python 3 Terminal & Test Runner"
-                  : "Execution Console"}
-              </span>
-
-              {/* Specialized Run Button per language */}
+                    {/* Test Runner Output Drawer (Tabbed SQL Table Results) */}
+          <div className={`${isOutputExpanded ? "h-96" : "h-64"} border-t border-slate-800 bg-slate-900/95 flex flex-col transition-all duration-200 z-10`}>
+            <div className="px-4 py-2 border-b border-slate-800 flex items-center justify-between bg-slate-950/70 shrink-0">
               {language === "sql" ? (
-                <button
-                  onClick={runSampleTest}
-                  className="flex items-center gap-1.5 px-3.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold shadow-md shadow-amber-500/20 cursor-pointer transition-colors"
-                >
-                  <Play className="w-3 h-3 fill-current" />
-                  Execute SQL Query
-                </button>
-              ) : language === "python" ? (
-                <button
-                  onClick={runSampleTest}
-                  className="flex items-center gap-1.5 px-3.5 py-1 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold shadow-md shadow-sky-500/20 cursor-pointer transition-colors"
-                >
-                  <Play className="w-3 h-3 fill-current" />
-                  Run Python Script
-                </button>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-amber-400 flex items-center gap-1.5 mr-2">
+                    <Database className="w-3.5 h-3.5" />
+                    SQL Query Studio
+                  </span>
+                  <div className="flex items-center gap-1 bg-slate-900 p-0.5 rounded-lg border border-slate-800 text-[11px]">
+                    <button
+                      type="button"
+                      onClick={() => setActiveOutputTab("table")}
+                      className={`px-2.5 py-1 rounded-md font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                        activeOutputTab === "table"
+                          ? "bg-amber-500 text-slate-950 shadow-xs"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      <Table className="w-3 h-3" />
+                      <span>Query Output {sqlTableResult ? `(${sqlTableResult.rowCount})` : ""}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveOutputTab("dataset")}
+                      className={`px-2.5 py-1 rounded-md font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                        activeOutputTab === "dataset"
+                          ? "bg-slate-700 text-white shadow-xs"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      <Database className="w-3 h-3" />
+                      <span>Source Table ({currentQ?.title.toLowerCase().includes("sales") ? "sales" : "employees"})</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveOutputTab("console")}
+                      className={`px-2.5 py-1 rounded-md font-bold transition-all cursor-pointer ${
+                        activeOutputTab === "console"
+                          ? "bg-slate-700 text-white shadow-xs"
+                          : "text-slate-400 hover:text-white"
+                      }`}
+                    >
+                      Console Log
+                    </button>
+                  </div>
+                </div>
               ) : (
-                <button
-                  onClick={runSampleTest}
-                  className="flex items-center gap-1.5 px-3.5 py-1 rounded-md bg-[#16499c] hover:bg-[#123c80] text-white text-xs font-bold cursor-pointer transition-colors"
-                >
-                  <Play className="w-3 h-3 fill-white" />
-                  Run Code
-                </button>
+                <span className="text-xs font-semibold text-slate-400">
+                  {language === "python"
+                    ? "Python 3 Terminal & Test Runner"
+                    : "Execution Console"}
+                </span>
               )}
+
+              {/* Right: Actions */}
+              <div className="flex items-center gap-2">
+                {language === "sql" ? (
+                  <button
+                    type="button"
+                    onClick={runSampleTest}
+                    className="flex items-center gap-1.5 px-3.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold shadow-md shadow-amber-500/20 cursor-pointer transition-colors"
+                  >
+                    <Play className="w-3 h-3 fill-current" />
+                    <span>Execute SQL Query</span>
+                  </button>
+                ) : language === "python" ? (
+                  <button
+                    type="button"
+                    onClick={runSampleTest}
+                    className="flex items-center gap-1.5 px-3.5 py-1 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-bold shadow-md shadow-sky-500/20 cursor-pointer transition-colors"
+                  >
+                    <Play className="w-3 h-3 fill-current" />
+                    <span>Run Python Script</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={runSampleTest}
+                    className="flex items-center gap-1.5 px-3.5 py-1 rounded-md bg-[#16499c] hover:bg-[#123c80] text-white text-xs font-bold cursor-pointer transition-colors"
+                  >
+                    <Play className="w-3 h-3 fill-white" />
+                    <span>Run Code</span>
+                  </button>
+                )}
+
+                {/* Toggle Expand Drawer */}
+                <button
+                  type="button"
+                  onClick={() => setIsOutputExpanded(!isOutputExpanded)}
+                  className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                  title={isOutputExpanded ? "Collapse Output Window" : "Expand Output Window"}
+                >
+                  {isOutputExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
-            <div className="flex-1 p-3 overflow-y-auto font-mono text-xs text-slate-300 whitespace-pre-wrap">
-              {testOutput ||
-                (language === "sql"
-                  ? "Click 'Execute SQL Query' to run your query against the PostgreSQL database engine..."
-                  : language === "python"
-                  ? "Click 'Run Python Script' to execute your code against test cases..."
-                  : "Click 'Run Code' to execute against sample test cases...")}
-            </div>
+
+            {/* Output Drawer Body */}
+            {language === "sql" && activeOutputTab === "table" ? (
+              <div className="flex-1 overflow-auto p-3">
+                {sqlTableResult && sqlTableResult.rowCount > 0 ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs px-1">
+                      <span className="text-emerald-400 font-bold flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        {sqlTableResult.message}
+                      </span>
+                      <span className="text-slate-400 font-mono text-[11px]">
+                        PostgreSQL 16.2 • {sqlTableResult.executionTimeMs}ms • {sqlTableResult.rowCount} rows returned
+                      </span>
+                    </div>
+                    <div className="overflow-x-auto rounded-xl border border-slate-700/80 bg-slate-950">
+                      <table className="w-full text-left border-collapse text-xs">
+                        <thead>
+                          <tr className="bg-slate-800/90 text-amber-300 border-b border-slate-700 font-bold uppercase tracking-wider text-[11px]">
+                            <th className="py-2.5 px-4 w-12 text-slate-500 font-mono">#</th>
+                            {sqlTableResult.columns.map((col, idx) => (
+                              <th key={idx} className="py-2.5 px-4 font-mono font-bold text-amber-400">
+                                {col}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-800/60 font-mono">
+                          {sqlTableResult.rows.map((row, rIdx) => (
+                            <tr key={rIdx} className="hover:bg-slate-800/40 transition-colors">
+                              <td className="py-2 px-4 text-slate-600 text-[11px]">{rIdx + 1}</td>
+                              {row.map((cell, cIdx) => (
+                                <td key={cIdx} className="py-2 px-4 text-slate-200">
+                                  {cell}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="h-full flex flex-col items-center justify-center p-6 text-center text-slate-400 space-y-2">
+                    <Database className="w-8 h-8 text-amber-400/60 mb-1" />
+                    <p className="text-xs font-semibold text-slate-300">
+                      No SQL query results to display yet.
+                    </p>
+                    <p className="text-[11px] text-slate-500 max-w-md">
+                      Write your SQL statement in the editor and click the <strong className="text-amber-400">Execute SQL Query</strong> button above to run and view the live tabular output.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={runSampleTest}
+                      className="mt-2 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-amber-500 text-slate-950 text-xs font-bold hover:bg-amber-400 transition-colors cursor-pointer"
+                    >
+                      <Play className="w-3 h-3 fill-current" />
+                      <span>Execute Query Now</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : language === "sql" && activeOutputTab === "dataset" ? (
+              <div className="flex-1 overflow-auto p-3 space-y-2">
+                <div className="flex items-center justify-between text-xs px-1">
+                  <span className="text-slate-300 font-bold flex items-center gap-1.5">
+                    <Database className="w-3.5 h-3.5 text-amber-400" />
+                    Database Table: <span className="font-mono text-amber-400">{currentQ?.title.toLowerCase().includes("sales") ? "sales" : "employees"}</span>
+                  </span>
+                  <span className="text-slate-500 text-[11px] font-mono">10 records loaded in mock database</span>
+                </div>
+                <div className="overflow-x-auto rounded-xl border border-slate-700/80 bg-slate-950">
+                  {currentQ?.title.toLowerCase().includes("sales") ? (
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="bg-slate-800/90 text-amber-300 border-b border-slate-700 font-bold uppercase tracking-wider text-[11px]">
+                          <th className="py-2 px-3 text-slate-500">id</th>
+                          <th className="py-2 px-3 text-amber-400">salesperson</th>
+                          <th className="py-2 px-3 text-amber-400">region</th>
+                          <th className="py-2 px-3 text-amber-400">amount</th>
+                          <th className="py-2 px-3 text-amber-400">sale_date</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/60 font-mono text-[11px]">
+                        {MOCK_DB_SALES.map((s) => (
+                          <tr key={s.id} className="hover:bg-slate-800/40">
+                            <td className="py-1.5 px-3 text-slate-500">{s.id}</td>
+                            <td className="py-1.5 px-3 text-slate-200">{s.salesperson}</td>
+                            <td className="py-1.5 px-3 text-slate-200">{s.region}</td>
+                            <td className="py-1.5 px-3 text-amber-300">{s.amount}</td>
+                            <td className="py-1.5 px-3 text-slate-400">{s.sale_date}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="bg-slate-800/90 text-amber-300 border-b border-slate-700 font-bold uppercase tracking-wider text-[11px]">
+                          <th className="py-2 px-3 text-slate-500">id</th>
+                          <th className="py-2 px-3 text-amber-400">name</th>
+                          <th className="py-2 px-3 text-amber-400">department_id</th>
+                          <th className="py-2 px-3 text-amber-400">salary</th>
+                          <th className="py-2 px-3 text-amber-400">hire_date</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-800/60 font-mono text-[11px]">
+                        {MOCK_DB_EMPLOYEES.map((e) => (
+                          <tr key={e.id} className="hover:bg-slate-800/40">
+                            <td className="py-1.5 px-3 text-slate-500">{e.id}</td>
+                            <td className="py-1.5 px-3 text-slate-200">{e.name}</td>
+                            <td className="py-1.5 px-3 text-slate-200">{e.department_id}</td>
+                            <td className="py-1.5 px-3 text-amber-300">${e.salary.toLocaleString()}</td>
+                            <td className="py-1.5 px-3 text-slate-400">{e.hire_date}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="flex-1 p-3 overflow-y-auto font-mono text-xs text-slate-300 whitespace-pre-wrap">
+                {testOutput ||
+                  (language === "sql"
+                    ? "Click 'Execute SQL Query' to run your query against the PostgreSQL database engine..."
+                    : language === "python"
+                    ? "Click 'Run Python Script' to execute your code against test cases..."
+                    : "Click 'Run Code' to execute against sample test cases...")}
+              </div>
+            )}
           </div>
           </>
           )}
