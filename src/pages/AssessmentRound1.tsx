@@ -48,6 +48,8 @@ export const AssessmentRound1: React.FC = () => {
     "Assessment locked due to multiple malpractice violations. Administrator has been notified to review your session."
   );
   const [isDisqualified, setIsDisqualified] = useState(false);
+  const lastTabSwitchReportRef = React.useRef<number>(0);
+  const handleSubmitRef = React.useRef<() => Promise<void>>(async () => {});
 
   useEffect(() => {
     async function loadQuestions() {
@@ -70,7 +72,9 @@ export const AssessmentRound1: React.FC = () => {
           if (savedMcq) {
             try {
               setMcqAnswers(JSON.parse(savedMcq));
-            } catch {}
+            } catch {
+              // ignore draft parse error
+            }
           }
           const savedEssay = localStorage.getItem(`izeon_r1_essay_${id}`);
           if (savedEssay) {
@@ -119,9 +123,10 @@ export const AssessmentRound1: React.FC = () => {
 
         setQuestions(data.round1Questions);
         setTimeLeft((data.durationR1 || 25) * 60);
-      } catch (err: any) {
+      } catch (err) {
         console.error("Failed to load questions:", err);
-        alert(err.message || "Cannot access assessment. Returning to dashboard.");
+        const message = err instanceof Error ? err.message : "Cannot access assessment. Returning to dashboard.";
+        alert(message);
         navigate("/dashboard");
       } finally {
         setIsLoading(false);
@@ -129,6 +134,7 @@ export const AssessmentRound1: React.FC = () => {
     }
 
     loadQuestions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attemptId]);
 
   const socket = getSocket();
@@ -140,6 +146,8 @@ export const AssessmentRound1: React.FC = () => {
     const handleConnect = () => {
       socket.emit("join:attempt", effectiveAttemptId);
     };
+
+
 
     if (socket.connected) {
       socket.emit("join:attempt", effectiveAttemptId);
@@ -185,7 +193,9 @@ export const AssessmentRound1: React.FC = () => {
       socket.off("proctor:unlocked");
       socket.off("proctor:disqualified");
     };
-  }, [effectiveAttemptId]);
+
+
+  }, [effectiveAttemptId, socket]);
 
   // Fallback sync when locked to instantly detect admin unlock decision
   useEffect(() => {
@@ -193,13 +203,12 @@ export const AssessmentRound1: React.FC = () => {
 
     const interval = setInterval(async () => {
       try {
-        const res = await apiRequest<{ attempt?: any; existingAttempt?: any }>("/assessment/active");
+        const res = await apiRequest<{ attempt?: AssessmentAttempt; existingAttempt?: AssessmentAttempt }>("/assessment/active");
         const currentAttempt = res.attempt || res.existingAttempt;
         if (currentAttempt) {
           if (
             currentAttempt.status === "ROUND_1_IN_PROGRESS" ||
-            currentAttempt.status === "ROUND_2_IN_PROGRESS" ||
-            currentAttempt.status === "IN_PROGRESS"
+            currentAttempt.status === "ROUND_2_IN_PROGRESS" 
           ) {
             setIsLocked(false);
             localStorage.removeItem("izeon_locked_round1");
@@ -210,7 +219,7 @@ export const AssessmentRound1: React.FC = () => {
             setLockMessage(currentAttempt.adminRemarks || "Disqualified by administrator.");
           }
         }
-      } catch (err) {
+      } catch {
         // silent
       }
     }, 2500);
@@ -224,6 +233,11 @@ export const AssessmentRound1: React.FC = () => {
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
+        const now = Date.now();
+        if (now - lastTabSwitchReportRef.current < 2500) {
+          return;
+        }
+        lastTabSwitchReportRef.current = now;
         // Immediately mark Strike 1 and Strike 2 without waiting for any event
         setTabSwitchCount((prev) => {
           const nextCount = prev + 1;
@@ -242,21 +256,26 @@ export const AssessmentRound1: React.FC = () => {
           return nextCount;
         });
 
-        // Notify server immediately via Socket & REST API fallback
+        // Notify server: use WebSocket if connected; ONLY use REST fallback if disconnected (never both!)
+        if (socket && socket.connected) {
         socket.emit("student:tab_switch", {
           attemptId: effectiveAttemptId,
           violationType: "TAB_SWITCH",
         });
 
-        apiRequest("/assessment/report-malpractice", {
+        } else {
+          apiRequest("/assessment/report-malpractice", {
           method: "POST",
           body: JSON.stringify({
             attemptId: effectiveAttemptId,
             violationType: "TAB_SWITCH",
           }),
-        }).catch((err) => console.error("Report malpractice error:", err));
+          }).catch((err) => console.error("Report malpractice error:", err));
+        }
       }
     };
+
+
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
@@ -266,6 +285,8 @@ export const AssessmentRound1: React.FC = () => {
       e.preventDefault();
       alert("⚠️ Copying and pasting are disabled in Round 1.");
     };
+
+
 
     document.addEventListener("contextmenu", handleContextMenu);
     document.addEventListener("copy", handleCopyPaste);
@@ -277,7 +298,9 @@ export const AssessmentRound1: React.FC = () => {
       document.removeEventListener("copy", handleCopyPaste);
       document.removeEventListener("paste", handleCopyPaste);
     };
-  }, [isLocked, isDisqualified, round1Result, isSubmitting, effectiveAttemptId]);
+
+
+  }, [isLocked, isDisqualified, round1Result, isSubmitting, effectiveAttemptId, socket]);
 
   // Timer countdown
   useEffect(() => {
@@ -287,7 +310,7 @@ export const AssessmentRound1: React.FC = () => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          handleSubmit();
+          handleSubmitRef.current();
           return 0;
         }
         return prev - 1;
@@ -308,6 +331,8 @@ export const AssessmentRound1: React.FC = () => {
     });
   };
 
+
+
   const handleEssayChange = (text: string) => {
     setWrittenEssay(text);
     const id = effectiveAttemptId || activeAttemptId;
@@ -315,6 +340,8 @@ export const AssessmentRound1: React.FC = () => {
       localStorage.setItem(`izeon_r1_essay_${id}`, text);
     }
   };
+
+
 
   const handleSubmit = async () => {
     if (isSubmitting || !effectiveAttemptId) return;
@@ -349,11 +376,18 @@ export const AssessmentRound1: React.FC = () => {
         cutoff: res.cutoffRound1 ?? 12,
         message: res.message,
       });
-    } catch (err: any) {
-      alert(err.message || "Failed to submit Round 1");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to submit Round 1";
+      alert(message);
       setIsSubmitting(false);
     }
   };
+
+
+
+  useEffect(() => {
+    handleSubmitRef.current = handleSubmit;
+  });
 
   const formatTime = (secs: number) => {
     const mins = Math.floor(secs / 60);
@@ -361,10 +395,14 @@ export const AssessmentRound1: React.FC = () => {
     return `${mins.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
+
+
   const countWords = (text: string) => {
     const trimmed = text.trim();
     return trimmed ? trimmed.split(/\s+/).length : 0;
   };
+
+
 
   if (isLoading) {
     return (
@@ -615,10 +653,10 @@ export const AssessmentRound1: React.FC = () => {
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-bold text-xs transition-all shadow-md shadow-[#16499c]/20 cursor-pointer"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-bold text-xs transition-all shadow-md shadow-[#16499c]/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send className="w-3.5 h-3.5" />
-            Submit Round 1
+            {isSubmitting ? "Submitting..." : "Submit Round 1"}
           </button>
         </div>
       </div>

@@ -17,11 +17,10 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  type FilterType = "ALL" | "PYTHON" | "SQL" | "Software Developer" | "APTITUDE_VERBAL";
+  type FilterType = "ALL" | "PYTHON" | "SQL" | "Software Developer" | "Network Engineer" | "APTITUDE_VERBAL";
   const [activeFilter, setActiveFilter] = useState<FilterType>("ALL");
 
   const loadQuestions = async () => {
-    setIsLoading(true);
     try {
       const data = await apiRequest<{ questions: Question[] }>(
         `/admin/assessments/${assessment.id}/questions`
@@ -29,13 +28,31 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
       setQuestions(data.questions);
     } catch (err) {
       console.error("Failed to load questions:", err);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    loadQuestions();
+    let isMounted = true;
+    async function fetchQuestions() {
+      try {
+        const data = await apiRequest<{ questions: Question[] }>(
+          `/admin/assessments/${assessment.id}/questions`
+        );
+        if (isMounted) {
+          setQuestions(data.questions);
+        }
+      } catch (err) {
+        console.error("Failed to load questions:", err);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+    fetchQuestions();
+    return () => {
+      isMounted = false;
+    };
   }, [assessment.id]);
 
   const handleDelete = async (questionId: string) => {
@@ -45,9 +62,10 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
       await apiRequest(`/admin/questions/${questionId}`, {
         method: "DELETE",
       });
-      loadQuestions();
-    } catch (err: any) {
-      alert(err.message || "Failed to delete question");
+      await loadQuestions();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to delete question";
+      alert(message);
     } finally {
       setDeletingId(null);
     }
@@ -60,6 +78,9 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
     if (activeFilter === "Software Developer") {
       return q.targetRole === "Software Developer" || (q.round === "ROUND_2_CODING" && q.category === "CODING");
     }
+    if (activeFilter === "Network Engineer") {
+      return q.targetRole === "Network Engineer";
+    }
     if (activeFilter === "APTITUDE_VERBAL") {
       return q.category === "APTITUDE" || q.category === "VERBAL" || q.category === "WRITTEN_PROMPT";
     }
@@ -71,6 +92,7 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
   const dsaQuestions = filteredQuestions.filter(
     (q) => q.category === "CODING" || q.targetRole === "Software Developer"
   );
+  const networkQuestions = filteredQuestions.filter((q) => q.targetRole === "Network Engineer");
   const generalQuestions = filteredQuestions.filter(
     (q) => q.category === "APTITUDE" || q.category === "VERBAL" || q.category === "WRITTEN_PROMPT"
   );
@@ -87,6 +109,13 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
       return (
         <span className="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 font-bold text-[10px] border border-indigo-200">
           Software Developer
+        </span>
+      );
+    }
+    if (role === "Network Engineer") {
+      return (
+        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px] border border-emerald-200">
+          Network Engineer
         </span>
       );
     }
@@ -167,6 +196,7 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
               { id: "PYTHON", label: " Python Domain" },
               { id: "SQL", label: "SQL Domain" },
               { id: "Software Developer", label: " Software Dev (DSA)" },
+              { id: "Network Engineer", label: "🌐 Network Engineer" },
               { id: "APTITUDE_VERBAL", label: " Aptitude & Verbal" },
             ] as const
           ).map((item) => (
@@ -327,6 +357,23 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
                         </div>
                         <div className="space-y-3">
                           {dsaQuestions.map((q, idx) => renderCard(q, idx, "bg-indigo-600"))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* SECTION: NETWORK ENGINEER TRACK */}
+                    {networkQuestions.length > 0 && (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 border-b border-emerald-200 pb-2">
+                          <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px] uppercase border border-emerald-200">
+                            🌐 Network Engineering ({networkQuestions.length} Questions)
+                          </span>
+                          <span className="text-[11px] text-slate-400">
+                            Protocols, Routing/Switching & Network Automation
+                          </span>
+                        </div>
+                        <div className="space-y-3">
+                          {networkQuestions.map((q, idx) => renderCard(q, idx, "bg-emerald-600"))}
                         </div>
                       </div>
                     )}

@@ -43,6 +43,8 @@ export const AssessmentRound2: React.FC = () => {
     isDataAnalyst ? "sql" : "python"
   );
   const [codeAnswers, setCodeAnswers] = useState<Record<string, string>>({});
+  // MCQ answers for Network Engineer theoretical questions (category: NETWORKING)
+  const [mcqAnswers, setMcqAnswers] = useState<Record<string, string>>({});
   const [testOutput, setTestOutput] = useState<string>("");
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number>(40 * 60); // In seconds
@@ -59,6 +61,7 @@ export const AssessmentRound2: React.FC = () => {
   );
   const [isCompleted, setIsCompleted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const lastTabSwitchReportRef = React.useRef<number>(0);
 
   const socket = getSocket();
 
@@ -353,6 +356,11 @@ export const AssessmentRound2: React.FC = () => {
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
+        const now = Date.now();
+        if (now - lastTabSwitchReportRef.current < 2500) {
+          return;
+        }
+        lastTabSwitchReportRef.current = now;
         // Immediately mark Strike 1 and Strike 2 without waiting for any event
         setTabSwitchCount((prev) => {
           const nextCount = prev + 1;
@@ -371,19 +379,22 @@ export const AssessmentRound2: React.FC = () => {
           return nextCount;
         });
 
-        // Notify server immediately via Socket & REST API fallback
+        // Notify server: use WebSocket if connected; ONLY use REST fallback if disconnected (never both!)
+        if (socket && socket.connected) {
         socket.emit("student:tab_switch", {
           attemptId: effectiveAttemptId,
           violationType: "TAB_SWITCH",
         });
 
-        apiRequest("/assessment/report-malpractice", {
+        } else {
+          apiRequest("/assessment/report-malpractice", {
           method: "POST",
           body: JSON.stringify({
             attemptId: effectiveAttemptId,
             violationType: "TAB_SWITCH",
           }),
-        }).catch((err) => console.error("Report malpractice error:", err));
+          }).catch((err) => console.error("Report malpractice error:", err));
+        }
       }
     };
 
@@ -805,7 +816,7 @@ export const AssessmentRound2: React.FC = () => {
               <div className="pt-4 border-t border-slate-800 flex flex-wrap gap-2">
                 {questions.map((q, idx) => (
                   <button
-                    key={q.id}
+                    key={q.id} 
                     onClick={() => {
                       setActiveIdx(idx);
                       if (isDataAnalyst) {
@@ -837,13 +848,55 @@ export const AssessmentRound2: React.FC = () => {
           )}
         </div>
 
-        {/* Right Pane: Code Editor + Test Console */}
+        {/* Right Pane: MCQ (NE) or Code Editor */}
         <div className="w-3/5 flex flex-col overflow-hidden relative bg-slate-950">
           {/* WEBCAM PROCTOR TILE FLOATING IN UPPER RIGHT */}
           <div className="absolute top-14 right-4 z-20 w-36 h-28 shadow-2xl">
             <CameraTile stream={cameraStream} />
           </div>
 
+          {/* NE NETWORKING MCQ PANEL */}
+          {currentQ?.category === "NETWORKING" || (Array.isArray(currentQ?.options) && currentQ.options.length > 0) ? (
+            <div className="flex-1 overflow-y-auto p-6 space-y-5 mt-4">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">🌐 Network Engineer — Theoretical MCQ</span>
+              </div>
+              <div className="text-sm text-slate-300 font-semibold bg-slate-900/80 p-5 rounded-2xl border border-slate-700 leading-relaxed whitespace-pre-wrap">
+                {currentQ.content}
+              </div>
+              <div className="space-y-3">
+                {Array.isArray(currentQ.options) && currentQ.options.map((opt: string, oi: number) => {
+                  const selected = mcqAnswers[currentQ.id] === opt;
+                  return (
+                    <button
+                      key={oi}
+                      onClick={() => setMcqAnswers(prev => ({ ...prev, [currentQ.id]: opt }))}
+                      className={`w-full text-left px-5 py-4 rounded-2xl border text-sm font-medium transition-all cursor-pointer flex items-center gap-3 ${
+                        selected
+                          ? "bg-emerald-500/20 border-emerald-400 text-emerald-200 shadow-md shadow-emerald-500/10"
+                          : "bg-slate-900 border-slate-700 text-slate-300 hover:border-emerald-500/40 hover:bg-slate-800"
+                      }`}
+                    >
+                      <span className={`inline-flex w-7 h-7 rounded-full text-xs font-bold items-center justify-center shrink-0 ${
+                        selected ? "bg-emerald-500 text-slate-950" : "bg-slate-700 text-slate-300"
+                      }`}>
+                        {["A","B","C","D"][oi]}
+                      </span>
+                      {opt}
+                    </button>
+                  );
+                })}
+              </div>
+              {mcqAnswers[currentQ.id] && (
+                <div className="flex items-center gap-2 text-xs text-emerald-400 font-semibold pt-2">
+                  <CheckCircle2 className="w-4 h-4" />
+                  Answer recorded: <span className="text-emerald-300">{mcqAnswers[currentQ.id]}</span>
+                </div>
+              )}
+            </div>
+          ) : (
+          <>
           {/* DEDICATED EDITOR HEADER TOOLBAR */}
           <div className="px-4 py-2.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between shrink-0">
             {/* Editor Dialect Indicator */}
@@ -1076,6 +1129,8 @@ transactions = [
                   : "Click 'Run Code' to execute against sample test cases...")}
             </div>
           </div>
+          </>
+          )}
         </div>
       </div>
     </div>

@@ -16,6 +16,27 @@ export const MalpracticeAlertModal: React.FC<MalpracticeAlertModalProps> = ({
   onClose,
 }) => {
   const [remarks, setRemarks] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  const handleGive = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await onGiveChance(alert.attemptId, remarks);
+    } catch {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleRejectAction = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await onReject(alert.attemptId, remarks);
+    } catch {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
@@ -34,7 +55,8 @@ export const MalpracticeAlertModal: React.FC<MalpracticeAlertModalProps> = ({
           {onClose && (
             <button
               onClick={onClose}
-              className="p-1 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+              disabled={isSubmitting}
+              className="p-1 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors disabled:opacity-50"
               title="Close modal"
             >
               ✕
@@ -88,29 +110,32 @@ export const MalpracticeAlertModal: React.FC<MalpracticeAlertModalProps> = ({
             </label>
             <textarea
               value={remarks}
+              disabled={isSubmitting}
               onChange={(e) => setRemarks(e.target.value)}
               placeholder="e.g., Candidate explained accidental keystroke; giving 1 final chance."
               rows={2}
-              className="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full text-xs p-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-slate-100"
             />
           </div>
 
           {/* Decision Buttons */}
           <div className="pt-2 flex flex-col sm:flex-row gap-3">
             <button
-              onClick={() => onGiveChance(alert.attemptId, remarks)}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-semibold text-xs transition-colors shadow-md shadow-[#16499c]/20 cursor-pointer"
+              onClick={handleGive}
+              disabled={isSubmitting}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-xs transition-colors shadow-md shadow-[#16499c]/20 cursor-pointer"
             >
               <CheckCircle2 className="w-4 h-4" />
-              Give Another Chance
+              {isSubmitting ? "Updating..." : "Give Another Chance"}
             </button>
 
             <button
-              onClick={() => onReject(alert.attemptId, remarks)}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs transition-colors shadow-md shadow-rose-600/20 cursor-pointer"
+              onClick={handleRejectAction}
+              disabled={isSubmitting}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-xs transition-colors shadow-md shadow-rose-600/20 cursor-pointer"
             >
               <XCircle className="w-4 h-4" />
-              Reject & Disqualify
+              {isSubmitting ? "Updating..." : "Reject & Disqualify"}
             </button>
           </div>
         </div>

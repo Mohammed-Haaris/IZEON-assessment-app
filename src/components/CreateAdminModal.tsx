@@ -20,6 +20,7 @@ export const CreateAdminModal: React.FC<CreateAdminModalProps> = ({ onClose, onS
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setErrorMessage(null);
 
     if (!name.trim() || !email.trim() || !password) {

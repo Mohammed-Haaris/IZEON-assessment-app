@@ -36,6 +36,24 @@ import {
   Settings,
 } from "lucide-react";
 
+interface MalpracticeLogItem {
+  id: string;
+  attemptId: string;
+  userId?: string;
+  violationType: string;
+  violationCount: number;
+  adminDecision?: string;
+  adminRemarks?: string;
+  timestamp: string | Date;
+  attempt?: {
+    status?: string;
+  };
+  user?: {
+    name?: string;
+    email?: string;
+  };
+}
+
 export const AdminDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"approvals" | "proctor" | "exams" | "results" | "admins">("approvals");
 
@@ -51,7 +69,7 @@ export const AdminDashboard: React.FC = () => {
   // Live Proctor & Malpractice Alerts
   const [activeAlert, setActiveAlert] = useState<MalpracticeAlert | null>(null);
   const [dismissedAlerts, setDismissedAlerts] = useState<string[]>([]);
-  const [malpracticeLogs, setMalpracticeLogs] = useState<any[]>([]);
+  const [malpracticeLogs, setMalpracticeLogs] = useState<MalpracticeLogItem[]>([]);
 
   // Assessments & Question Modals
   const [assessments, setAssessments] = useState<Assessment[]>([]);
@@ -64,11 +82,67 @@ export const AdminDashboard: React.FC = () => {
   // Results & Candidate Inspection Modal
   const [selectedAttemptForDetails, setSelectedAttemptForDetails] = useState<AssessmentAttempt | null>(null);
   const [resultsSearchQuery, setResultsSearchQuery] = useState("");
-  const [resultsRoleFilter, setResultsRoleFilter] = useState<"ALL" | "Software Developer" | "Data Analyst">("ALL");
+  const [resultsRoleFilter, setResultsRoleFilter] = useState<"ALL" | "Software Developer" | "Data Analyst" | "Network Engineer">("ALL");
   const [resultsStatusFilter, setResultsStatusFilter] = useState<string>("ALL");
 
   // Socket
   const socket = getSocket();
+
+  const loadStudents = async () => {
+    try {
+      const data = await apiRequest<{ students: User[] }>("/admin/students");
+      setStudents(data.students);
+    } catch (err) {
+      console.error("Load students error:", err);
+    }
+  };
+
+  const loadMalpracticeLogs = async () => {
+    try {
+      const data = await apiRequest<{ logs: MalpracticeLogItem[] }>("/admin/malpractice-logs");
+      const seen = new Set<string>();
+      const dedupedLogs = (data.logs || []).filter((log: MalpracticeLogItem) => {
+        const key = `${log.attemptId}_${log.violationCount}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+      setMalpracticeLogs(dedupedLogs);
+      return dedupedLogs;
+    } catch (err) {
+      console.error("Load logs error:", err);
+      return [];
+    }
+  };
+
+  const loadAssessments = async () => {
+    try {
+      const data = await apiRequest<{ assessments: Assessment[] }>("/admin/assessments");
+      setAssessments(data.assessments);
+    } catch (err) {
+      console.error("Load assessments error:", err);
+    }
+  };
+
+  const loadAttempts = async () => {
+    try {
+      const data = await apiRequest<{ attempts: AssessmentAttempt[] }>("/admin/attempts");
+      setAttempts(data.attempts);
+      return data.attempts;
+    } catch (err) {
+      console.error("Load attempts error:", err);
+      return [];
+    }
+  };
+
+  const loadAdmins = async () => {
+    try {
+      const data = await apiRequest<{ admins: User[] }>("/admin/admins");
+      setAdmins(data.admins);
+    } catch (err) {
+      console.error("Load admins error:", err);
+    }
+  };
 
   useEffect(() => {
     const handleConnect = () => {
@@ -98,56 +172,7 @@ export const AdminDashboard: React.FC = () => {
       socket.off("admin:malpractice_alert");
       socket.off("admin:action_resolved");
     };
-  }, []);
-
-  const loadStudents = async () => {
-    try {
-      const data = await apiRequest<{ students: User[] }>("/admin/students");
-      setStudents(data.students);
-    } catch (err) {
-      console.error("Load students error:", err);
-    }
-  };
-
-  const loadMalpracticeLogs = async () => {
-    try {
-      const data = await apiRequest<{ logs: any[] }>("/admin/malpractice-logs");
-      setMalpracticeLogs(data.logs);
-      return data.logs;
-    } catch (err) {
-      console.error("Load logs error:", err);
-      return [];
-    }
-  };
-
-  const loadAssessments = async () => {
-    try {
-      const data = await apiRequest<{ assessments: Assessment[] }>("/admin/assessments");
-      setAssessments(data.assessments);
-    } catch (err) {
-      console.error("Load assessments error:", err);
-    }
-  };
-
-  const loadAttempts = async () => {
-    try {
-      const data = await apiRequest<{ attempts: any[] }>("/admin/attempts");
-      setAttempts(data.attempts);
-      return data.attempts;
-    } catch (err) {
-      console.error("Load attempts error:", err);
-      return [];
-    }
-  };
-
-  const loadAdmins = async () => {
-    try {
-      const data = await apiRequest<{ admins: User[] }>("/admin/admins");
-      setAdmins(data.admins);
-    } catch (err) {
-      console.error("Load admins error:", err);
-    }
-  };
+  }, [socket]);
 
   useEffect(() => {
     async function loadAllInitialData() {
@@ -159,7 +184,7 @@ export const AdminDashboard: React.FC = () => {
       // Auto-popup if candidate is locked and admin just loaded dashboard
       if (atts && logs) {
         const lockedAttempt = atts.find(
-          (a: any) => a.status === "MALPRACTICE_LOCKED" && !dismissedAlerts.includes(a.id)
+          (a: AssessmentAttempt) => a.status === "MALPRACTICE_LOCKED" && !dismissedAlerts.includes(a.id)
         );
         if (lockedAttempt && lockedAttempt.user) {
           setActiveAlert({
@@ -176,6 +201,7 @@ export const AdminDashboard: React.FC = () => {
       }
     }
     loadAllInitialData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Permanently delete user from entire database
@@ -188,8 +214,10 @@ export const AdminDashboard: React.FC = () => {
     try {
       await apiRequest(`/admin/users/${userId}`, { method: "DELETE" });
       await Promise.all([loadStudents(), loadAttempts(), loadMalpracticeLogs(), loadAdmins()]);
-    } catch (err: any) {
-      alert(err.message || "Failed to delete user from database");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to delete user from database";
+      alert(message);
+
     }
   };
 
@@ -203,28 +231,40 @@ export const AdminDashboard: React.FC = () => {
     try {
       await apiRequest(`/admin/attempts/${attemptId}`, { method: "DELETE" });
       await Promise.all([loadAttempts(), loadMalpracticeLogs()]);
-    } catch (err: any) {
-      alert(err.message || "Failed to delete attempt");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to delete attempt";
+      alert(message);
+
     }
   };
 
   // Student approval handler
   const handleUpdateStudentStatus = async (id: string, status: "APPROVED" | "REJECTED") => {
+    if (updatingStudentId === id) return;
+    setUpdatingStudentId(id);
     try {
       await apiRequest(`/admin/students/${id}/status`, {
         method: "PATCH",
         body: JSON.stringify({ status }),
       });
       loadStudents();
-    } catch (err: any) {
-      alert(err.message || "Failed to update status");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to update status";
+      alert(message);
+
+    } finally {
+      setUpdatingStudentId(null);
     }
   };
 
   const [processingLogId, setProcessingLogId] = useState<string | null>(null);
+  const [processingAttemptId, setProcessingAttemptId] = useState<string | null>(null);
+  const [updatingStudentId, setUpdatingStudentId] = useState<string | null>(null);
 
   // Malpractice decision handlers
   const handleGiveChance = async (attemptId: string, remarks: string = "Admin granted candidate another chance", logId?: string) => {
+    if (processingAttemptId === attemptId || (logId && processingLogId === logId)) return;
+    setProcessingAttemptId(attemptId);
     if (logId) {
       setProcessingLogId(logId);
       setMalpracticeLogs((prev) =>
@@ -243,18 +283,24 @@ export const AdminDashboard: React.FC = () => {
           body: JSON.stringify({ remarks }),
         });
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Give chance REST error:", err);
-      alert(err.message || "Failed to give chance");
+      const message = err instanceof Error ? err.message : "Failed to give chance";
+      alert(message);
+      console.error("Give chance REST error:", err);
+
     }
     socket.emit("admin:give_chance", { attemptId, remarks, logId });
     setActiveAlert(null);
     setDismissedAlerts((prev) => [...prev, attemptId]);
     await Promise.all([loadMalpracticeLogs(), loadAttempts()]);
     setProcessingLogId(null);
+    setProcessingAttemptId(null);
   };
 
   const handleRejectCandidate = async (attemptId: string, remarks: string = "Disqualified for repeated tab-switching malpractice", logId?: string) => {
+    if (processingAttemptId === attemptId || (logId && processingLogId === logId)) return;
+    setProcessingAttemptId(attemptId);
     if (logId) {
       setProcessingLogId(logId);
       setMalpracticeLogs((prev) =>
@@ -273,15 +319,19 @@ export const AdminDashboard: React.FC = () => {
           body: JSON.stringify({ remarks }),
         });
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("Reject candidate REST error:", err);
-      alert(err.message || "Failed to reject candidate");
+      const message = err instanceof Error ? err.message : "Failed to reject candidate";
+      alert(message);
+      console.error("Reject candidate REST error:", err);
+
     }
     socket.emit("admin:reject_student", { attemptId, remarks, logId });
     setActiveAlert(null);
     setDismissedAlerts((prev) => [...prev, attemptId]);
     await Promise.all([loadMalpracticeLogs(), loadAttempts()]);
     setProcessingLogId(null);
+    setProcessingAttemptId(null);
   };
 
   const filteredStudents = students.filter((s) => {
@@ -304,8 +354,8 @@ export const AdminDashboard: React.FC = () => {
       {activeAlert && (
         <MalpracticeAlertModal
           alert={activeAlert}
-          onGiveChance={handleGiveChance}
-          onReject={handleRejectCandidate}
+          onGiveChance={(attemptId, remarks) => handleGiveChance(attemptId, remarks, activeAlert.logId)}
+          onReject={(attemptId, remarks) => handleRejectCandidate(attemptId, remarks, activeAlert.logId)}
           onClose={() => {
             if (activeAlert) {
               setDismissedAlerts((prev) => [...prev, activeAlert.attemptId]);
@@ -471,17 +521,19 @@ export const AdminDashboard: React.FC = () => {
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => handleGiveChance(attempt.id, "Admin authorized candidate to resume assessment")}
-                      className="px-4 py-2 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-extrabold text-xs shadow-sm shadow-[#16499c]/20 transition-all cursor-pointer flex items-center gap-1.5"
+                      disabled={processingAttemptId === attempt.id}
+                      className="px-4 py-2 rounded-xl bg-[#16499c] hover:bg-[#123c80] disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold text-xs shadow-sm shadow-[#16499c]/20 transition-all cursor-pointer flex items-center gap-1.5"
                     >
                       <CheckCircle2 className="w-4 h-4" />
-                      Give Another Chance
+                      {processingAttemptId === attempt.id ? "Updating..." : "Give Another Chance"}
                     </button>
                     <button
                       onClick={() => handleRejectCandidate(attempt.id, "Candidate disqualified by admin")}
-                      className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-sm shadow-rose-600/20 transition-all cursor-pointer flex items-center gap-1.5"
+                      disabled={processingAttemptId === attempt.id}
+                      className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold text-xs shadow-sm shadow-rose-600/20 transition-all cursor-pointer flex items-center gap-1.5"
                     >
                       <XCircle className="w-4 h-4" />
-                      Disqualify Candidate
+                      {processingAttemptId === attempt.id ? "Updating..." : "Disqualify Candidate"}
                     </button>
                   </div>
                 </div>
@@ -504,7 +556,7 @@ export const AdminDashboard: React.FC = () => {
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id as "approvals" | "proctor" | "exams" | "results" | "admins")}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${isActive
                 ? "bg-[#16499c] text-white shadow-xs"
                 : "text-slate-600 hover:text-[#16499c] hover:bg-[#eff5ff]"
@@ -616,7 +668,7 @@ export const AdminDashboard: React.FC = () => {
                         <td className="py-3.5 px-6 whitespace-nowrap">
                           {student.position ? (
                             <span className="font-semibold text-slate-800 text-xs">
-                              {student.position === "Data Analyst" ? " Data Analyst" : " Software Dev"}
+                              {student.position === "Data Analyst" ? "📊 Data Analyst" : student.position === "Network Engineer" ? "🌐 Network Engineer" : "💻 Software Dev"}
                             </span>
                           ) : (
                             <span className="text-slate-400">—</span>
@@ -1077,11 +1129,12 @@ export const AdminDashboard: React.FC = () => {
                 <div className="w-52">
                   <CustomSelect
                     value={resultsRoleFilter}
-                    onChange={(val) => setResultsRoleFilter(val as any)}
+                    onChange={(val) => setResultsRoleFilter(val as "ALL" | "Software Developer" | "Data Analyst" | "Network Engineer")}
                     options={[
                       { label: "All Tracks & Roles", value: "ALL" },
                       { label: "Software Developer", value: "Software Developer", badge: "Core Dev" },
                       { label: "Data Analyst", value: "Data Analyst", badge: "Python & SQL" },
+                      { label: "Network Engineer", value: "Network Engineer", badge: "Networks & Security" },
                     ]}
                     placeholder="Filter by Track"
                   />
@@ -1213,6 +1266,10 @@ export const AdminDashboard: React.FC = () => {
                                   <>
 
                                     <span>Data Analyst</span>
+                                  </>
+                                ) : att.user?.position === "Network Engineer" ? (
+                                  <>
+                                    <span>Network Engineer</span>
                                   </>
                                 ) : (
                                   <>

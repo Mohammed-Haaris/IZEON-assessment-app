@@ -20,7 +20,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
   const [assessmentId, setAssessmentId] = useState<string>(
     selectedAssessmentId || (assessments[0]?.id ?? "")
   );
-  const [targetRole, setTargetRole] = useState<"ALL" | "Software Developer" | "Data Analyst">("ALL");
+  const [targetRole, setTargetRole] = useState<"ALL" | "Software Developer" | "Data Analyst" | "Network Engineer">("ALL");
   const [round, setRound] = useState<"ROUND_1_APTITUDE_VERBAL_WRITTEN" | "ROUND_2_CODING">(
     "ROUND_1_APTITUDE_VERBAL_WRITTEN"
   );
@@ -72,7 +72,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
     }
   };
 
-  const handleRoleChange = (newRole: "ALL" | "Software Developer" | "Data Analyst") => {
+  const handleRoleChange = (newRole: "ALL" | "Software Developer" | "Data Analyst" | "Network Engineer") => {
     setTargetRole(newRole);
     if (newRole === "Data Analyst") {
       if (round === "ROUND_2_CODING") {
@@ -80,6 +80,13 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
         setCodeLanguageTab("sql");
       } else {
         setCategory("PYTHON");
+      }
+    } else if (newRole === "Network Engineer") {
+      if (round === "ROUND_2_CODING") {
+        setCategory("PYTHON");
+        setCodeLanguageTab("python");
+      } else {
+        setCategory("APTITUDE");
       }
     }
   };
@@ -92,6 +99,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (!assessmentId) {
       setError("Please select an assessment.");
       return;
@@ -117,7 +125,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
     setError("");
 
     try {
-      const payload: any = {
+      const payload: Record<string, unknown> = {
         title,
         content,
         category,
@@ -155,8 +163,9 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
 
       onSuccess();
       onClose();
-    } catch (err: any) {
-      setError(err.message || "Failed to add question.");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to add question.";
+      setError(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -187,6 +196,11 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
       label: "Data Analyst Track (Python & SQL)",
       description: "Python Data Analysis, Pandas & SQL Relational Queries",
     },
+    {
+      value: "Network Engineer",
+      label: "Network Engineer Track",
+      description: "Protocols, Routing/Switching, Network Automation & Diagnostics",
+    },
   ];
 
   // Round options for custom dropdown
@@ -216,7 +230,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
       : [
           { value: "CODING", label: "Coding Problem (Software Dev Track)" },
           { value: "SQL", label: "SQL Query Problem (Data Analyst Track)" },
-          { value: "PYTHON", label: "Python Scripting Problem (Data Analyst Track)" },
+          { value: "PYTHON", label: "Python Scripting Problem (Data Analyst & Network Track)" },
         ];
 
   return (
@@ -278,7 +292,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
               </label>
               <CustomSelect
                 value={targetRole}
-                onChange={(val) => handleRoleChange(val as any)}
+                onChange={(val) => handleRoleChange(val as "ALL" | "Software Developer" | "Data Analyst" | "Network Engineer")}
                 options={trackOptions}
               />
             </div>
@@ -290,7 +304,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
               </label>
               <CustomSelect
                 value={round}
-                onChange={(val) => handleRoundChange(val as any)}
+                onChange={(val) => handleRoundChange(val as "ROUND_1_APTITUDE_VERBAL_WRITTEN" | "ROUND_2_CODING")}
                 options={roundOptions}
               />
             </div>
@@ -303,7 +317,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
               </label>
               <CustomSelect
                 value={category}
-                onChange={(val) => setCategory(val as any)}
+                onChange={(val) => setCategory(val as QuestionCategory)}
                 options={categoryOptions}
               />
             </div>

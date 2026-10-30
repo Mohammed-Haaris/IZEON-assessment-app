@@ -7,7 +7,8 @@ export type QuestionCategory =
   | "WRITTEN_PROMPT"
   | "CODING"
   | "SQL"
-  | "PYTHON";
+  | "PYTHON"
+  | "NETWORKING";
 export type AttemptStatus =
   | "NOT_STARTED"
   | "ROUND_1_IN_PROGRESS"
@@ -67,6 +68,7 @@ export interface Assessment {
 }
 
 export interface AssessmentAttempt {
+  adminRemarks: string;
   id: string;
   userId: string;
   assessmentId: string;

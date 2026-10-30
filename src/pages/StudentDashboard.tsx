@@ -22,7 +22,7 @@ export const StudentDashboard: React.FC = () => {
 
   const [assessment, setAssessment] = useState<Assessment | null>(null);
   const [existingAttempt, setExistingAttempt] = useState<AssessmentAttempt | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => user?.status !== "REJECTED");
   const [isStarting, setIsStarting] = useState(false);
   const [error, setError] = useState("");
 
@@ -40,18 +40,48 @@ export const StudentDashboard: React.FC = () => {
       }>("/assessment/active");
       setAssessment(data.assessment);
       setExistingAttempt(data.existingAttempt);
-    } catch (err: any) {
-      setError(err.message || "Failed to load active assessment");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to load active assessment";
+      setError(message);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    loadAssessment();
+    if (user?.status === "REJECTED") return;
+    let isMounted = true;
+
+    async function fetchActive() {
+      try {
+        const data = await apiRequest<{
+          assessment: Assessment;
+          existingAttempt: AssessmentAttempt | null;
+        }>("/assessment/active");
+        if (isMounted) {
+          setAssessment(data.assessment);
+          setExistingAttempt(data.existingAttempt);
+        }
+      } catch (err) {
+        if (isMounted) {
+          const message = err instanceof Error ? err.message : "Failed to load active assessment";
+          setError(message);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchActive();
+    return () => {
+      isMounted = false;
+    };
   }, [user?.status]);
 
   const handleStartAssessment = async () => {
+    if (isStarting) return;
     if (!assessment) return;
     if (existingAttempt?.status === "COMPLETED" || existingAttempt?.status === "DISQUALIFIED") {
       setError("You have already completed this assessment. Retakes or resuming are not permitted.");
@@ -84,8 +114,9 @@ export const StudentDashboard: React.FC = () => {
       } else {
         navigate(`/assessment/round1?attemptId=${data.attempt.id}`);
       }
-    } catch (err: any) {
-      setError(err.message || "Failed to start assessment");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to start assessment";
+      setError(message);
       setIsStarting(false);
     }
   };
@@ -105,7 +136,7 @@ export const StudentDashboard: React.FC = () => {
               Welcome, <span className="text-[#16499c]">{user.name}</span>
             </h1>
             <p className="text-sm text-slate-600 mt-1 font-medium">
-              {user.college ? `${user.college} • ` : ""}Candidate Assessment Examination Portal
+              {user.college ? `${user.college} • ` : ""}{user.position ? `${user.position} Track • ` : ""}Candidate Assessment Examination Portal
             </p>
           </div>
         </div>
@@ -202,10 +233,14 @@ export const StudentDashboard: React.FC = () => {
                     <button
                       onClick={handleStartAssessment}
                       disabled={isStarting}
-                      className="flex items-center gap-2.5 px-8 py-4 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-bold text-base transition-all shadow-lg shadow-[#16499c]/25 cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
+                      className="flex items-center gap-2.5 px-8 py-4 rounded-xl bg-[#16499c] hover:bg-[#123c80] disabled:opacity-50 text-white font-bold text-base transition-all shadow-lg shadow-[#16499c]/25 cursor-pointer transform hover:-translate-y-0.5 active:translate-y-0"
                     >
                       <Play className="w-5 h-5 fill-white" />
-                      {existingAttempt ? "Resume Assessment" : "Start Assessment Now"}
+                      {isStarting
+                        ? "Opening Session..."
+                        : existingAttempt
+                        ? "Resume Assessment"
+                        : "Start Assessment Now"}
                     </button>
                   )}
                 </div>
@@ -290,7 +325,7 @@ export const StudentDashboard: React.FC = () => {
                     </li>
                     <li className="flex items-center gap-2.5">
                       <ShieldCheck className="w-4 h-4 text-[#16499c] shrink-0" />
-                      <span><strong>Write & Run Code:</strong> Python for Developers or SQL for Data Analysts</span>
+                      <span><strong>Write & Run Code:</strong> Python/JS for Developers, SQL for Analysts, or Automation for Network Engineers</span>
                     </li>
                     <li className="flex items-center gap-2.5 text-rose-600 font-medium">
                       <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
@@ -310,3 +345,4 @@ export const StudentDashboard: React.FC = () => {
     </div>
   );
 };
+ 

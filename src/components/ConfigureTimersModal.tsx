@@ -47,6 +47,7 @@ export const ConfigureTimersModal: React.FC<ConfigureTimersModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setErrorMessage(null);
 
     if (durationR1 < 1 || durationR2 < 1) {
