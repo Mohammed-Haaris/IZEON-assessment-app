@@ -600,9 +600,7 @@ export const AssessmentRound1: React.FC = () => {
       {(cameraStream) => (
         <div className="max-w-6xl mx-auto px-4 py-6 space-y-6 relative">
           {/* WEBCAM PROCTOR TILE FLOATING IN UPPER RIGHT (Identical to Round 2) */}
-          <div className="fixed top-20 right-6 z-30 w-36 h-28 shadow-2xl">
-            <CameraTile stream={cameraStream} />
-          </div>
+          <CameraTile stream={cameraStream} />
 
           {/* WARNING POPUP (Strike 1) */}
           {warningModal && (

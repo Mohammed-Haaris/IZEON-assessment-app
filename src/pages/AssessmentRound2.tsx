@@ -850,10 +850,6 @@ export const AssessmentRound2: React.FC = () => {
 
         {/* Right Pane: MCQ (NE) or Code Editor */}
         <div className="w-3/5 flex flex-col overflow-hidden relative bg-slate-950">
-          {/* WEBCAM PROCTOR TILE FLOATING IN UPPER RIGHT */}
-          <div className="absolute top-14 right-4 z-20 w-36 h-28 shadow-2xl">
-            <CameraTile stream={cameraStream} />
-          </div>
 
           {/* NE NETWORKING MCQ PANEL */}
           {currentQ?.category === "NETWORKING" || (Array.isArray(currentQ?.options) && currentQ.options.length > 0) ? (
@@ -1133,6 +1129,8 @@ transactions = [
           )}
         </div>
       </div>
+    {/* FLOATING WEBCAM PROCTOR TILE (Draggable, Minimizable, Never covers questions) */}
+      <CameraTile stream={cameraStream} />
     </div>
       )}
     </CameraGuard>
