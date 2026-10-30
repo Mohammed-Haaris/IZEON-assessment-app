@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { apiRequest } from "../services/api";
 import type { Assessment, Question } from "../types";
-import { X, Trash2, Plus, CheckCircle2 } from "lucide-react";
+import { X, Trash2, Plus, CheckCircle2, Edit2 } from "lucide-react";
+import { EditQuestionModal } from "./EditQuestionModal";
 
 interface QuestionListModalProps {
   assessment: Assessment;
@@ -17,6 +18,7 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
   const [questions, setQuestions] = useState<Question[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   type FilterType = "ALL" | "PYTHON" | "SQL" | "Software Developer" | "Network Engineer" | "APTITUDE_VERBAL";
   const [activeFilter, setActiveFilter] = useState<FilterType>("ALL");
 
@@ -251,17 +253,29 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-indigo-600 text-xs">
-                          {q.points} Pts
-                        </span>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => setEditingQuestion(q)}
+                          className="flex items-center gap-1 font-bold text-indigo-700 text-xs bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded-lg transition-colors cursor-pointer"
+                          title="Click to edit marks / question"
+                        >
+                          <span>{q.points} Pts</span>
+                          <Edit2 className="w-2.5 h-2.5 text-indigo-500" />
+                        </button>
+                        <button
+                          onClick={() => setEditingQuestion(q)}
+                          className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-slate-200/60 rounded-lg cursor-pointer transition-colors"
+                          title="Edit Question Details"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
                         <button
                           onClick={() => handleDelete(q.id)}
                           disabled={deletingId === q.id}
-                          className="p-1 text-slate-400 hover:text-rose-600 rounded cursor-pointer"
+                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg cursor-pointer transition-colors"
                           title="Delete Question"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
@@ -401,6 +415,17 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
           )}
         </div>
       </div>
+
+      {/* EDIT QUESTION & POINTS MODAL */}
+      {editingQuestion && (
+        <EditQuestionModal
+          question={editingQuestion}
+          onClose={() => setEditingQuestion(null)}
+          onSuccess={async () => {
+            await loadQuestions();
+          }}
+        />
+      )}
     </div>
   );
 };
