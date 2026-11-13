@@ -226,11 +226,13 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
           { value: "PYTHON", label: "Python Data Analysis MCQ (Analyst Track)" },
           { value: "SQL", label: "SQL Query & Relations MCQ (Analyst Track)" },
           { value: "WRITTEN_PROMPT", label: "Written Grammar & Essay Prompt" },
+          { value: "NETWORKING", label: "Networking MCQ (Network Engineer Track)" },
         ]
       : [
           { value: "CODING", label: "Coding Problem (Software Dev Track)" },
           { value: "SQL", label: "SQL Query Problem (Data Analyst Track)" },
           { value: "PYTHON", label: "Python Scripting Problem (Data Analyst & Network Track)" },
+          { value: "NETWORKING", label: "Networking Problem / MCQ (Network Engineer Track)" },
         ];
 
   return (

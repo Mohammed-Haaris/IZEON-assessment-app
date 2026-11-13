@@ -223,6 +223,22 @@ export const EditQuestionModal: React.FC<EditQuestionModalProps> = ({
                   Pts
                 </span>
               </div>
+              <div className="flex items-center gap-1.5 mt-1.5">
+                <button
+                  type="button"
+                  onClick={() => setPoints(1)}
+                  className="px-2 py-0.5 rounded-md bg-white border border-indigo-200 text-indigo-700 font-bold text-[10px] hover:bg-indigo-50 cursor-pointer"
+                >
+                  1 Pt (R1 Standard)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPoints(10)}
+                  className="px-2 py-0.5 rounded-md bg-white border border-indigo-200 text-indigo-700 font-bold text-[10px] hover:bg-indigo-50 cursor-pointer"
+                >
+                  10 Pts (R2 Standard)
+                </button>
+              </div>
               <p className="text-[11px] text-slate-500 mt-1">
                 Points awarded upon correct evaluation
               </p>

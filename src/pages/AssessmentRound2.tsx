@@ -1142,8 +1142,8 @@ export const AssessmentRound2: React.FC = () => {
         {/* Right Pane: MCQ (NE) or Code Editor */}
         <div className="w-3/5 flex flex-col overflow-hidden relative bg-slate-950">
 
-          {/* NE NETWORKING MCQ PANEL */}
-          {currentQ?.category === "NETWORKING" || (Array.isArray(currentQ?.options) && currentQ.options.length > 0) ? (
+          {/* THEORETICAL MCQ PANEL (Only when question has multiple choice options) */}
+          {Array.isArray(currentQ?.options) && currentQ.options.length > 0 ? (
             <div className="flex-1 overflow-y-auto p-6 space-y-5 mt-4">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
