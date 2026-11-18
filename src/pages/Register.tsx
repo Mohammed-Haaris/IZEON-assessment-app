@@ -110,6 +110,9 @@ export const Register: React.FC = () => {
               <div className="relative">
                 <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                 <input
+                  id="name"
+                  name="name"
+                  autoComplete="name"
                   type="text"
                   required
                   value={name}
@@ -128,6 +131,9 @@ export const Register: React.FC = () => {
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                 <input
+                  id="email"
+                  name="email"
+                  autoComplete="username email"
                   type="email"
                   required
                   value={email}
@@ -146,6 +152,9 @@ export const Register: React.FC = () => {
               <div className="relative">
                 <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                 <input
+                  id="mobileNumber"
+                  name="mobileNumber"
+                  autoComplete="tel"
                   type="tel"
                   required
                   value={mobileNumber}
@@ -164,6 +173,9 @@ export const Register: React.FC = () => {
               <div className="relative">
                 <Calendar className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                 <input
+                  id="dob"
+                  name="dob"
+                  autoComplete="bday"
                   type="date"
                   required
                   value={dob}
@@ -181,6 +193,9 @@ export const Register: React.FC = () => {
               <div className="relative">
                 <Hash className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                 <input
+                  id="rollNumber"
+                  name="rollNumber"
+                  autoComplete="off"
                   type="text"
                   required
                   value={rollNumber}
@@ -199,6 +214,9 @@ export const Register: React.FC = () => {
               <div className="relative">
                 <GraduationCap className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                 <input
+                  id="department"
+                  name="department"
+                  autoComplete="off"
                   type="text"
                   required
                   value={department}
@@ -217,6 +235,9 @@ export const Register: React.FC = () => {
               <div className="relative">
                 <Building className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                 <input
+                  id="college"
+                  name="college"
+                  autoComplete="off"
                   type="text"
                   required
                   value={college}
@@ -235,6 +256,9 @@ export const Register: React.FC = () => {
               <div className="relative">
                 <Percent className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                 <input
+                  id="tenthMark"
+                  name="tenthMark"
+                  autoComplete="off"
                   type="text"
                   required
                   value={tenthMark}
@@ -253,6 +277,9 @@ export const Register: React.FC = () => {
               <div className="relative">
                 <Percent className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                 <input
+                  id="twelfthMark"
+                  name="twelfthMark"
+                  autoComplete="off"
                   type="text"
                   required
                   value={twelfthMark}
@@ -271,6 +298,9 @@ export const Register: React.FC = () => {
               <div className="relative">
                 <GraduationCap className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
                 <input
+                  id="cgpa"
+                  name="cgpa"
+                  autoComplete="off"
                   type="text"
                   required
                   value={cgpa}
@@ -383,6 +413,19 @@ export const Register: React.FC = () => {
             </div>
           </div>
 
+          {/* Hidden username anchor for browser credential managers to guarantee email is saved */}
+          <input
+            type="text"
+            name="username"
+            id="credential-username"
+            value={email}
+            readOnly
+            tabIndex={-1}
+            autoComplete="username"
+            className="hidden sr-only"
+            aria-hidden="true"
+          />
+
           {/* Password */}
           <div>
             <label className="block text-sm font-semibold text-slate-800 mb-1.5">
@@ -391,6 +434,9 @@ export const Register: React.FC = () => {
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
               <input
+                id="password"
+                name="password"
+                autoComplete="new-password"
                 type={showPassword ? "text" : "password"}
                 required
                 value={password}

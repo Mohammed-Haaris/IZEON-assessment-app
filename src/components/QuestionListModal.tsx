@@ -125,6 +125,29 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
     }
   };
 
+  const handleDeduplicate = async () => {
+    setIsStandardizing(true);
+    setStatusMessage(null);
+    try {
+      const res = await apiRequest<{ message: string; deletedCount: number }>(
+        `/admin/assessments/${assessment.id}/deduplicate`,
+        { method: "POST" }
+      );
+      setStatusMessage({
+        type: "success",
+        text: res.message || "Deduplication complete!",
+      });
+      await loadQuestions();
+    } catch (err: any) {
+      setStatusMessage({
+        type: "error",
+        text: err.message || "Failed to remove duplicates.",
+      });
+    } finally {
+      setIsStandardizing(false);
+    }
+  };
+
   // Groupings by track
   const r1Questions = questions.filter((q) => q.round === "ROUND_1_APTITUDE_VERBAL_WRITTEN");
   const r2Questions = questions.filter((q) => q.round === "ROUND_2_CODING");
@@ -361,6 +384,15 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              onClick={handleDeduplicate}
+              disabled={isStandardizing}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-bold text-xs transition-colors cursor-pointer shadow-xs disabled:opacity-60"
+              title="Detect and remove duplicate questions"
+            >
+              <Trash2 className="w-3.5 h-3.5 text-amber-600" />
+              <span>Clean Duplicates</span>
+            </button>
             <button
               onClick={handleStandardizeMarks}
               disabled={isStandardizing}
