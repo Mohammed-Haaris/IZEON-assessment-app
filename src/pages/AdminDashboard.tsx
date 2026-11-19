@@ -34,6 +34,7 @@ import {
   AlertOctagon,
   Clock,
   Settings,
+  Calendar,
 } from "lucide-react";
 
 interface MalpracticeLogItem {
@@ -84,6 +85,14 @@ export const AdminDashboard: React.FC = () => {
   const [resultsSearchQuery, setResultsSearchQuery] = useState("");
   const [resultsRoleFilter, setResultsRoleFilter] = useState<"ALL" | "Software Developer" | "Data Analyst" | "Network Engineer">("ALL");
   const [resultsStatusFilter, setResultsStatusFilter] = useState<string>("ALL");
+  const [resultsDatePreset, setResultsDatePreset] = useState<"ALL" | "TODAY" | "YESTERDAY" | "LAST_7_DAYS" | "LAST_30_DAYS" | "CUSTOM">("ALL");
+  const [resultsStartDate, setResultsStartDate] = useState<string>("");
+  const [resultsEndDate, setResultsEndDate] = useState<string>("");
+
+  // Candidate Directory Date Filters
+  const [studentDatePreset, setStudentDatePreset] = useState<"ALL" | "TODAY" | "YESTERDAY" | "LAST_7_DAYS" | "CUSTOM">("ALL");
+  const [studentStartDate, setStudentStartDate] = useState<string>("");
+  const [studentEndDate, setStudentEndDate] = useState<string>("");
 
   // Socket
   const socket = getSocket();
@@ -345,7 +354,42 @@ export const AdminDashboard: React.FC = () => {
       (s.position && s.position.toLowerCase().includes(q)) ||
       (s.mobileNumber && s.mobileNumber.toLowerCase().includes(q)) ||
       (s.college && s.college.toLowerCase().includes(q));
-    return matchesStatus && matchesSearch;
+
+    if (!matchesStatus || !matchesSearch) return false;
+
+    // Date Filter for Students
+    if (studentDatePreset !== "ALL") {
+      if (!s.createdAt) return false;
+      const sDate = new Date(s.createdAt);
+      if (isNaN(sDate.getTime())) return false;
+
+      const y = sDate.getFullYear();
+      const m = String(sDate.getMonth() + 1).padStart(2, "0");
+      const d = String(sDate.getDate()).padStart(2, "0");
+      const sDateStr = `${y}-${m}-${d}`;
+
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+      if (studentDatePreset === "TODAY") {
+        if (sDateStr !== todayStr) return false;
+      } else if (studentDatePreset === "YESTERDAY") {
+        const yesterday = new Date(now);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yestStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
+        if (sDateStr !== yestStr) return false;
+      } else if (studentDatePreset === "LAST_7_DAYS") {
+        const sevenDaysAgo = new Date(now);
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        sevenDaysAgo.setHours(0, 0, 0, 0);
+        if (sDate < sevenDaysAgo) return false;
+      } else if (studentDatePreset === "CUSTOM") {
+        if (studentStartDate && sDateStr < studentStartDate) return false;
+        if (studentEndDate && sDateStr > studentEndDate) return false;
+      }
+    }
+
+    return true;
   });
 
   return (
@@ -595,7 +639,7 @@ export const AdminDashboard: React.FC = () => {
               />
             </div>
 
-            <div className="flex items-center gap-1.5 w-full sm:w-auto">
+            <div className="flex items-center gap-1.5 w-full sm:w-auto flex-wrap">
               <span className="text-xs text-slate-500 font-bold">Filter:</span>
               {(["ALL", "APPROVED", "REJECTED"] as const).map((status) => (
                 <button
@@ -609,6 +653,47 @@ export const AdminDashboard: React.FC = () => {
                   {status === "ALL" ? "All" : status === "APPROVED" ? "Active" : "Restricted"}
                 </button>
               ))}
+
+              <div className="w-44">
+                <CustomSelect
+                  value={studentDatePreset}
+                  onChange={(val) => {
+                    setStudentDatePreset(val as any);
+                    if (val !== "CUSTOM") {
+                      setStudentStartDate("");
+                      setStudentEndDate("");
+                    }
+                  }}
+                  options={[
+                    { label: "All Reg Dates", value: "ALL" },
+                    { label: "Today", value: "TODAY" },
+                    { label: "Yesterday", value: "YESTERDAY" },
+                    { label: "Last 7 Days", value: "LAST_7_DAYS" },
+                    { label: "Custom Range", value: "CUSTOM" },
+                  ]}
+                  placeholder="Filter Date"
+                />
+              </div>
+
+              {studentDatePreset === "CUSTOM" && (
+                <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-xl shadow-xs">
+                  <input
+                    type="date"
+                    value={studentStartDate}
+                    onChange={(e) => setStudentStartDate(e.target.value)}
+                    className="text-xs bg-white border border-slate-200 rounded-lg px-2 py-1 text-slate-800 font-medium focus:outline-none focus:border-[#16499c]"
+                    title="From Date"
+                  />
+                  <span className="text-slate-400 text-xs font-semibold">to</span>
+                  <input
+                    type="date"
+                    value={studentEndDate}
+                    onChange={(e) => setStudentEndDate(e.target.value)}
+                    className="text-xs bg-white border border-slate-200 rounded-lg px-2 py-1 text-slate-800 font-medium focus:outline-none focus:border-[#16499c]"
+                    title="To Date"
+                  />
+                </div>
+              )}
 
               <button
                 onClick={() =>
@@ -1017,6 +1102,45 @@ export const AdminDashboard: React.FC = () => {
             if (att.status !== resultsStatusFilter) return false;
           }
 
+          // Date Filter
+          if (resultsDatePreset !== "ALL") {
+            const attemptDateRaw = att.createdAt || att.startedAt || att.completedAt;
+            if (!attemptDateRaw) return false;
+
+            const attemptDate = new Date(attemptDateRaw);
+            if (isNaN(attemptDate.getTime())) return false;
+
+            const y = attemptDate.getFullYear();
+            const m = String(attemptDate.getMonth() + 1).padStart(2, "0");
+            const d = String(attemptDate.getDate()).padStart(2, "0");
+            const attemptDateStr = `${y}-${m}-${d}`;
+
+            const now = new Date();
+            const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+            if (resultsDatePreset === "TODAY") {
+              if (attemptDateStr !== todayStr) return false;
+            } else if (resultsDatePreset === "YESTERDAY") {
+              const yesterday = new Date(now);
+              yesterday.setDate(yesterday.getDate() - 1);
+              const yestStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
+              if (attemptDateStr !== yestStr) return false;
+            } else if (resultsDatePreset === "LAST_7_DAYS") {
+              const sevenDaysAgo = new Date(now);
+              sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+              sevenDaysAgo.setHours(0, 0, 0, 0);
+              if (attemptDate < sevenDaysAgo) return false;
+            } else if (resultsDatePreset === "LAST_30_DAYS") {
+              const thirtyDaysAgo = new Date(now);
+              thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+              thirtyDaysAgo.setHours(0, 0, 0, 0);
+              if (attemptDate < thirtyDaysAgo) return false;
+            } else if (resultsDatePreset === "CUSTOM") {
+              if (resultsStartDate && attemptDateStr < resultsStartDate) return false;
+              if (resultsEndDate && attemptDateStr > resultsEndDate) return false;
+            }
+          }
+
           return true;
         });
 
@@ -1156,6 +1280,64 @@ export const AdminDashboard: React.FC = () => {
                     placeholder="Filter Status"
                   />
                 </div>
+
+                {/* Human-Crafted Custom Select: Date Filter */}
+                <div className="w-52">
+                  <CustomSelect
+                    value={resultsDatePreset}
+                    onChange={(val) => {
+                      setResultsDatePreset(val as any);
+                      if (val !== "CUSTOM") {
+                        setResultsStartDate("");
+                        setResultsEndDate("");
+                      }
+                    }}
+                    options={[
+                      { label: "All Exam Dates", value: "ALL" },
+                      { label: "Today", value: "TODAY", badge: "Live" },
+                      { label: "Yesterday", value: "YESTERDAY" },
+                      { label: "Last 7 Days", value: "LAST_7_DAYS" },
+                      { label: "Last 30 Days", value: "LAST_30_DAYS" },
+                      { label: "Custom Date Range", value: "CUSTOM", badge: "Calendar" },
+                    ]}
+                    placeholder="Filter by Date"
+                  />
+                </div>
+
+                {/* Custom Date Pickers */}
+                {resultsDatePreset === "CUSTOM" && (
+                  <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl shadow-xs animate-in fade-in">
+                    <Calendar className="w-3.5 h-3.5 text-[#16499c] shrink-0" />
+                    <input
+                      type="date"
+                      value={resultsStartDate}
+                      onChange={(e) => setResultsStartDate(e.target.value)}
+                      className="text-xs bg-white border border-slate-200 rounded-lg px-2 py-1 text-slate-800 font-medium focus:outline-none focus:border-[#16499c]"
+                      title="From Date"
+                    />
+                    <span className="text-slate-400 text-xs font-semibold">to</span>
+                    <input
+                      type="date"
+                      value={resultsEndDate}
+                      onChange={(e) => setResultsEndDate(e.target.value)}
+                      className="text-xs bg-white border border-slate-200 rounded-lg px-2 py-1 text-slate-800 font-medium focus:outline-none focus:border-[#16499c]"
+                      title="To Date"
+                    />
+                    {(resultsStartDate || resultsEndDate) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setResultsStartDate("");
+                          setResultsEndDate("");
+                        }}
+                        className="text-slate-400 hover:text-slate-600 p-1 text-xs hover:bg-slate-200 rounded-md transition-colors"
+                        title="Clear date inputs"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-2.5 shrink-0">
@@ -1192,14 +1374,44 @@ export const AdminDashboard: React.FC = () => {
 
             {/* Master Marks & Candidate Submissions Table */}
             <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
-                <div>
-                  <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                    Candidate Submissions & Evaluated Marks
-                  </h3>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
-                    Showing {filteredAttempts.length} of {attempts.length} total attempts
-                  </p>
+              <div className="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50/50 flex-wrap gap-2">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                      Candidate Submissions & Evaluated Marks
+                    </h3>
+                    <p className="text-[11px] text-slate-500 mt-0.5">
+                      Showing {filteredAttempts.length} of {attempts.length} total attempts
+                    </p>
+                  </div>
+                  {resultsDatePreset !== "ALL" && (
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#eff5ff] border border-[#16499c]/30 text-[#16499c] text-xs font-bold shadow-xs">
+                      <Calendar className="w-3.5 h-3.5" />
+                      <span>
+                        Date:{" "}
+                        {resultsDatePreset === "TODAY"
+                          ? "Today"
+                          : resultsDatePreset === "YESTERDAY"
+                          ? "Yesterday"
+                          : resultsDatePreset === "LAST_7_DAYS"
+                          ? "Last 7 Days"
+                          : resultsDatePreset === "LAST_30_DAYS"
+                          ? "Last 30 Days"
+                          : `${resultsStartDate || "Start"} → ${resultsEndDate || "End"}`}
+                      </span>
+                      <button
+                        onClick={() => {
+                          setResultsDatePreset("ALL");
+                          setResultsStartDate("");
+                          setResultsEndDate("");
+                        }}
+                        className="ml-1 text-[#16499c] hover:text-rose-600 font-bold p-0.5 cursor-pointer"
+                        title="Remove date filter"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1257,6 +1469,23 @@ export const AdminDashboard: React.FC = () => {
                                   <span className="text-slate-400 font-mono">• Ph: {att.user.mobileNumber}</span>
                                 )}
                               </div>
+                              {(att.createdAt || att.startedAt) && (
+                                <div className="text-[10px] text-slate-500 font-medium flex items-center gap-1.5 mt-1.5 bg-slate-50 px-2 py-0.5 rounded-md w-fit border border-slate-200/70">
+                                  <Calendar className="w-3 h-3 text-[#16499c]" />
+                                  <span>
+                                    Exam:{" "}
+                                    <strong>
+                                      {new Date(att.createdAt || att.startedAt!).toLocaleDateString("en-IN", {
+                                        day: "2-digit",
+                                        month: "short",
+                                        year: "numeric",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                      })}
+                                    </strong>
+                                  </span>
+                                </div>
+                              )}
                             </td>
 
                             {/* Target Track */}

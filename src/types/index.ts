@@ -81,6 +81,7 @@ export interface AssessmentAttempt {
   answers?: any;
   startedAt?: string | null;
   completedAt?: string | null;
+  createdAt?: string;
   user?: User;
   assessment?: Assessment;
 }
