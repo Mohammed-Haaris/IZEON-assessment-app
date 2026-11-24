@@ -139,15 +139,8 @@ export const AdminDashboard: React.FC = () => {
   const loadMalpracticeLogs = async () => {
     try {
       const data = await apiRequest<{ logs: MalpracticeLogItem[] }>("/admin/malpractice-logs");
-      const seen = new Set<string>();
-      const dedupedLogs = (data.logs || []).filter((log: MalpracticeLogItem) => {
-        const key = `${log.attemptId}_${log.violationCount}`;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-      setMalpracticeLogs(dedupedLogs);
-      return dedupedLogs;
+      setMalpracticeLogs(data.logs || []);
+      return data.logs || [];
     } catch (err) {
       console.error("Load logs error:", err);
       return [];
@@ -1286,24 +1279,30 @@ export const AdminDashboard: React.FC = () => {
                     <div
                       onClick={() => setConfiguringTimersAssessment(a)}
                       className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-[#16499c]/40 hover:bg-[#eff5ff]/40 cursor-pointer transition-all group"
-                      title="Click to edit Round 1 timer"
+                      title="Click to edit Round 1 timer & cutoff"
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] uppercase font-bold text-slate-400">Round 1</span>
                         <Settings className="w-3 h-3 text-slate-400 group-hover:text-[#16499c]" />
                       </div>
                       <p className="font-extrabold text-slate-900 mt-0.5">{a.durationR1} Minutes</p>
+                      <span className="inline-block text-[10px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 mt-1">
+                        Cutoff: {a.cutoffRound1 ?? 12} Pts
+                      </span>
                     </div>
                     <div
                       onClick={() => setConfiguringTimersAssessment(a)}
                       className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-[#16499c]/40 hover:bg-[#eff5ff]/40 cursor-pointer transition-all group"
-                      title="Click to edit Round 2 timer"
+                      title="Click to edit Round 2 timer & cutoff"
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-[10px] uppercase font-bold text-slate-400">Round 2</span>
                         <Settings className="w-3 h-3 text-slate-400 group-hover:text-[#16499c]" />
                       </div>
                       <p className="font-extrabold text-slate-900 mt-0.5">{a.durationR2} Minutes</p>
+                      <span className="inline-block text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 mt-1">
+                        Cutoff: {a.cutoffRound2 ?? 30} Pts
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -1689,8 +1688,14 @@ export const AdminDashboard: React.FC = () => {
                     <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                       <th className="py-3 px-5">Candidate Profile</th>
                       <th className="py-3 px-5">Target Track</th>
-                      <th className="py-3 px-5 text-center">Round 1</th>
-                      <th className="py-3 px-5 text-center">Round 2</th>
+                      <th className="py-3 px-5 text-center">
+                        Round 1
+                        <span className="block text-[9px] font-normal text-slate-400 capitalize">Cutoff: {assessments[0]?.cutoffRound1 ?? 12} Pts</span>
+                      </th>
+                      <th className="py-3 px-5 text-center">
+                        Round 2
+                        <span className="block text-[9px] font-normal text-slate-400 capitalize">Cutoff: {assessments[0]?.cutoffRound2 ?? 30} Pts</span>
+                      </th>
                       <th className="py-3 px-5 text-center">Total Marks</th>
                       <th className="py-3 px-5 text-center">Integrity</th>
                       <th className="py-3 px-5 text-center">Status</th>

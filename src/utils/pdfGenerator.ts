@@ -287,16 +287,20 @@ export const generateCandidateScorecardPDF = (attempt: AssessmentAttempt) => {
         attempt.user?.position === "Data Analyst"
           ? "Aptitude, Verbal, Python & SQL MCQs, Written"
           : "Aptitude, Verbal & Written Prompt",
-        `${r1} Points`,
-        r1 > 0 ? "Completed" : "Not Attempted",
+        `${r1} Points (Cutoff: ${attempt.assessment?.cutoffRound1 ?? 12} Pts)`,
+        r1 >= (attempt.assessment?.cutoffRound1 ?? 12) ? "Qualified" : (r1 > 0 ? "Completed" : "Not Attempted"),
       ],
       [
         "Round 2: Technical Hands-on",
         attempt.user?.position === "Data Analyst"
           ? "SQL Analytics Query & Python Data Scripting"
           : "DSA Problem Solving & Algorithmic Coding",
-        `${r2} Points`,
-        attempt.status === "COMPLETED" ? "Submitted" : attempt.status.replace(/_/g, " "),
+        `${r2} Points (Cutoff: ${attempt.assessment?.cutoffRound2 ?? 30} Pts)`,
+        attempt.status === "COMPLETED"
+          ? r2 >= (attempt.assessment?.cutoffRound2 ?? 30)
+            ? "Qualified"
+            : "Completed"
+          : attempt.status.replace(/_/g, " "),
       ],
       [
         "TOTAL AGGREGATE",

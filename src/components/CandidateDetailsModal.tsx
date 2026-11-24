@@ -266,10 +266,17 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
                 <span className="text-[11px] font-bold uppercase text-[#16499c]">
                   Round 2: Technical
                 </span>
-                <p className="text-2xl font-black text-slate-900 mt-0.5">
-                  {attempt.round2Score !== null && attempt.round2Score !== undefined
-                    ? `${attempt.round2Score} Pts`
-                    : "—"}
+                <p className="text-2xl font-black text-slate-900 mt-0.5 flex items-baseline gap-1.5">
+                  <span>
+                    {attempt.round2Score !== null && attempt.round2Score !== undefined
+                      ? `${attempt.round2Score} Pts`
+                      : "—"}
+                  </span>
+                  {attempt.assessment?.cutoffRound2 !== undefined && (
+                    <span className="text-xs font-semibold text-slate-400">
+                      (Cutoff: {attempt.assessment.cutoffRound2})
+                    </span>
+                  )}
                 </p>
               </div>
               <Code2 className="w-8 h-8 text-[#93c5fd]" />

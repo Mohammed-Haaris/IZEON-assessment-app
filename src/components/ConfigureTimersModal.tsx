@@ -27,6 +27,7 @@ export const ConfigureTimersModal: React.FC<ConfigureTimersModalProps> = ({
   const [durationR2, setDurationR2] = useState<number>(assessment.durationR2 || 40);
   const [passingScore, setPassingScore] = useState<number>(assessment.passingScore || 60);
   const [cutoffRound1, setCutoffRound1] = useState<number>(assessment.cutoffRound1 ?? 12);
+  const [cutoffRound2, setCutoffRound2] = useState<number>(assessment.cutoffRound2 ?? 30);
   const [title, setTitle] = useState(assessment.title || "");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,6 +68,7 @@ export const ConfigureTimersModal: React.FC<ConfigureTimersModalProps> = ({
             durationR2: Number(durationR2),
             passingScore: Number(passingScore),
             cutoffRound1: Number(cutoffRound1),
+            cutoffRound2: Number(cutoffRound2),
           }),
         }
       );
@@ -216,22 +218,22 @@ export const ConfigureTimersModal: React.FC<ConfigureTimersModalProps> = ({
           </div>
 
           {/* Cutoffs & Passing Scores */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="space-y-1.5 p-3 rounded-xl bg-amber-50/60 border border-amber-200/80">
               <label className="block text-xs font-bold text-amber-900 flex items-center justify-between">
                 <span className="flex items-center gap-1">
                   <Award className="w-3.5 h-3.5 text-amber-600" />
-                  Round 1 Qualifying Cutoff
+                  Round 1 Cutoff
                 </span>
                 <span className="text-[10px] font-semibold text-amber-700 bg-amber-100/70 px-1.5 py-0.5 rounded">
-                  Unlocks R2
+                  Max 20
                 </span>
               </label>
               <div className="relative">
                 <input
                   type="number"
                   min="0"
-                  max="100"
+                  max="20"
                   value={cutoffRound1}
                   onChange={(e) => setCutoffRound1(Math.max(0, parseInt(e.target.value) || 0))}
                   className="w-full text-xs font-bold py-2 pl-3 pr-10 rounded-lg border border-amber-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-mono"
@@ -241,7 +243,35 @@ export const ConfigureTimersModal: React.FC<ConfigureTimersModalProps> = ({
                 </span>
               </div>
               <p className="text-[10px] text-amber-700 font-medium">
-                Students scoring below this cutoff in Round 1 cannot take Round 2.
+                Minimum score to unlock Round 2.
+              </p>
+            </div>
+
+            <div className="space-y-1.5 p-3 rounded-xl bg-blue-50/60 border border-blue-200/80">
+              <label className="block text-xs font-bold text-blue-900 flex items-center justify-between">
+                <span className="flex items-center gap-1">
+                  <Award className="w-3.5 h-3.5 text-blue-600" />
+                  Round 2 Cutoff
+                </span>
+                <span className="text-[10px] font-semibold text-blue-700 bg-blue-100/70 px-1.5 py-0.5 rounded">
+                  Max 50
+                </span>
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  min="0"
+                  max="50"
+                  value={cutoffRound2}
+                  onChange={(e) => setCutoffRound2(Math.max(0, parseInt(e.target.value) || 0))}
+                  className="w-full text-xs font-bold py-2 pl-3 pr-10 rounded-lg border border-blue-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono"
+                />
+                <span className="absolute right-3 top-2 text-[11px] font-bold text-blue-600">
+                  Pts
+                </span>
+              </div>
+              <p className="text-[10px] text-blue-700 font-medium">
+                Minimum score in Round 2 to clear technical round.
               </p>
             </div>
 
@@ -249,17 +279,17 @@ export const ConfigureTimersModal: React.FC<ConfigureTimersModalProps> = ({
               <label className="block text-xs font-bold text-slate-800 flex items-center justify-between">
                 <span className="flex items-center gap-1">
                   <Award className="w-3.5 h-3.5 text-[#16499c]" />
-                  Final Passing Score
+                  Final Passing
                 </span>
                 <span className="text-[10px] font-semibold text-slate-500 bg-slate-200/60 px-1.5 py-0.5 rounded">
-                  Overall (R1+R2)
+                  Total 70
                 </span>
               </label>
               <div className="relative">
                 <input
                   type="number"
                   min="0"
-                  max="200"
+                  max="70"
                   value={passingScore}
                   onChange={(e) => setPassingScore(Math.max(0, parseInt(e.target.value) || 0))}
                   className="w-full text-xs font-bold py-2 pl-3 pr-10 rounded-lg border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] transition-all font-mono"
@@ -269,7 +299,7 @@ export const ConfigureTimersModal: React.FC<ConfigureTimersModalProps> = ({
                 </span>
               </div>
               <p className="text-[10px] text-slate-500 font-medium">
-                Benchmark for overall selection / certificate generation.
+                Overall qualifying benchmark.
               </p>
             </div>
           </div>

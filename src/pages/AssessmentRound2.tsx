@@ -586,16 +586,25 @@ export const AssessmentRound2: React.FC = () => {
         const currentAttempt = res.attempt || res.existingAttempt;
         if (currentAttempt) {
           if (
-            currentAttempt.status === "ROUND_2_IN_PROGRESS" ||
-            currentAttempt.status === "IN_PROGRESS"
+            (currentAttempt.status === "ROUND_2_IN_PROGRESS" ||
+              currentAttempt.status === "IN_PROGRESS" ||
+              currentAttempt.status === "ROUND_1_IN_PROGRESS") &&
+            (currentAttempt.tabSwitchCount ?? 0) < 2
           ) {
             setIsLocked(false);
             localStorage.removeItem("izeon_locked_round2");
+            setTabSwitchCount(currentAttempt.tabSwitchCount ?? 1);
           } else if (currentAttempt.status === "DISQUALIFIED") {
             setIsLocked(false);
             localStorage.removeItem("izeon_locked_round2");
             setIsDisqualified(true);
             setLockMessage(currentAttempt.adminRemarks || "Disqualified by administrator.");
+          } else if (
+            currentAttempt.status === "MALPRACTICE_LOCKED" ||
+            (currentAttempt.tabSwitchCount ?? 0) >= 2
+          ) {
+            setIsLocked(true);
+            localStorage.setItem("izeon_locked_round2", "true");
           }
         }
       } catch (err) {
@@ -656,7 +665,7 @@ export const AssessmentRound2: React.FC = () => {
               "Assessment locked due to multiple malpractice violations. Administrator has been notified to review your session."
             );
           }
-          return nextCount;
+          return Math.min(nextCount, 2);
         });
 
         // Notify server: use WebSocket if connected; ONLY use REST fallback if disconnected (never both!)
