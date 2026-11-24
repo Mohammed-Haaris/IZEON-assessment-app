@@ -40,7 +40,7 @@ import {
   Edit2,
   GraduationCap,
   Camera,
-  CameraOff,
+  CameraOff
 } from "lucide-react";
 
 interface MalpracticeLogItem {
@@ -83,6 +83,24 @@ export const AdminDashboard: React.FC = () => {
   const [activeAlert, setActiveAlert] = useState<MalpracticeAlert | null>(null);
   const [dismissedAlerts, setDismissedAlerts] = useState<string[]>([]);
   const [malpracticeLogs, setMalpracticeLogs] = useState<MalpracticeLogItem[]>([]);
+
+  // Real-time Camera Exemption Requests (Students with webcam problems in Chrome)
+  const [cameraHelpRequests, setCameraHelpRequests] = useState<Array<{
+    studentId: string;
+    studentName: string;
+    studentEmail: string;
+    college?: string;
+    reason?: string;
+    timestamp: string | Date;
+  }>>([]);
+  const [activeCameraModal, setActiveCameraModal] = useState<{
+    studentId: string;
+    studentName: string;
+    studentEmail: string;
+    college?: string;
+    reason?: string;
+    timestamp: string | Date;
+  } | null>(null);
 
   // Assessments & Question Modals
   const [assessments, setAssessments] = useState<Assessment[]>([]);
@@ -223,10 +241,26 @@ export const AdminDashboard: React.FC = () => {
       loadAttempts();
     });
 
+    // Real-time camera help requests from students whose webcams failed in Google Chrome
+    socket.on("admin:camera_help_request", (req: any) => {
+      setCameraHelpRequests((prev) => {
+        if (prev.some((r) => r.studentId === req.studentId)) return prev;
+        return [req, ...prev];
+      });
+      setActiveCameraModal(req);
+    });
+
+    socket.on("admin:camera_exemption_confirmed", (data: { studentId: string; allowWithoutCamera: boolean }) => {
+      setCameraHelpRequests((prev) => prev.filter((r) => r.studentId !== data.studentId));
+      setActiveCameraModal((current) => (current?.studentId === data.studentId ? null : current));
+    });
+
     return () => {
       socket.off("connect", handleConnect);
       socket.off("admin:malpractice_alert");
       socket.off("admin:action_resolved");
+      socket.off("admin:camera_help_request");
+      socket.off("admin:camera_exemption_confirmed");
     };
   }, [socket]);
 
@@ -338,11 +372,22 @@ export const AdminDashboard: React.FC = () => {
             : att
         )
       );
+      setCameraHelpRequests((prev) => prev.filter((r) => r.studentId !== studentId));
+      socket.emit("admin:grant_camera_exemption", {
+        studentId,
+        allowWithoutCamera: newStatus,
+      });
     } catch (err: any) {
       alert(err.message || `Failed to update camera exemption for ${studentName}`);
     } finally {
       setUpdatingCameraExemptionId(null);
     }
+  };
+
+  const handleAllowStudentWithoutCamera = async (studentId: string, studentName: string) => {
+    await handleToggleCameraExemption(studentId, false, studentName);
+    setCameraHelpRequests((prev) => prev.filter((r) => r.studentId !== studentId));
+    setActiveCameraModal((current) => (current?.studentId === studentId ? null : current));
   };
 
   // Malpractice decision handlers
@@ -482,6 +527,71 @@ export const AdminDashboard: React.FC = () => {
             setActiveAlert(null);
           }}
         />
+      )}
+
+      {/* REAL-TIME CAMERA HELP REQUEST MODAL POPUP (1-CLICK ALLOW) */}
+      {activeCameraModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl border-2 border-amber-400 shadow-2xl max-w-md w-full overflow-hidden p-6 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center text-amber-700">
+                  <CameraOff className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-sm text-slate-900">Camera Access Request</h3>
+                  <p className="text-[10px] text-amber-700 font-semibold uppercase tracking-wider">Candidate Needs 1-Click Exemption</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveCameraModal(null)}
+                className="text-slate-400 hover:text-slate-600 text-xs p-1 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-2 bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 text-xs">
+              <div>
+                <span className="text-slate-500 font-medium">Candidate:</span>
+                <span className="font-bold text-slate-900 ml-1.5">{activeCameraModal.studentName}</span>
+              </div>
+              <div>
+                <span className="text-slate-500 font-medium">Email:</span>
+                <span className="font-mono text-slate-700 ml-1.5">{activeCameraModal.studentEmail}</span>
+              </div>
+              {activeCameraModal.college && (
+                <div>
+                  <span className="text-slate-500 font-medium">College:</span>
+                  <span className="font-semibold text-slate-800 ml-1.5">{activeCameraModal.college}</span>
+                </div>
+              )}
+              <div className="pt-1 text-[11px] text-rose-600 bg-rose-50 p-2 rounded-xl border border-rose-200">
+                ⚠️ Reason: {activeCameraModal.reason || "Webcam failed or permission blocked in Google Chrome"}
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed font-medium">
+              Click below to grant this candidate immediate permission to take the exam without camera. Their assessment screen will unlock in real time.
+            </p>
+
+            <div className="flex gap-2.5 pt-1">
+              <button
+                onClick={() => handleAllowStudentWithoutCamera(activeCameraModal.studentId, activeCameraModal.studentName)}
+                className="flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/25 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <Check className="w-4 h-4" />
+                Allow Candidate (No Camera)
+              </button>
+              <button
+                onClick={() => setActiveCameraModal(null)}
+                className="py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs cursor-pointer transition-colors"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Header Banner - Executive Human-Designed Light Green & Brand Blue Aesthetic */}
@@ -666,7 +776,7 @@ export const AdminDashboard: React.FC = () => {
       <div className="bg-white p-1.5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-wrap gap-1">
         {[
           { id: "approvals", label: "Candidate Directory", icon: Users, badge: students.length },
-          { id: "proctor", label: "Live Monitoring & Logs", icon: ShieldAlert },
+          { id: "proctor", label: "Live Monitoring & Logs", icon: ShieldAlert, badge: cameraHelpRequests.length || undefined },
           { id: "exams", label: "Assessment & Question Bank", icon: FileSpreadsheet },
           { id: "results", label: "Candidate Scores & Master Marks", icon: Award, badge: attempts.length },
           { id: "colleges", label: "Colleges & Campuses", icon: Building, badge: colleges.length },
@@ -939,6 +1049,56 @@ export const AdminDashboard: React.FC = () => {
       {/* TAB 2: LIVE PROCTORING & MALPRACTICE LOGS */}
       {activeTab === "proctor" && (
         <div className="space-y-6">
+          {/* Real-time Camera Exemption Requests Queue */}
+          {cameraHelpRequests.length > 0 && (
+            <div className="bg-amber-50/95 border-2 border-amber-300 rounded-2xl p-5 shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+                  <CameraOff className="w-5 h-5 text-amber-600" />
+                  <div>
+                    <h3 className="font-extrabold text-sm text-amber-950">
+                      Camera Issues Reported by Candidates ({cameraHelpRequests.length})
+                    </h3>
+                    <p className="text-[11px] text-amber-800 font-medium">
+                      Webcam failed or permission was denied in Google Chrome. Allow them to proceed with 1 click.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="divide-y divide-amber-200/80 bg-white rounded-xl border border-amber-200 overflow-hidden">
+                {cameraHelpRequests.map((req) => (
+                  <div key={req.studentId} className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-amber-50/40 transition-colors">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-slate-900 text-xs">{req.studentName}</span>
+                        {req.college && (
+                          <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[10px] font-semibold">
+                            {req.college}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[11px] text-slate-500 font-mono">{req.studentEmail}</div>
+                      <div className="text-[10px] text-rose-600 font-medium">
+                        Issue: {req.reason || "Webcam failed to start in browser"}
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleAllowStudentWithoutCamera(req.studentId, req.studentName)}
+                      className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer shrink-0"
+                    >
+                      <Check className="w-4 h-4" />
+                      Allow Candidate (No Camera)
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="p-4 rounded-2xl bg-[#eff5ff]/80 border border-[#16499c]/30 text-xs text-slate-900 flex items-start gap-3 shadow-xs">
             <ShieldAlert className="w-5 h-5 text-[#16499c] shrink-0 mt-0.5" />
             <div>

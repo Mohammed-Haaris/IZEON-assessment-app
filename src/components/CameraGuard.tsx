@@ -5,9 +5,12 @@ import {
   RotateCw,
   ArrowLeft,
   ShieldAlert,
+  Bell,
+  CheckCircle2,
 } from "lucide-react";
 import interviewLogo from "../assets/interview logo.png";
 import { useAuth } from "../context/AuthContext";
+import { getSocket } from "../services/socket";
 
 interface CameraGuardProps {
   children: (cameraStream: MediaStream | null) => React.ReactNode;
@@ -17,15 +20,75 @@ interface CameraGuardProps {
 type CameraStatus = "CHECKING" | "ACTIVE" | "DENIED" | "NO_HARDWARE" | "IN_USE_OR_ERROR";
 
 export const CameraGuard: React.FC<CameraGuardProps> = ({ children, roundName }) => {
-  const { user } = useAuth();
-  const isExempt = Boolean(user?.allowWithoutCamera);
+  const { user, refreshUser, updateUserLocally } = useAuth();
+  const [isExemptOverride, setIsExemptOverride] = useState<boolean>(false);
+  const isExempt = Boolean(user?.allowWithoutCamera) || isExemptOverride;
   const navigate = useNavigate();
   const [status, setStatus] = useState<CameraStatus>(isExempt ? "ACTIVE" : "CHECKING");
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isRetrying, setIsRetrying] = useState<boolean>(false);
+  const [isHelpRequested, setIsHelpRequested] = useState<boolean>(false);
+  const [isCheckingStatus, setIsCheckingStatus] = useState<boolean>(false);
   const previewVideoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+
+  // Real-time listener: unlocks immediately when admin clicks "Allow Candidate (No Camera)"
+  useEffect(() => {
+    const socket = getSocket();
+    if (user?.id) {
+      socket.emit("join:student", user.id);
+    }
+
+    const handleExemptionGranted = (data: { studentId: string; allowWithoutCamera: boolean }) => {
+      if (data.studentId === user?.id && data.allowWithoutCamera) {
+        setIsExemptOverride(true);
+        updateUserLocally({ allowWithoutCamera: true });
+        setStatus("ACTIVE");
+      }
+    };
+
+    socket.on("student:camera_exemption_granted", handleExemptionGranted);
+
+    return () => {
+      socket.off("student:camera_exemption_granted", handleExemptionGranted);
+    };
+  }, [user?.id, updateUserLocally]);
+
+  // Background sync check in case student is waiting for admin approval
+  useEffect(() => {
+    if (isExempt) return;
+    const interval = setInterval(async () => {
+      try {
+        await refreshUser();
+      } catch {
+        // ignore
+      }
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [isExempt, refreshUser]);
+
+  const handleRequestAdminExemption = () => {
+    if (!user) return;
+    setIsHelpRequested(true);
+    const socket = getSocket();
+    socket.emit("student:camera_help_request", {
+      studentId: user.id,
+      studentName: user.name,
+      studentEmail: user.email,
+      college: user.college,
+      reason: errorMessage || "Webcam failed to start or blocked in browser",
+    });
+  };
+
+  const handleCheckExemptionStatus = async () => {
+    setIsCheckingStatus(true);
+    try {
+      await refreshUser();
+    } finally {
+      setIsCheckingStatus(false);
+    }
+  };
 
   const stopActiveStream = () => {
     if (streamRef.current) {
@@ -213,6 +276,52 @@ export const CameraGuard: React.FC<CameraGuardProps> = ({ children, roundName })
               <div className="pt-2 text-[11px] text-[#16499c] font-semibold">
                 Tip: Click the lock / settings icon 🔒 beside <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-slate-200">http://localhost:4000</span> in your URL bar, change Camera to <strong>Allow</strong>, and click Retry.
               </div>
+            )}
+          </div>
+
+          {/* 1-Click Admin Exemption Request */}
+          <div className="p-4 bg-amber-50/90 border border-amber-200 rounded-2xl text-left space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                <Bell className="w-4 h-4 text-amber-600 shrink-0" />
+                Camera Not Working in Google Chrome?
+              </span>
+              {isHelpRequested && (
+                <span className="text-[10px] font-bold text-amber-700 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-full flex items-center gap-1 animate-pulse">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  Admin Alerted
+                </span>
+              )}
+            </div>
+            <p className="text-[11px] text-amber-800 leading-relaxed font-medium">
+              If your camera cannot turn on or is blocked, click below. The administrator will instantly allow you to take the exam without camera.
+            </p>
+            <div className="pt-1 flex gap-2">
+              <button
+                type="button"
+                onClick={handleRequestAdminExemption}
+                disabled={isHelpRequested}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:bg-amber-500 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
+              >
+                <Bell className={`w-3.5 h-3.5 ${isHelpRequested ? "animate-bounce" : ""}`} />
+                {isHelpRequested ? "Exemption Requested • Waiting for 1-Click Approval..." : "Request Admin to Allow (No Camera)"}
+              </button>
+              <button
+                type="button"
+                onClick={handleCheckExemptionStatus}
+                disabled={isCheckingStatus}
+                className="px-3 py-2.5 rounded-xl bg-white border border-amber-300 hover:bg-amber-50 text-amber-800 font-bold text-xs transition-colors cursor-pointer flex items-center gap-1"
+                title="Check if admin has already approved"
+              >
+                <RotateCw className={`w-3.5 h-3.5 ${isCheckingStatus ? "animate-spin" : ""}`} />
+                <span className="text-[10px]">Sync</span>
+              </button>
+            </div>
+            {isHelpRequested && (
+              <p className="text-[10px] text-emerald-700 font-semibold flex items-center gap-1 mt-1">
+                <CheckCircle2 className="w-3 h-3 shrink-0" />
+                Notification sent to Admin live monitor. Your exam will unlock automatically when approved.
+              </p>
             )}
           </div>
 
