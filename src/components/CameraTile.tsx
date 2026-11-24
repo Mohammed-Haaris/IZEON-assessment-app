@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { CameraOff, Minus, Maximize2, GripHorizontal } from "lucide-react";
+import { CameraOff, Minus, Maximize2, GripHorizontal, ShieldCheck } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 interface CameraTileProps {
   stream?: MediaStream | null;
@@ -12,6 +13,8 @@ export const CameraTile: React.FC<CameraTileProps> = ({
   onPermissionChange,
   className = "",
 }) => {
+  const { user } = useAuth();
+  const isExempt = Boolean(user?.allowWithoutCamera);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [errorMsg, setErrorMsg] = useState<string>("");
@@ -237,11 +240,23 @@ export const CameraTile: React.FC<CameraTileProps> = ({
         {/* Permission Fallback */}
         {!hasPermission && (
           <div className="w-full h-full flex flex-col items-center justify-center p-3 text-center bg-slate-950 text-slate-300">
-            <CameraOff className="w-6 h-6 text-rose-500 mb-1" />
-            <p className="text-[11px] font-bold text-rose-400">Camera Inactive</p>
-            <p className="text-[9px] text-slate-400 mt-0.5 max-w-[130px] leading-tight">
-              {errorMsg || "Requesting camera..."}
-            </p>
+            {isExempt ? (
+              <>
+                <ShieldCheck className="w-6 h-6 text-amber-400 mb-1" />
+                <p className="text-[11px] font-bold text-amber-300">Camera Exempt</p>
+                <p className="text-[9px] text-slate-400 mt-0.5 max-w-[130px] leading-tight">
+                  Admin authorized assessment without camera
+                </p>
+              </>
+            ) : (
+              <>
+                <CameraOff className="w-6 h-6 text-rose-500 mb-1" />
+                <p className="text-[11px] font-bold text-rose-400">Camera Inactive</p>
+                <p className="text-[9px] text-slate-400 mt-0.5 max-w-[130px] leading-tight">
+                  {errorMsg || "Requesting camera..."}
+                </p>
+              </>
+            )}
           </div>
         )}
 

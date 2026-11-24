@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { apiRequest } from "../services/api";
+import { CollegeSelect } from "../components/CollegeSelect";
+import type { College } from "../types";
 import {
   User,
   Mail,
   Lock,
-  Building,
   AlertCircle,
   ArrowRight,
   ShieldCheck,
@@ -28,6 +30,8 @@ export const Register: React.FC = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [college, setCollege] = useState("");
+  const [colleges, setColleges] = useState<College[]>([]);
+  const [isLoadingColleges, setIsLoadingColleges] = useState(true);
   const [department, setDepartment] = useState("");
   const [rollNumber, setRollNumber] = useState("");
   const [position, setPosition] = useState<"Software Developer" | "Data Analyst" | "Network Engineer">("Software Developer");
@@ -42,6 +46,13 @@ export const Register: React.FC = () => {
 
   const { register } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    apiRequest<{ colleges: College[] }>("/auth/colleges")
+      .then((data) => setColleges(data.colleges || []))
+      .catch((err) => console.error("Failed to load colleges:", err))
+      .finally(() => setIsLoadingColleges(false));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -227,25 +238,18 @@ export const Register: React.FC = () => {
               </div>
             </div>
 
-            {/* College / Organization */}
+            {/* College / Organization Dropdown */}
             <div className="sm:col-span-2">
               <label className="block text-sm font-semibold text-slate-800 mb-1.5">
                 College / Institution <span className="text-rose-500">*</span>
               </label>
-              <div className="relative">
-                <Building className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
-                <input
-                  id="college"
-                  name="college"
-                  autoComplete="off"
-                  type="text"
-                  required
-                  value={college}
-                  onChange={(e) => setCollege(e.target.value)}
-                  placeholder="e.g., National Engineering College"
-                  className="w-full text-sm pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#16499c]/20 focus:border-[#16499c] transition-all"
-                />
-              </div>
+              <CollegeSelect
+                value={college}
+                onChange={setCollege}
+                colleges={colleges}
+                isLoading={isLoadingColleges}
+                required
+              />
             </div>
 
             {/* 10th Standard Marks */}

@@ -33,6 +33,7 @@ export interface User {
   cgpa?: string;
   role: Role;
   status: StudentStatus;
+  allowWithoutCamera?: boolean;
   createdAt?: string;
 }
 
@@ -84,6 +85,16 @@ export interface AssessmentAttempt {
   createdAt?: string;
   user?: User;
   assessment?: Assessment;
+}
+
+export interface College {
+  id: string;
+  name: string;
+  code?: string | null;
+  isActive: boolean;
+  studentCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface MalpracticeAlert {

@@ -7,6 +7,7 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import interviewLogo from "../assets/interview logo.png";
+import { useAuth } from "../context/AuthContext";
 
 interface CameraGuardProps {
   children: (cameraStream: MediaStream | null) => React.ReactNode;
@@ -16,8 +17,10 @@ interface CameraGuardProps {
 type CameraStatus = "CHECKING" | "ACTIVE" | "DENIED" | "NO_HARDWARE" | "IN_USE_OR_ERROR";
 
 export const CameraGuard: React.FC<CameraGuardProps> = ({ children, roundName }) => {
+  const { user } = useAuth();
+  const isExempt = Boolean(user?.allowWithoutCamera);
   const navigate = useNavigate();
-  const [status, setStatus] = useState<CameraStatus>("CHECKING");
+  const [status, setStatus] = useState<CameraStatus>(isExempt ? "ACTIVE" : "CHECKING");
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isRetrying, setIsRetrying] = useState<boolean>(false);
@@ -116,6 +119,11 @@ export const CameraGuard: React.FC<CameraGuardProps> = ({ children, roundName })
 
   // Continuous heartbeat to ensure camera stream hasn't died silently
   useEffect(() => {
+    if (isExempt) {
+      setStatus("ACTIVE");
+      return;
+    }
+
     verifyAndStartCamera();
 
     const interval = setInterval(() => {
@@ -133,7 +141,7 @@ export const CameraGuard: React.FC<CameraGuardProps> = ({ children, roundName })
       clearInterval(interval);
       stopActiveStream();
     };
-  }, [verifyAndStartCamera]);
+  }, [verifyAndStartCamera, isExempt]);
 
   // Connect stream to preview video element when modal is shown
   useEffect(() => {
@@ -141,6 +149,19 @@ export const CameraGuard: React.FC<CameraGuardProps> = ({ children, roundName })
       previewVideoRef.current.srcObject = stream;
     }
   }, [stream, status]);
+
+  // If candidate is exempted by administrator, allow immediate access without camera
+  if (isExempt) {
+    return (
+      <>
+        <div className="bg-amber-50 border-b border-amber-200 text-amber-800 text-xs py-1.5 px-4 text-center font-semibold flex items-center justify-center gap-2 select-none">
+          <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+          Camera Exemption Active — Allowed to take assessment without webcam (Authorized by Administrator)
+        </div>
+        {children(null)}
+      </>
+    );
+  }
 
   // If camera is ACTIVE, render the examination page with the stream provided
   if (status === "ACTIVE") {

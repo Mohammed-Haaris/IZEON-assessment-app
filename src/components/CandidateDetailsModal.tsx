@@ -17,16 +17,19 @@ import {
   CheckCircle2,
   XCircle,
   Percent,
+  Camera,
 } from "lucide-react";
 
 interface CandidateDetailsModalProps {
   attempt: AssessmentAttempt;
   onClose: () => void;
+  onToggleCameraExemption?: (studentId: string, currentStatus: boolean, studentName: string) => Promise<void>;
 }
 
 export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
   attempt,
   onClose,
+  onToggleCameraExemption,
 }) => {
   const r1Score = attempt.round1Score ?? 0;
   const r2Score = attempt.round2Score ?? 0;
@@ -194,6 +197,44 @@ export const CandidateDetailsModal: React.FC<CandidateDetailsModalProps> = ({
               <p className="font-bold text-slate-900 mt-1 text-sm">
                 {attempt.user?.cgpa || "—"}
               </p>
+            </div>
+
+            <div>
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <Camera className="w-3.5 h-3.5 text-[#16499c]" />
+                Camera Rule
+              </span>
+              <div className="mt-1 flex items-center gap-2">
+                {attempt.user?.allowWithoutCamera ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                    Allowed Without Camera
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                    <CheckCircle2 className="w-3 h-3 text-[#16499c]" />
+                    Camera Required
+                  </span>
+                )}
+                {onToggleCameraExemption && attempt.user?.id && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onToggleCameraExemption(
+                        attempt.user!.id,
+                        Boolean(attempt.user?.allowWithoutCamera),
+                        attempt.user?.name || "Candidate"
+                      );
+                      if (attempt.user) {
+                        attempt.user.allowWithoutCamera = !attempt.user.allowWithoutCamera;
+                      }
+                    }}
+                    className="text-[11px] font-bold text-[#16499c] hover:underline cursor-pointer"
+                  >
+                    {attempt.user?.allowWithoutCamera ? "Change to Required" : "Allow Without Camera"}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
