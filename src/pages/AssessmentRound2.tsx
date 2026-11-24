@@ -298,6 +298,9 @@ export const AssessmentRound2: React.FC = () => {
     (JSON.parse(localStorage.getItem("izeon_user") || "{}")?.position as string | undefined);
   const isDataAnalyst = candidateRole === "Data Analyst";
   const isNetworkEngineer = candidateRole === "Network Engineer";
+  const isCloudEngineer = candidateRole === "Cloud Engineer";
+  const isAIEngineer = candidateRole === "AI Engineer";
+  const isDigitalMarketing = candidateRole === "Digital Marketing";
 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -759,7 +762,16 @@ export const AssessmentRound2: React.FC = () => {
         } else {
           setLanguage("python");
         }
-      } else if (isNetworkEngineer || targetQ.category === "NETWORKING") {
+      } else if (
+        isNetworkEngineer ||
+        isCloudEngineer ||
+        isAIEngineer ||
+        isDigitalMarketing ||
+        targetQ.category === "NETWORKING" ||
+        targetQ.category === "CLOUD" ||
+        targetQ.category === "AI" ||
+        targetQ.category === "DIGITAL_MARKETING"
+      ) {
         setLanguage("python");
       }
     }
@@ -1022,11 +1034,20 @@ export const AssessmentRound2: React.FC = () => {
             {questions.map((q, idx) => {
               const isSQL = q.category === "SQL";
               const isNet = q.category === "NETWORKING" || isNetworkEngineer;
+              const isCloud = q.category === "CLOUD" || isCloudEngineer;
+              const isAI = q.category === "AI" || isAIEngineer;
+              const isMarketing = q.category === "DIGITAL_MARKETING" || isDigitalMarketing;
               const isPython = q.category === "PYTHON";
               const label = isSQL
                 ? `🗄️ Task ${idx + 1}: SQL Query`
                 : isNet
-                ? `🌐 Task ${idx + 1}: Network Automation`
+                ? `🌐 Task ${idx + 1}: Network Auto`
+                : isCloud
+                ? `☁️ Task ${idx + 1}: Cloud Infra`
+                : isAI
+                ? `🤖 Task ${idx + 1}: AI / ML Logic`
+                : isMarketing
+                ? `📈 Task ${idx + 1}: Marketing Analytics`
                 : isPython
                 ? `🐍 Task ${idx + 1}: Python Script`
                 : `💻 Problem ${idx + 1}`;
@@ -1043,6 +1064,12 @@ export const AssessmentRound2: React.FC = () => {
                         ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20"
                         : isNet
                         ? "bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20"
+                        : isCloud
+                        ? "bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20"
+                        : isAI
+                        ? "bg-purple-500 text-white shadow-md shadow-purple-500/20"
+                        : isMarketing
+                        ? "bg-rose-500 text-white shadow-md shadow-rose-500/20"
                         : isPython
                         ? "bg-sky-500 text-slate-950 shadow-md shadow-sky-500/20"
                         : "bg-[#16499c] text-white shadow-md shadow-[#16499c]/20"
@@ -1249,7 +1276,17 @@ export const AssessmentRound2: React.FC = () => {
                   <span className="w-2.5 h-2.5 rounded-full bg-sky-400 animate-pulse" />
                   <span className="text-xs font-bold text-sky-400 flex items-center gap-1.5">
                     <Code2 className="w-3.5 h-3.5" />
-                    {isDataAnalyst ? "Python 3 Data Analytics Console" : "Python 3 Algorithmic Environment"}
+                    {isDataAnalyst
+                      ? "Python 3 Data Analytics Console"
+                      : isCloudEngineer
+                      ? "Python 3 Cloud Automation & Infra Engine"
+                      : isAIEngineer
+                      ? "Python 3 AI & Vector Search Engine"
+                      : isDigitalMarketing
+                      ? "Python 3 Marketing Analytics & ROI Engine"
+                      : isNetworkEngineer
+                      ? "Python 3 Network Automation Environment"
+                      : "Python 3 Algorithmic Environment"}
                   </span>
                 </div>
               ) : (

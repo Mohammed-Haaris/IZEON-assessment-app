@@ -294,6 +294,14 @@ export const generateCandidateScorecardPDF = (attempt: AssessmentAttempt) => {
         "Round 2: Technical Hands-on",
         attempt.user?.position === "Data Analyst"
           ? "SQL Analytics Query & Python Data Scripting"
+          : attempt.user?.position === "Network Engineer"
+          ? "Protocols, Routing/Switching & Network Automation"
+          : attempt.user?.position === "Cloud Engineer"
+          ? "Cloud Architecture, K8s & Infrastructure Automation"
+          : attempt.user?.position === "AI Engineer"
+          ? "RAG Pipelines, Vector Search & Core ML Logic"
+          : attempt.user?.position === "Digital Marketing"
+          ? "Performance Marketing, SEO Strategy & Growth Analytics"
           : "DSA Problem Solving & Algorithmic Coding",
         `${r2} Points (Cutoff: ${attempt.assessment?.cutoffRound2 ?? 30} Pts)`,
         attempt.status === "COMPLETED"

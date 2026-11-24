@@ -113,7 +113,7 @@ export const AdminDashboard: React.FC = () => {
   // Results & Candidate Inspection Modal
   const [selectedAttemptForDetails, setSelectedAttemptForDetails] = useState<AssessmentAttempt | null>(null);
   const [resultsSearchQuery, setResultsSearchQuery] = useState("");
-  const [resultsRoleFilter, setResultsRoleFilter] = useState<"ALL" | "Software Developer" | "Data Analyst" | "Network Engineer">("ALL");
+  const [resultsRoleFilter, setResultsRoleFilter] = useState<string>("ALL");
   const [resultsStatusFilter, setResultsStatusFilter] = useState<string>("ALL");
   const [resultsDatePreset, setResultsDatePreset] = useState<"ALL" | "TODAY" | "YESTERDAY" | "LAST_7_DAYS" | "LAST_30_DAYS" | "CUSTOM">("ALL");
   const [resultsStartDate, setResultsStartDate] = useState<string>("");
@@ -934,7 +934,17 @@ export const AdminDashboard: React.FC = () => {
                         <td className="py-3.5 px-6 whitespace-nowrap">
                           {student.position ? (
                             <span className="font-semibold text-slate-800 text-xs">
-                              {student.position === "Data Analyst" ? "📊 Data Analyst" : student.position === "Network Engineer" ? "🌐 Network Engineer" : "💻 Software Dev"}
+                              {student.position === "Data Analyst"
+                                ? "📊 Data Analyst"
+                                : student.position === "Network Engineer"
+                                ? "🌐 Network Engineer"
+                                : student.position === "Cloud Engineer"
+                                ? "☁️ Cloud Engineer"
+                                : student.position === "AI Engineer"
+                                ? "🤖 AI Engineer"
+                                : student.position === "Digital Marketing"
+                                ? "📈 Digital Marketing"
+                                : "💻 Software Dev"}
                             </span>
                           ) : (
                             <span className="text-slate-400">—</span>
@@ -1520,12 +1530,15 @@ export const AdminDashboard: React.FC = () => {
                 <div className="w-52">
                   <CustomSelect
                     value={resultsRoleFilter}
-                    onChange={(val) => setResultsRoleFilter(val as "ALL" | "Software Developer" | "Data Analyst" | "Network Engineer")}
+                    onChange={(val) => setResultsRoleFilter(val)}
                     options={[
                       { label: "All Tracks & Roles", value: "ALL" },
                       { label: "Software Developer", value: "Software Developer", badge: "Core Dev" },
                       { label: "Data Analyst", value: "Data Analyst", badge: "Python & SQL" },
                       { label: "Network Engineer", value: "Network Engineer", badge: "Networks & Security" },
+                      { label: "Cloud Engineer", value: "Cloud Engineer", badge: "Cloud & DevOps" },
+                      { label: "AI Engineer", value: "AI Engineer", badge: "AI, RAG & ML" },
+                      { label: "Digital Marketing", value: "Digital Marketing", badge: "Growth & SEO" },
                     ]}
                     placeholder="Filter by Track"
                   />
@@ -1766,17 +1779,17 @@ export const AdminDashboard: React.FC = () => {
                             <td className="py-3.5 px-5 whitespace-nowrap">
                               <div className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
                                 {att.user?.position === "Data Analyst" ? (
-                                  <>
-                                    <span>Data Analyst</span>
-                                  </>
+                                  <span>Data Analyst</span>
                                 ) : att.user?.position === "Network Engineer" ? (
-                                  <>
-                                    <span>Network Engineer</span>
-                                  </>
+                                  <span>Network Engineer</span>
+                                ) : att.user?.position === "Cloud Engineer" ? (
+                                  <span>Cloud Engineer</span>
+                                ) : att.user?.position === "AI Engineer" ? (
+                                  <span>AI Engineer</span>
+                                ) : att.user?.position === "Digital Marketing" ? (
+                                  <span>Digital Marketing</span>
                                 ) : (
-                                  <>
-                                    <span>Software Dev</span>
-                                  </>
+                                  <span>Software Dev</span>
                                 )}
                               </div>
                             </td>

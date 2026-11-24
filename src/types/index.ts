@@ -8,7 +8,10 @@ export type QuestionCategory =
   | "CODING"
   | "SQL"
   | "PYTHON"
-  | "NETWORKING";
+  | "NETWORKING"
+  | "CLOUD"
+  | "AI"
+  | "DIGITAL_MARKETING";
 export type AttemptStatus =
   | "NOT_STARTED"
   | "ROUND_1_IN_PROGRESS"

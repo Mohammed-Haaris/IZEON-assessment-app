@@ -17,6 +17,9 @@ import {
   Code,
   Database,
   Network,
+  Cloud,
+  Brain,
+  Megaphone,
   Hash,
   Eye,
   EyeOff,
@@ -34,7 +37,9 @@ export const Register: React.FC = () => {
   const [isLoadingColleges, setIsLoadingColleges] = useState(true);
   const [department, setDepartment] = useState("");
   const [rollNumber, setRollNumber] = useState("");
-  const [position, setPosition] = useState<"Software Developer" | "Data Analyst" | "Network Engineer">("Software Developer");
+  const [position, setPosition] = useState<
+    "Software Developer" | "Data Analyst" | "Network Engineer" | "Cloud Engineer" | "AI Engineer" | "Digital Marketing"
+  >("Software Developer");
   const [dob, setDob] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
   const [tenthMark, setTenthMark] = useState("");
@@ -410,6 +415,99 @@ export const Register: React.FC = () => {
                     </div>
                     <div className="text-xs text-slate-600 mt-1 font-normal leading-snug">
                       Protocols, Routing/Switching & Network Automation
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPosition("Cloud Engineer")}
+                  className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-start gap-3.5 ${
+                    position === "Cloud Engineer"
+                      ? "border-[#16499c] bg-[#eff5ff] ring-2 ring-[#16499c]/20 shadow-sm"
+                      : "border-slate-200 hover:border-slate-300 bg-white"
+                  }`}
+                >
+                  <div
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                      position === "Cloud Engineer"
+                        ? "bg-[#16499c] text-white shadow-sm"
+                        : "bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    <Cloud className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
+                      Cloud Engineer
+                      {position === "Cloud Engineer" && (
+                        <span className="w-2 h-2 rounded-full bg-[#16499c]"></span>
+                      )}
+                    </div>
+                    <div className="text-xs text-slate-600 mt-1 font-normal leading-snug">
+                      IaC, Containers, Kubernetes & Cloud Automation
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPosition("AI Engineer")}
+                  className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-start gap-3.5 ${
+                    position === "AI Engineer"
+                      ? "border-[#16499c] bg-[#eff5ff] ring-2 ring-[#16499c]/20 shadow-sm"
+                      : "border-slate-200 hover:border-slate-300 bg-white"
+                  }`}
+                >
+                  <div
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                      position === "AI Engineer"
+                        ? "bg-[#16499c] text-white shadow-sm"
+                        : "bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    <Brain className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
+                      AI Engineer
+                      {position === "AI Engineer" && (
+                        <span className="w-2 h-2 rounded-full bg-[#16499c]"></span>
+                      )}
+                    </div>
+                    <div className="text-xs text-slate-600 mt-1 font-normal leading-snug">
+                      RAG, Vector Search, LLM Pipelines & Core ML Logic
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPosition("Digital Marketing")}
+                  className={`p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-start gap-3.5 ${
+                    position === "Digital Marketing"
+                      ? "border-[#16499c] bg-[#eff5ff] ring-2 ring-[#16499c]/20 shadow-sm"
+                      : "border-slate-200 hover:border-slate-300 bg-white"
+                  }`}
+                >
+                  <div
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                      position === "Digital Marketing"
+                        ? "bg-[#16499c] text-white shadow-sm"
+                        : "bg-slate-100 text-slate-600"
+                    }`}
+                  >
+                    <Megaphone className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
+                      Digital Marketing
+                      {position === "Digital Marketing" && (
+                        <span className="w-2 h-2 rounded-full bg-[#16499c]"></span>
+                      )}
+                    </div>
+                    <div className="text-xs text-slate-600 mt-1 font-normal leading-snug">
+                      Performance Marketing, SEO Strategy & Growth Analytics
                     </div>
                   </div>
                 </button>
