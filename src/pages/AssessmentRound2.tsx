@@ -23,6 +23,7 @@ import {
   ChevronDown,
   ChevronUp,
   RefreshCw,
+  Sparkles,
 } from "lucide-react";
 
 
@@ -352,14 +353,14 @@ export const AssessmentRound2: React.FC = () => {
   // Clean starter code templates (NEVER expose answers directly in assessment)
   const getCleanTemplate = (lang: string, isDATrack: boolean) => {
     if (lang === "sql") {
-      return "-- Write your SQL query here\n";
+      return "-- Write your SQL query here\r\n";
     }
     if (lang === "python") {
       return isDATrack
-        ? "def analyze_transactions(transactions, threshold):\n    # Write your solution here\n    pass\n"
-        : "# Write your Python solution here\n";
+        ? "def analyze_transactions(transactions, threshold):\r\n    # Write your solution here\r\n    pass\r\n"
+        : "# Write your Python solution here\r\n";
     }
-    return "function solution(input) {\n  // Write solution here\n  \n}\n";
+    return "function solution(input) {\r\n  // Write solution here\r\n  \r\n}\r\n";
   };
 
   const sanitizeStarter = (code: string | undefined | null, lang: string, isDATrack: boolean) => {
@@ -451,11 +452,17 @@ export const AssessmentRound2: React.FC = () => {
 
           // Strict role-based filtering:
           if (candidateRole === "Software Developer") {
-            r2 = r2.filter((q: any) => q.category !== "SQL" && q.targetRole !== "Data Analyst" && q.targetRole !== "Network Engineer");
+            r2 = r2.filter((q: any) => q.category !== "SQL" && q.targetRole !== "Data Analyst" && q.targetRole !== "Network Engineer" && q.targetRole !== "Cloud Engineer" && q.targetRole !== "AI Engineer" && q.targetRole !== "Digital Marketing");
           } else if (candidateRole === "Data Analyst") {
-            r2 = r2.filter((q: any) => q.targetRole !== "Software Developer" && q.targetRole !== "Network Engineer");
+            r2 = r2.filter((q: any) => q.targetRole === "Data Analyst" || q.category === "SQL" || (q.targetRole === "ALL" && q.category === "PYTHON"));
           } else if (candidateRole === "Network Engineer") {
             r2 = r2.filter((q: any) => q.targetRole === "Network Engineer" || q.category === "NETWORKING");
+          } else if (candidateRole === "Cloud Engineer") {
+            r2 = r2.filter((q: any) => q.targetRole === "Cloud Engineer" || q.category === "CLOUD");
+          } else if (candidateRole === "AI Engineer") {
+            r2 = r2.filter((q: any) => q.targetRole === "AI Engineer" || q.category === "AI");
+          } else if (candidateRole === "Digital Marketing") {
+            r2 = r2.filter((q: any) => q.targetRole === "Digital Marketing" || q.category === "DIGITAL_MARKETING");
           } else {
             // General / default fallback: exclude SQL unless candidate is Data Analyst
             r2 = r2.filter((q: any) => q.category !== "SQL");
@@ -474,13 +481,17 @@ export const AssessmentRound2: React.FC = () => {
             const sqlStarter = sanitizeStarter(q.starterCode?.sql, "sql", isDataAnalyst);
             const pyStarter = sanitizeStarter(q.starterCode?.python, "python", isDataAnalyst);
             const jsStarter = sanitizeStarter(q.starterCode?.javascript, "javascript", isDataAnalyst);
+            const textStarter = q.starterCode?.text || q.starterCode?.theory || "";
 
             initialCodes[`${q.id}_sql`] = sqlStarter;
             initialCodes[`${q.id}_python`] = pyStarter;
             initialCodes[`${q.id}_javascript`] = jsStarter;
+            initialCodes[`${q.id}_text`] = textStarter;
 
             // Preferred initial code per question
-            if (isDataAnalyst && (q.category === "SQL" || q.starterCode?.sql)) {
+            if (isDigitalMarketing || q.category === "DIGITAL_MARKETING") {
+              initialCodes[q.id] = textStarter || pyStarter || "";
+            } else if (isDataAnalyst && (q.category === "SQL" || q.starterCode?.sql)) {
               initialCodes[q.id] = sqlStarter;
             } else if (q.category === "PYTHON" || q.starterCode?.python) {
               initialCodes[q.id] = pyStarter;
@@ -780,7 +791,7 @@ export const AssessmentRound2: React.FC = () => {
   const runSampleTest = () => {
     if (!currentQ || isRunningCode) return;
     setIsRunningCode(true);
-    setTestOutput("Running code in execution engine...\n\n");
+    setTestOutput("Running code in execution engine...\r\n\r\n");
     setCodeTestResults(null);
     setSqlTableResult(null);
 
@@ -792,11 +803,11 @@ export const AssessmentRound2: React.FC = () => {
           setSqlTableResult(result);
           setActiveOutputTab("table");
           setTestOutput(
-            `[PostgreSQL 16.2 Client Engine]\n` +
-            `Status: ${result.status} ✓\n` +
-            `Execution Time: ${result.executionTimeMs}ms | Rows Returned: ${result.rowCount}\n` +
-            `${result.message}\n\n` +
-            (result.columns.length > 0 ? result.columns.join(" | ") + "\n" + result.rows.map(r => r.join(" | ")).join("\n") : "")
+            `[PostgreSQL 16.2 Client Engine]\r\n` +
+            `Status: ${result.status} ✓\r\n` +
+            `Execution Time: ${result.executionTimeMs}ms | Rows Returned: ${result.rowCount}\r\n` +
+            `${result.message}\r\n\r\n` +
+            (result.columns.length > 0 ? result.columns.join(" | ") + "\r\n" + result.rows.map(r => r.join(" | ")).join("\r\n") : "")
           );
         } else if (language === "javascript") {
           const userCode = currentCode || "";
@@ -804,12 +815,12 @@ export const AssessmentRound2: React.FC = () => {
           setCodeTestResults(execRes);
           setActiveOutputTab("table");
           setTestOutput(
-            `[Node.js v20 LTS Runtime]\n` +
-            `Status: ${execRes.status}\n` +
-            `Result: ${execRes.message}\n` +
-            (execRes.logs.length > 0 ? `\n--- Console Logs ---\n${execRes.logs.join('\n')}\n` : "") +
-            `\n--- Test Cases Evaluation ---\n` +
-            execRes.results.map(r => `Test Case ${r.testCaseIndex} (${r.passed ? "PASSED ✓" : "FAILED ✗"}): Input: ${r.input} | Expected: ${r.expected} | Actual: ${r.actual}`).join('\n')
+            `[Node.js v20 LTS Runtime]\r\n` +
+            `Status: ${execRes.status}\r\n` +
+            `Result: ${execRes.message}\r\n` +
+            (execRes.logs.length > 0 ? `\r\n--- Console Logs ---\r\n${execRes.logs.join('\r\n')}\r\n` : "") +
+            `\r\n--- Test Cases Evaluation ---\r\n` +
+            execRes.results.map(r => `Test Case ${r.testCaseIndex} (${r.passed ? "PASSED ✓" : "FAILED ✗"}): Input: ${r.input} | Expected: ${r.expected} | Actual: ${r.actual}`).join('\r\n')
           );
         } else {
           // Python execution evaluation
@@ -852,11 +863,11 @@ export const AssessmentRound2: React.FC = () => {
             setCodeTestResults(res);
             setActiveOutputTab("table");
             setTestOutput(
-              `[Python 3.12 Runtime Engine]\n` +
-              `Status: SUCCESS ✓\n` +
-              `Execution Speed: 4.2ms | Memory Overhead: 12.8 MB\n` +
-              `${res.message}\n\n` +
-              mockResults.map(r => `Test Case ${r.testCaseIndex} (PASSED ✓): Input: ${r.input} | Expected: ${r.expected} | Actual: ${r.actual}`).join('\n')
+              `[Python 3.12 Runtime Engine]\r\n` +
+              `Status: SUCCESS ✓\r\n` +
+              `Execution Speed: 4.2ms | Memory Overhead: 12.8 MB\r\n` +
+              `${res.message}\r\n\r\n` +
+              mockResults.map(r => `Test Case ${r.testCaseIndex} (PASSED ✓): Input: ${r.input} | Expected: ${r.expected} | Actual: ${r.actual}`).join('\r\n')
             );
           }
         }
@@ -1172,8 +1183,38 @@ export const AssessmentRound2: React.FC = () => {
                 {currentQ.content}
               </div>
 
-              {/* Sample test cases */}
-              {Array.isArray(currentQ.testCases) && (
+              {/* Sample test cases or Marketing Strategy Evaluation Rubric */}
+              {(isDigitalMarketing || currentQ?.category === "DIGITAL_MARKETING") ? (
+                <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-rose-500/10 border border-amber-500/30 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="text-xs font-bold text-amber-300 flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-amber-400" />
+                      Strategic Evaluation Rubric (10 Marks)
+                    </div>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30">
+                      Theoretical Case Study
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-300">
+                    <div className="bg-slate-900/90 p-3 rounded-xl border border-slate-800">
+                      <span className="font-semibold text-white block text-xs">1. Root Cause Diagnosis (3 pts)</span>
+                      Analytical clarity on marketing bottlenecks, CAC inflation & ad fatigue.
+                    </div>
+                    <div className="bg-slate-900/90 p-3 rounded-xl border border-slate-800">
+                      <span className="font-semibold text-white block text-xs">2. Strategy & Funnel (3 pts)</span>
+                      Actionable full-funnel split (TOFU/MOFU/BOFU) and channel strategy.
+                    </div>
+                    <div className="bg-slate-900/90 p-3 rounded-xl border border-slate-800">
+                      <span className="font-semibold text-white block text-xs">3. Unit Economics & KPIs (2 pts)</span>
+                      Quantitative targets for ROAS, CAC, CTR, conversion rates & LTV.
+                    </div>
+                    <div className="bg-slate-900/90 p-3 rounded-xl border border-slate-800">
+                      <span className="font-semibold text-white block text-xs">4. Tactical Roadmap (2 pts)</span>
+                      Structured weekly rollout, A/B test experiments & milestones.
+                    </div>
+                  </div>
+                </div>
+              ) : Array.isArray(currentQ.testCases) && currentQ.testCases.length > 0 ? (
                 <div className="space-y-3">
                   <h4 className="text-sm font-bold text-slate-200 uppercase tracking-wider">
                     Sample Test Cases
@@ -1192,7 +1233,7 @@ export const AssessmentRound2: React.FC = () => {
                     </div>
                   ))}
                 </div>
-              )}
+              ) : null}
 
               {/* Problem Switcher */}
               <div className="pt-4 border-t border-slate-800 flex flex-wrap gap-2">
@@ -1256,6 +1297,130 @@ export const AssessmentRound2: React.FC = () => {
                   Answer recorded: <span className="text-emerald-300">{mcqAnswers[currentQ.id]}</span>
                 </div>
               )}
+            </div>
+          ) : (isDigitalMarketing || currentQ?.category === "DIGITAL_MARKETING") ? (
+            /* DEDICATED DIGITAL MARKETING THEORETICAL STRATEGY CASE STUDY EDITOR */
+            <div className="flex-1 flex flex-col overflow-hidden bg-slate-950">
+              {/* Header Bar */}
+              <div className="px-5 py-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
+                  <div>
+                    <div className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      Digital Marketing Strategic Case Study Editor
+                    </div>
+                    <div className="text-[10px] text-slate-400">
+                      Theoretical Case Study Response • Markdown Formatted Strategy
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700 text-[11px] font-mono text-slate-300">
+                    {currentCode ? currentCode.trim().split(/\s+/).filter(Boolean).length : 0} words
+                    <span className="text-slate-500 mx-1.5">|</span>
+                    {currentCode ? currentCode.length : 0} chars
+                  </div>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-semibold">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Autosaved to session</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Strategy Template Quick Insert Toolbar */}
+              <div className="px-5 py-2 bg-slate-900/60 border-b border-slate-800/80 flex items-center gap-2 overflow-x-auto text-[11px]">
+                <span className="text-slate-400 font-semibold shrink-0">Quick Insert Frameworks:</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const block = "\r\n\r\n### Executive Summary & Problem Diagnosis:\r\n- Target Audience:\r\n- Bottleneck:\r\n";
+                    handleCodeChange((currentCode || "") + block);
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 shrink-0 transition-colors cursor-pointer"
+                >
+                  + Executive Summary
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const block = "\r\n\r\n### Funnel Split (TOFU / MOFU / BOFU):\r\n- TOFU (Top of Funnel - Awareness):\r\n- MOFU (Middle of Funnel - Consideration):\r\n- BOFU (Bottom of Funnel - Conversion):\r\n";
+                    handleCodeChange((currentCode || "") + block);
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 shrink-0 transition-colors cursor-pointer"
+                >
+                  + Funnel Breakdown
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const block = "\r\n\r\n### Unit Economics & KPI Framework:\r\n- Target ROAS:\r\n- Target CAC:\r\n- Conversion Rate (%):\r\n- Payback Period:\r\n";
+                    handleCodeChange((currentCode || "") + block);
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 shrink-0 transition-colors cursor-pointer"
+                >
+                  + Unit Economics (CAC/ROAS)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const block = "\r\n\r\n### 30-Day Tactical Execution Plan:\r\n- Week 1:\r\n- Week 2:\r\n- Week 3:\r\n- Week 4:\r\n";
+                    handleCodeChange((currentCode || "") + block);
+                  }}
+                  className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 shrink-0 transition-colors cursor-pointer"
+                >
+                  + 30-Day Action Plan
+                </button>
+              </div>
+
+              {/* Textarea Strategy Editor */}
+              <div className="flex-1 p-5 overflow-hidden flex flex-col">
+                <textarea
+                  value={currentCode || ""}
+                  onChange={(e) => handleCodeChange(e.target.value)}
+                  placeholder="Write your comprehensive theoretical strategy, case study diagnosis, unit economics, and action plan here..."
+                  className="w-full flex-1 p-5 rounded-2xl bg-slate-900 border border-slate-800 text-slate-100 text-sm leading-relaxed font-sans placeholder-slate-500 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/40 resize-none overflow-y-auto selection:bg-amber-500/30 selection:text-white"
+                  spellCheck="false"
+                />
+              </div>
+
+              {/* Marketing Footer Toolbar */}
+              <div className="px-5 py-3 bg-slate-900 border-t border-slate-800 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2 text-xs text-slate-400">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <span>Your strategic analysis is continually preserved for final evaluation.</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {activeIdx > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => switchQuestion(activeIdx - 1)}
+                      className="px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 cursor-pointer transition-colors"
+                    >
+                      ← Previous Task
+                    </button>
+                  )}
+                  {activeIdx < questions.length - 1 ? (
+                    <button
+                      type="button"
+                      onClick={() => switchQuestion(activeIdx + 1)}
+                      className="px-4 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold shadow-md shadow-amber-500/20 cursor-pointer transition-colors"
+                    >
+                      Next Task →
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleSubmitAssessment}
+                      disabled={isSubmitting}
+                      className="px-5 py-1.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white text-xs font-bold shadow-md shadow-[#16499c]/20 cursor-pointer transition-colors"
+                    >
+                      {isSubmitting ? "Submitting..." : "Submit Assessment"}
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           ) : (
           <>
