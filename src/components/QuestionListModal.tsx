@@ -33,7 +33,15 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
   const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  type FilterType = "ALL" | "DATA_ANALYST" | "SOFTWARE_DEV" | "NETWORK_ENGINEER" | "ROUND_1";
+  type FilterType =
+    | "ALL"
+    | "DATA_ANALYST"
+    | "SOFTWARE_DEV"
+    | "NETWORK_ENGINEER"
+    | "CLOUD_ENGINEER"
+    | "AI_ENGINEER"
+    | "DIGITAL_MARKETING"
+    | "ROUND_1";
   const [activeFilter, setActiveFilter] = useState<FilterType>("ALL");
   const [daSubFilter, setDaSubFilter] = useState<"ALL" | "PYTHON" | "SQL">("ALL");
 
@@ -96,7 +104,10 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
           "• Round 1: 20 Questions (1 Pt each = 20 Pts, Cutoff: 12)\n" +
           "• Round 2 Software Dev: 5 Coding Questions (10 Pts each = 50 Pts)\n" +
           "• Round 2 Data Analyst: 3 Python + 2 SQL (10 Pts each = 50 Pts)\n" +
-          "• Round 2 Network Engineer: 5 Questions (10 Pts each = 50 Pts)\n\n" +
+          "• Round 2 Network Engineer: 5 Questions (10 Pts each = 50 Pts)\n" +
+          "• Round 2 Cloud Engineer: 5 Questions (10 Pts each = 50 Pts)\n" +
+          "• Round 2 AI Engineer: 5 Questions (10 Pts each = 50 Pts)\n" +
+          "• Round 2 Digital Marketing: 5 Questions (10 Pts each = 50 Pts)\n\n" +
           "Proceed with auto-standardization?"
       )
     ) {
@@ -173,6 +184,21 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
     return q.targetRole === "Network Engineer" || q.category === "NETWORKING";
   });
 
+  // Cloud Engineer: targetRole === "Cloud Engineer" or category === "CLOUD"
+  const cloudQuestions = r2Questions.filter((q) => {
+    return q.targetRole === "Cloud Engineer" || q.category === "CLOUD";
+  });
+
+  // AI Engineer: targetRole === "AI Engineer" or category === "AI"
+  const aiQuestions = r2Questions.filter((q) => {
+    return q.targetRole === "AI Engineer" || q.category === "AI";
+  });
+
+  // Digital Marketing: targetRole === "Digital Marketing" or category === "DIGITAL_MARKETING"
+  const dmQuestions = r2Questions.filter((q) => {
+    return q.targetRole === "Digital Marketing" || q.category === "DIGITAL_MARKETING";
+  });
+
   // Filtered list based on activeFilter, daSubFilter, and searchQuery
   const filteredQuestions = questions.filter((q) => {
     // Search query filter
@@ -197,6 +223,18 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
 
     if (activeFilter === "NETWORK_ENGINEER") {
       return neQuestions.some((item) => item.id === q.id);
+    }
+
+    if (activeFilter === "CLOUD_ENGINEER") {
+      return cloudQuestions.some((item) => item.id === q.id);
+    }
+
+    if (activeFilter === "AI_ENGINEER") {
+      return aiQuestions.some((item) => item.id === q.id);
+    }
+
+    if (activeFilter === "DIGITAL_MARKETING") {
+      return dmQuestions.some((item) => item.id === q.id);
     }
 
     if (activeFilter === "ROUND_1") {
@@ -225,6 +263,27 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
       return (
         <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[10px] border border-emerald-200">
           Network Engineer Track
+        </span>
+      );
+    }
+    if (role === "Cloud Engineer") {
+      return (
+        <span className="px-2 py-0.5 rounded-full bg-cyan-50 text-cyan-700 font-bold text-[10px] border border-cyan-200">
+          Cloud Engineer Track
+        </span>
+      );
+    }
+    if (role === "AI Engineer") {
+      return (
+        <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 font-bold text-[10px] border border-purple-200">
+          AI Engineer Track
+        </span>
+      );
+    }
+    if (role === "Digital Marketing") {
+      return (
+        <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 font-bold text-[10px] border border-rose-200">
+          Digital Marketing Track
         </span>
       );
     }
@@ -261,6 +320,27 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
       return (
         <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold text-[10px] border border-emerald-200">
           NETWORKING
+        </span>
+      );
+    }
+    if (cat === "CLOUD") {
+      return (
+        <span className="px-2 py-0.5 rounded-md bg-cyan-100 text-cyan-800 font-bold text-[10px] border border-cyan-200">
+          CLOUD
+        </span>
+      );
+    }
+    if (cat === "AI") {
+      return (
+        <span className="px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 font-bold text-[10px] border border-purple-200">
+          AI / ML
+        </span>
+      );
+    }
+    if (cat === "DIGITAL_MARKETING") {
+      return (
+        <span className="px-2 py-0.5 rounded-md bg-rose-100 text-rose-800 font-bold text-[10px] border border-rose-200">
+          MARKETING
         </span>
       );
     }
@@ -460,6 +540,21 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
                 desc: "5 Questions (50 Pts)",
               },
               {
+                id: "CLOUD_ENGINEER",
+                label: `☁️ Cloud Engineer (${cloudQuestions.length})`,
+                desc: "5 Questions (50 Pts)",
+              },
+              {
+                id: "AI_ENGINEER",
+                label: `🤖 AI Engineer (${aiQuestions.length})`,
+                desc: "5 Questions (50 Pts)",
+              },
+              {
+                id: "DIGITAL_MARKETING",
+                label: `📈 Digital Marketing (${dmQuestions.length})`,
+                desc: "5 Questions (50 Pts)",
+              },
+              {
                 id: "ROUND_1",
                 label: `🧠 Round 1 (${r1Questions.length})`,
                 desc: "20 Questions (20 Pts)",
@@ -619,6 +714,72 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
                     {filteredQuestions
                       .filter((q) => neQuestions.some((item) => item.id === q.id))
                       .map((q, idx) => renderCard(q, idx, "bg-emerald-600"))}
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION: CLOUD ENGINEER TRACK */}
+              {(activeFilter === "ALL" || activeFilter === "CLOUD_ENGINEER") && cloudQuestions.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between border-b border-cyan-200 pb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="px-3 py-1 rounded-full bg-cyan-100 text-cyan-900 font-extrabold text-[11px] uppercase border border-cyan-200 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-cyan-600" />
+                        ☁️ Cloud Engineer Track ({cloudQuestions.length} Questions • 50 Pts Total)
+                      </span>
+                      <span className="text-[11px] font-semibold text-cyan-600">
+                        5 Cloud Automation, K8s & Security Questions • 10 Pts Each
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {filteredQuestions
+                      .filter((q) => cloudQuestions.some((item) => item.id === q.id))
+                      .map((q, idx) => renderCard(q, idx, "bg-cyan-600"))}
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION: AI ENGINEER TRACK */}
+              {(activeFilter === "ALL" || activeFilter === "AI_ENGINEER") && aiQuestions.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between border-b border-purple-200 pb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="px-3 py-1 rounded-full bg-purple-100 text-purple-900 font-extrabold text-[11px] uppercase border border-purple-200 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+                        🤖 AI Engineer Track ({aiQuestions.length} Questions • 50 Pts Total)
+                      </span>
+                      <span className="text-[11px] font-semibold text-purple-600">
+                        5 RAG, Vector Search, LLM & ML Questions • 10 Pts Each
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {filteredQuestions
+                      .filter((q) => aiQuestions.some((item) => item.id === q.id))
+                      .map((q, idx) => renderCard(q, idx, "bg-purple-600"))}
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION: DIGITAL MARKETING TRACK */}
+              {(activeFilter === "ALL" || activeFilter === "DIGITAL_MARKETING") && dmQuestions.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between border-b border-rose-200 pb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="px-3 py-1 rounded-full bg-rose-100 text-rose-900 font-extrabold text-[11px] uppercase border border-rose-200 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-rose-600" />
+                        📈 Digital Marketing Track ({dmQuestions.length} Questions • 50 Pts Total)
+                      </span>
+                      <span className="text-[11px] font-semibold text-rose-600">
+                        5 Performance Marketing, SEO & Attribution Questions • 10 Pts Each
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    {filteredQuestions
+                      .filter((q) => dmQuestions.some((item) => item.id === q.id))
+                      .map((q, idx) => renderCard(q, idx, "bg-rose-600"))}
                   </div>
                 </div>
               )}

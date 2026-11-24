@@ -20,7 +20,9 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
   const [assessmentId, setAssessmentId] = useState<string>(
     selectedAssessmentId || (assessments[0]?.id ?? "")
   );
-  const [targetRole, setTargetRole] = useState<"ALL" | "Software Developer" | "Data Analyst" | "Network Engineer">("ALL");
+  const [targetRole, setTargetRole] = useState<
+    "ALL" | "Software Developer" | "Data Analyst" | "Network Engineer" | "Cloud Engineer" | "AI Engineer" | "Digital Marketing"
+  >("ALL");
   const [round, setRound] = useState<"ROUND_1_APTITUDE_VERBAL_WRITTEN" | "ROUND_2_CODING">(
     "ROUND_1_APTITUDE_VERBAL_WRITTEN"
   );
@@ -72,7 +74,7 @@ export const AddQuestionModal: React.FC<AddQuestionModalProps> = ({
     }
   };
 
-  const handleRoleChange = (newRole: "ALL" | "Software Developer" | "Data Analyst" | "Network Engineer") => {
+  const handleRoleChange = (newRole: any) => {
     setTargetRole(newRole);
     if (newRole === "Data Analyst") {
       if (round === "ROUND_2_CODING") {
