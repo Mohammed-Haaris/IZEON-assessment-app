@@ -247,48 +247,48 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
   const renderRoleBadge = (role?: string | null) => {
     if (role === "Data Analyst") {
       return (
-        <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-bold text-[10px] border border-blue-200">
+        <span className="px-2.5 py-0.5 rounded-md bg-blue-100 text-blue-900 font-bold text-[10px] border border-blue-300">
           Data Analyst Track
         </span>
       );
     }
     if (role === "Software Developer") {
       return (
-        <span className="px-2 py-0.5 rounded-full bg-violet-50 text-violet-700 font-bold text-[10px] border border-violet-200">
+        <span className="px-2.5 py-0.5 rounded-md bg-indigo-100 text-indigo-900 font-bold text-[10px] border border-indigo-300">
           Software Developer Track
         </span>
       );
     }
     if (role === "Network Engineer") {
       return (
-        <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[10px] border border-emerald-200">
+        <span className="px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-900 font-bold text-[10px] border border-emerald-300">
           Network Engineer Track
         </span>
       );
     }
     if (role === "Cloud Engineer") {
       return (
-        <span className="px-2 py-0.5 rounded-full bg-cyan-50 text-cyan-700 font-bold text-[10px] border border-cyan-200">
+        <span className="px-2.5 py-0.5 rounded-md bg-sky-100 text-sky-900 font-bold text-[10px] border border-sky-300">
           Cloud Engineer Track
         </span>
       );
     }
     if (role === "AI Engineer") {
       return (
-        <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 font-bold text-[10px] border border-purple-200">
+        <span className="px-2.5 py-0.5 rounded-md bg-purple-100 text-purple-900 font-bold text-[10px] border border-purple-300">
           AI Engineer Track
         </span>
       );
     }
     if (role === "Digital Marketing") {
       return (
-        <span className="px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 font-bold text-[10px] border border-rose-200">
+        <span className="px-2.5 py-0.5 rounded-md bg-amber-100 text-amber-900 font-bold text-[10px] border border-amber-300">
           Digital Marketing Track
         </span>
       );
     }
     return (
-      <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium text-[10px] border border-slate-200">
+      <span className="px-2.5 py-0.5 rounded-md bg-slate-200 text-slate-800 font-bold text-[10px] border border-slate-300">
         Common (Round 1)
       </span>
     );
@@ -374,11 +374,11 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
         <div className="flex items-center gap-1.5 shrink-0">
           <button
             onClick={() => setEditingQuestion(q)}
-            className="flex items-center gap-1 font-bold text-indigo-700 text-xs bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+            className="flex items-center gap-1 font-bold text-[#16499c] text-xs bg-[#eff5ff] hover:bg-[#dbeafe] border border-[#16499c]/30 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
             title="Click to edit points weightage"
           >
             <span>{q.points} Pts</span>
-            <Edit2 className="w-2.5 h-2.5 text-indigo-500" />
+            <Edit2 className="w-2.5 h-2.5 text-[#16499c]" />
           </button>
           <button
             onClick={() => setEditingQuestion(q)}
@@ -467,31 +467,31 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
             <button
               onClick={handleDeduplicate}
               disabled={isStandardizing}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-bold text-xs transition-colors cursor-pointer shadow-xs disabled:opacity-60"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs border border-slate-300 transition-colors cursor-pointer shadow-xs disabled:opacity-60"
               title="Detect and remove duplicate questions"
             >
-              <Trash2 className="w-3.5 h-3.5 text-amber-600" />
+              <Trash2 className="w-3.5 h-3.5 text-slate-700" />
               <span>Clean Duplicates</span>
             </button>
             <button
               onClick={handleStandardizeMarks}
               disabled={isStandardizing}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold text-xs transition-colors cursor-pointer shadow-xs disabled:opacity-60"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs shadow-sm transition-colors cursor-pointer disabled:opacity-60"
               title="Auto-configure total 70 Marks (20 R1 + 50 R2)"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isStandardizing ? "animate-spin" : ""}`} />
+              <RefreshCw className={`w-3.5 h-3.5 text-slate-300 ${isStandardizing ? "animate-spin" : ""}`} />
               <span>Standardize 70 Pts</span>
             </button>
             <button
               onClick={onOpenAddQuestion}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-semibold text-xs shadow-sm shadow-[#16499c]/20 cursor-pointer"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-bold text-xs shadow-md shadow-[#16499c]/25 cursor-pointer transition-all"
             >
               <Plus className="w-3.5 h-3.5" />
-              Add Question
+              <span>Add Question</span>
             </button>
             <button
               onClick={onClose}
-              className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+              className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -526,37 +526,37 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
               { id: "ALL", label: `All Questions (${questions.length})` },
               {
                 id: "DATA_ANALYST",
-                label: `📊 Data Analyst (${daQuestions.length})`,
+                label: `Data Analyst (${daQuestions.length})`,
                 desc: "3 Python + 2 SQL (50 Pts)",
               },
               {
                 id: "SOFTWARE_DEV",
-                label: `💻 Software Dev (${devQuestions.length})`,
+                label: `Software Dev (${devQuestions.length})`,
                 desc: "5 Coding (50 Pts)",
               },
               {
                 id: "NETWORK_ENGINEER",
-                label: `🌐 Network Engineer (${neQuestions.length})`,
+                label: `Network Engineer (${neQuestions.length})`,
                 desc: "5 Questions (50 Pts)",
               },
               {
                 id: "CLOUD_ENGINEER",
-                label: `☁️ Cloud Engineer (${cloudQuestions.length})`,
+                label: `Cloud Engineer (${cloudQuestions.length})`,
                 desc: "5 Questions (50 Pts)",
               },
               {
                 id: "AI_ENGINEER",
-                label: `🤖 AI Engineer (${aiQuestions.length})`,
+                label: `AI Engineer (${aiQuestions.length})`,
                 desc: "5 Questions (50 Pts)",
               },
               {
                 id: "DIGITAL_MARKETING",
-                label: `📈 Digital Marketing (${dmQuestions.length})`,
+                label: `Digital Marketing (${dmQuestions.length})`,
                 desc: "5 Questions (50 Pts)",
               },
               {
                 id: "ROUND_1",
-                label: `🧠 Round 1 (${r1Questions.length})`,
+                label: `Round 1 (${r1Questions.length})`,
                 desc: "20 Questions (20 Pts)",
               },
             ].map((tab) => (
@@ -568,8 +568,8 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
                 }}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-1.5 ${
                   activeFilter === tab.id
-                    ? "bg-[#16499c] text-white shadow-sm shadow-[#16499c]/25"
-                    : "bg-white text-slate-700 hover:bg-slate-100 border border-slate-200"
+                    ? "bg-[#16499c] text-white shadow-md shadow-[#16499c]/30 border border-[#16499c]"
+                    : "bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 shadow-2xs"
                 }`}
               >
                 <span>{tab.label}</span>
@@ -592,37 +592,37 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
 
         {/* DATA ANALYST SUB-FILTER PILLS (Shown when Data Analyst tab is selected) */}
         {activeFilter === "DATA_ANALYST" && (
-          <div className="px-6 py-2 bg-blue-50/60 border-b border-blue-100 flex items-center gap-2 text-xs">
-            <span className="font-bold text-blue-900 text-[11px]">Filter Data Analyst:</span>
+          <div className="px-6 py-2 bg-slate-100 border-b border-slate-200 flex items-center gap-2 text-xs">
+            <span className="font-bold text-slate-800 text-[11px]">Filter Analyst Tasks:</span>
             <button
               onClick={() => setDaSubFilter("ALL")}
-              className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${
+              className={`px-3 py-1 rounded-lg text-xs font-bold cursor-pointer transition-colors ${
                 daSubFilter === "ALL"
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-blue-800 border border-blue-200 hover:bg-blue-100/50"
+                  ? "bg-[#16499c] text-white shadow-xs"
+                  : "bg-white text-slate-700 border border-slate-300 hover:bg-slate-50"
               }`}
             >
-              All Analyst Questions ({daQuestions.length})
+              All Tasks ({daQuestions.length})
             </button>
             <button
               onClick={() => setDaSubFilter("PYTHON")}
-              className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${
+              className={`px-3 py-1 rounded-lg text-xs font-bold cursor-pointer transition-colors ${
                 daSubFilter === "PYTHON"
-                  ? "bg-sky-600 text-white"
-                  : "bg-white text-sky-800 border border-sky-200 hover:bg-sky-50"
+                  ? "bg-slate-900 text-white shadow-xs"
+                  : "bg-white text-slate-700 border border-slate-300 hover:bg-slate-50"
               }`}
             >
-              🐍 Python Scripting ({daPythonQuestions.length} Questions • 10 Pts each)
+              Python Scripting ({daPythonQuestions.length} • 10 Pts each)
             </button>
             <button
               onClick={() => setDaSubFilter("SQL")}
-              className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer transition-colors ${
+              className={`px-3 py-1 rounded-lg text-xs font-bold cursor-pointer transition-colors ${
                 daSubFilter === "SQL"
-                  ? "bg-amber-600 text-white"
-                  : "bg-white text-amber-800 border border-amber-200 hover:bg-amber-50"
+                  ? "bg-amber-600 text-white shadow-xs"
+                  : "bg-white text-slate-700 border border-slate-300 hover:bg-slate-50"
               }`}
             >
-              🗄️ SQL Queries ({daSqlQuestions.length} Questions • 10 Pts each)
+              SQL Queries ({daSqlQuestions.length} • 10 Pts each)
             </button>
           </div>
         )}
@@ -649,16 +649,16 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
               {/* SECTION: DATA ANALYST TRACK */}
               {(activeFilter === "ALL" || activeFilter === "DATA_ANALYST") && daQuestions.length > 0 && (
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-blue-200 pb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-900 font-extrabold text-[11px] uppercase border border-blue-200 flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                        📊 Data Analyst Track ({daQuestions.length} Questions • 50 Pts Total)
-                      </span>
-                      <span className="text-[11px] font-semibold text-blue-600">
-                        {daPythonQuestions.length} Python (30 Pts) + {daSqlQuestions.length} SQL (20 Pts)
+                  <div className="flex items-center justify-between bg-slate-900 text-white px-4 py-2.5 rounded-2xl border border-slate-800 shadow-sm">
+                    <div className="flex items-center gap-2.5">
+                      <span className="px-2.5 py-0.5 rounded-lg bg-blue-500/20 text-blue-300 font-extrabold text-[11px] uppercase border border-blue-400/30 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+                        Data Analyst Track ({daQuestions.length} Questions • 50 Pts Total)
                       </span>
                     </div>
+                    <span className="text-[11px] font-bold text-slate-300">
+                      {daPythonQuestions.length} Python (30 Pts) + {daSqlQuestions.length} SQL (20 Pts)
+                    </span>
                   </div>
                   <div className="space-y-3">
                     {filteredQuestions
@@ -677,16 +677,16 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
               {/* SECTION: SOFTWARE DEVELOPER TRACK */}
               {(activeFilter === "ALL" || activeFilter === "SOFTWARE_DEV") && devQuestions.length > 0 && (
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-violet-200 pb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="px-3 py-1 rounded-full bg-violet-100 text-violet-900 font-extrabold text-[11px] uppercase border border-violet-200 flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-violet-600" />
-                        💻 Software Developer Track ({devQuestions.length} Questions • 50 Pts Total)
-                      </span>
-                      <span className="text-[11px] font-semibold text-violet-600">
-                        5 Algorithmic Problems • 10 Pts Each
+                  <div className="flex items-center justify-between bg-slate-900 text-white px-4 py-2.5 rounded-2xl border border-slate-800 shadow-sm">
+                    <div className="flex items-center gap-2.5">
+                      <span className="px-2.5 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 font-extrabold text-[11px] uppercase border border-indigo-400/30 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                        Software Developer Track ({devQuestions.length} Questions • 50 Pts Total)
                       </span>
                     </div>
+                    <span className="text-[11px] font-bold text-slate-300">
+                      5 Algorithmic Problems • 10 Pts Each
+                    </span>
                   </div>
                   <div className="space-y-3">
                     {filteredQuestions
@@ -699,16 +699,16 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
               {/* SECTION: NETWORK ENGINEER TRACK */}
               {(activeFilter === "ALL" || activeFilter === "NETWORK_ENGINEER") && neQuestions.length > 0 && (
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-emerald-200 pb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 font-extrabold text-[11px] uppercase border border-emerald-200 flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-                        🌐 Network Engineer Track ({neQuestions.length} Questions • 50 Pts Total)
-                      </span>
-                      <span className="text-[11px] font-semibold text-emerald-600">
-                        5 Network Automation & Theory Questions • 10 Pts Each
+                  <div className="flex items-center justify-between bg-slate-900 text-white px-4 py-2.5 rounded-2xl border border-slate-800 shadow-sm">
+                    <div className="flex items-center gap-2.5">
+                      <span className="px-2.5 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 font-extrabold text-[11px] uppercase border border-emerald-400/30 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                        Network Engineer Track ({neQuestions.length} Questions • 50 Pts Total)
                       </span>
                     </div>
+                    <span className="text-[11px] font-bold text-slate-300">
+                      5 Network Automation & Theory Questions • 10 Pts Each
+                    </span>
                   </div>
                   <div className="space-y-3">
                     {filteredQuestions
@@ -721,16 +721,16 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
               {/* SECTION: CLOUD ENGINEER TRACK */}
               {(activeFilter === "ALL" || activeFilter === "CLOUD_ENGINEER") && cloudQuestions.length > 0 && (
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-cyan-200 pb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="px-3 py-1 rounded-full bg-cyan-100 text-cyan-900 font-extrabold text-[11px] uppercase border border-cyan-200 flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-cyan-600" />
-                        ☁️ Cloud Engineer Track ({cloudQuestions.length} Questions • 50 Pts Total)
-                      </span>
-                      <span className="text-[11px] font-semibold text-cyan-600">
-                        5 Cloud Automation, K8s & Security Questions • 10 Pts Each
+                  <div className="flex items-center justify-between bg-slate-900 text-white px-4 py-2.5 rounded-2xl border border-slate-800 shadow-sm">
+                    <div className="flex items-center gap-2.5">
+                      <span className="px-2.5 py-0.5 rounded-lg bg-sky-500/20 text-sky-300 font-extrabold text-[11px] uppercase border border-sky-400/30 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+                        Cloud Engineer Track ({cloudQuestions.length} Questions • 50 Pts Total)
                       </span>
                     </div>
+                    <span className="text-[11px] font-bold text-slate-300">
+                      5 Cloud Automation, K8s & Security Questions • 10 Pts Each
+                    </span>
                   </div>
                   <div className="space-y-3">
                     {filteredQuestions
@@ -743,16 +743,16 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
               {/* SECTION: AI ENGINEER TRACK */}
               {(activeFilter === "ALL" || activeFilter === "AI_ENGINEER") && aiQuestions.length > 0 && (
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-purple-200 pb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="px-3 py-1 rounded-full bg-purple-100 text-purple-900 font-extrabold text-[11px] uppercase border border-purple-200 flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-purple-600" />
-                        🤖 AI Engineer Track ({aiQuestions.length} Questions • 50 Pts Total)
-                      </span>
-                      <span className="text-[11px] font-semibold text-purple-600">
-                        5 RAG, Vector Search, LLM & ML Questions • 10 Pts Each
+                  <div className="flex items-center justify-between bg-slate-900 text-white px-4 py-2.5 rounded-2xl border border-slate-800 shadow-sm">
+                    <div className="flex items-center gap-2.5">
+                      <span className="px-2.5 py-0.5 rounded-lg bg-purple-500/20 text-purple-300 font-extrabold text-[11px] uppercase border border-purple-400/30 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                        AI Engineer Track ({aiQuestions.length} Questions • 50 Pts Total)
                       </span>
                     </div>
+                    <span className="text-[11px] font-bold text-slate-300">
+                      5 RAG, Vector Search, LLM & ML Questions • 10 Pts Each
+                    </span>
                   </div>
                   <div className="space-y-3">
                     {filteredQuestions
@@ -765,16 +765,16 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
               {/* SECTION: DIGITAL MARKETING TRACK */}
               {(activeFilter === "ALL" || activeFilter === "DIGITAL_MARKETING") && dmQuestions.length > 0 && (
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-rose-200 pb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="px-3 py-1 rounded-full bg-rose-100 text-rose-900 font-extrabold text-[11px] uppercase border border-rose-200 flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-rose-600" />
-                        📈 Digital Marketing Track ({dmQuestions.length} Questions • 50 Pts Total)
-                      </span>
-                      <span className="text-[11px] font-semibold text-rose-600">
-                        5 Performance Marketing, SEO & Attribution Questions • 10 Pts Each
+                  <div className="flex items-center justify-between bg-slate-900 text-white px-4 py-2.5 rounded-2xl border border-slate-800 shadow-sm">
+                    <div className="flex items-center gap-2.5">
+                      <span className="px-2.5 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 font-extrabold text-[11px] uppercase border border-amber-400/30 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                        Digital Marketing Track ({dmQuestions.length} Questions • 50 Pts Total)
                       </span>
                     </div>
+                    <span className="text-[11px] font-bold text-slate-300">
+                      5 Strategic Case Studies • 10 Pts Each
+                    </span>
                   </div>
                   <div className="space-y-3">
                     {filteredQuestions
@@ -787,15 +787,16 @@ export const QuestionListModal: React.FC<QuestionListModalProps> = ({
               {/* SECTION: ROUND 1 COGNITIVE APTITUDE & VERBAL */}
               {(activeFilter === "ALL" || activeFilter === "ROUND_1") && r1Questions.length > 0 && (
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="px-3 py-1 rounded-full bg-slate-200 text-slate-800 font-extrabold text-[11px] uppercase border border-slate-300 flex items-center gap-1.5">
-                        🧠 Round 1: Aptitude & Verbal ({r1Questions.length} Questions • 20 Pts Total)
-                      </span>
-                      <span className="text-[11px] font-semibold text-slate-500">
-                        1 Pt Each • Minimum Cutoff: 12 Pts
+                  <div className="flex items-center justify-between bg-slate-900 text-white px-4 py-2.5 rounded-2xl border border-slate-800 shadow-sm">
+                    <div className="flex items-center gap-2.5">
+                      <span className="px-2.5 py-0.5 rounded-lg bg-slate-800 text-slate-200 font-extrabold text-[11px] uppercase border border-slate-700 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+                        Round 1: Aptitude & Verbal ({r1Questions.length} Questions • 20 Pts Total)
                       </span>
                     </div>
+                    <span className="text-[11px] font-bold text-slate-300">
+                      1 Pt Each • Minimum Cutoff: 12 Pts
+                    </span>
                   </div>
                   <div className="space-y-3">
                     {filteredQuestions
