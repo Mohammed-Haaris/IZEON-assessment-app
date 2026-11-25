@@ -40,7 +40,9 @@ import {
   Edit2,
   GraduationCap,
   Camera,
-  CameraOff
+  CameraOff,
+  History as HistoryIcon,
+  Radio
 } from "lucide-react";
 
 interface MalpracticeLogItem {
@@ -62,7 +64,7 @@ interface MalpracticeLogItem {
 }
 
 export const AdminDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"approvals" | "proctor" | "exams" | "results" | "admins" | "colleges">("approvals");
+  const [activeTab, setActiveTab] = useState<"approvals" | "proctor" | "past_proctor" | "exams" | "results" | "admins" | "colleges">("approvals");
 
   // Colleges Directory state
   const [colleges, setColleges] = useState<College[]>([]);
@@ -78,6 +80,10 @@ export const AdminDashboard: React.FC = () => {
   const [students, setStudents] = useState<User[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
+  // Past Proctoring Logs Filter States
+  const [pastLogsSearch, setPastLogsSearch] = useState("");
+  const [pastLogsDecisionFilter, setPastLogsDecisionFilter] = useState<string>("ALL");
+  const [pastLogsDatePreset, setPastLogsDatePreset] = useState<"ALL" | "TODAY" | "YESTERDAY" | "LAST_7_DAYS">("ALL");
 
   // Live Proctor & Malpractice Alerts
   const [activeAlert, setActiveAlert] = useState<MalpracticeAlert | null>(null);
@@ -346,7 +352,7 @@ export const AdminDashboard: React.FC = () => {
   const [updatingStudentId, setUpdatingStudentId] = useState<string | null>(null);
   const [updatingCameraExemptionId, setUpdatingCameraExemptionId] = useState<string | null>(null);
 
-  const handleToggleCameraExemption = async (studentId: string, currentStatus: boolean, studentName: string) => {
+  const handleToggleCameraExemption = async (studentId: string, currentStatus: boolean, studentName: string = "Candidate") => {
     if (updatingCameraExemptionId === studentId) return;
     const newStatus = !currentStatus;
     setUpdatingCameraExemptionId(studentId);
@@ -780,7 +786,7 @@ export const AdminDashboard: React.FC = () => {
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as "approvals" | "proctor" | "exams" | "results" | "admins" | "colleges")}
+              onClick={() => setActiveTab(tab.id as "approvals" | "proctor" | "past_proctor" | "exams" | "results" | "admins" | "colleges")}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${isActive
                 ? "bg-[#16499c] text-white shadow-xs"
                 : "text-slate-600 hover:text-[#16499c] hover:bg-[#eff5ff]"
@@ -1049,181 +1055,515 @@ export const AdminDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 2: LIVE PROCTORING & MALPRACTICE LOGS */}
-      {activeTab === "proctor" && (
-        <div className="space-y-6">
-          {/* Real-time Camera Exemption Requests Queue */}
-          {cameraHelpRequests.length > 0 && (
-            <div className="bg-amber-50/95 border-2 border-amber-300 rounded-2xl p-5 shadow-xs space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
-                  <CameraOff className="w-5 h-5 text-amber-600" />
+      {/* TAB 2: 🔴 LIVE MONITORING (ACTIVE CANDIDATES ONLY) */}
+      {activeTab === "proctor" && (() => {
+        const liveAttempts = attempts.filter((att) => {
+          return (
+            att.status === "ROUND_1_IN_PROGRESS" ||
+            att.status === "ROUND_1_COMPLETED" ||
+            att.status === "ROUND_2_IN_PROGRESS" ||
+            att.status === "MALPRACTICE_LOCKED"
+          );
+        });
+        const lockedAttempts = liveAttempts.filter((att) => att.status === "MALPRACTICE_LOCKED");
+
+        return (
+          <div className="space-y-6">
+            {/* Live Monitoring Command Header */}
+            <div className="bg-slate-900 text-white p-6 rounded-3xl border border-slate-800 shadow-xl space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
+                <div className="flex items-center gap-3">
+                  <span className="relative flex h-3.5 w-3.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500"></span>
+                  </span>
                   <div>
-                    <h3 className="font-extrabold text-sm text-amber-950">
-                      Camera Issues Reported by Candidates ({cameraHelpRequests.length})
-                    </h3>
-                    <p className="text-[11px] text-amber-800 font-medium">
-                      Webcam failed or permission was denied in Google Chrome. Allow them to proceed with 1 click.
+                    <h2 className="text-base font-extrabold text-white flex items-center gap-2">
+                      Real-Time Live Monitoring Room
+                    </h2>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Displaying strictly active candidate sessions currently taking an exam. Past sessions are archived.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      loadAttempts();
+                      loadMalpracticeLogs();
+                    }}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition-colors cursor-pointer"
+                  >
+                    <RotateCw className="w-3.5 h-3.5" />
+                    <span>Refresh Live</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("past_proctor")}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white text-xs font-bold shadow-md shadow-[#16499c]/30 transition-all cursor-pointer"
+                  >
+                    <HistoryIcon className="w-3.5 h-3.5" />
+                    <span>Past Proctoring History ({malpracticeLogs.length}) →</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 4 Live Metric KPI Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                <div className="p-4 rounded-2xl bg-slate-800/80 border border-slate-700/80 space-y-1">
+                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                    <span>Active In Exam</span>
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  </div>
+                  <div className="text-2xl font-black text-white">{liveAttempts.length}</div>
+                  <p className="text-[10px] text-emerald-400 font-medium">Currently writing Round 1 or 2</p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-800/80 border border-slate-700/80 space-y-1">
+                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                    <span>Malpractice Suspended</span>
+                    <span className={`w-2 h-2 rounded-full ${lockedAttempts.length > 0 ? "bg-rose-500 animate-ping" : "bg-slate-500"}`} />
+                  </div>
+                  <div className={`text-2xl font-black ${lockedAttempts.length > 0 ? "text-rose-400" : "text-white"}`}>{lockedAttempts.length}</div>
+                  <p className="text-[10px] text-slate-400 font-medium">Awaiting Admin Unlock / Disqualify</p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-800/80 border border-slate-700/80 space-y-1">
+                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                    <span>Camera Exempt Requests</span>
+                    <span className={`w-2 h-2 rounded-full ${cameraHelpRequests.length > 0 ? "bg-amber-400 animate-pulse" : "bg-slate-500"}`} />
+                  </div>
+                  <div className={`text-2xl font-black ${cameraHelpRequests.length > 0 ? "text-amber-400" : "text-white"}`}>{cameraHelpRequests.length}</div>
+                  <p className="text-[10px] text-slate-400 font-medium">1-Click Chrome Exemption</p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-800/80 border border-slate-700/80 space-y-1">
+                  <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                    <span>Anti-Cheating Engine</span>
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#93c5fd]" />
+                  </div>
+                  <div className="text-xs font-extrabold text-emerald-400 pt-1">Active Protection</div>
+                  <p className="text-[10px] text-slate-400 font-medium">Auto Tab & Strike Detection</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Real-time Camera Exemption Requests Queue */}
+            {cameraHelpRequests.length > 0 && (
+              <div className="bg-amber-50/95 border-2 border-amber-300 rounded-2xl p-5 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+                    <CameraOff className="w-5 h-5 text-amber-600" />
+                    <div>
+                      <h3 className="font-extrabold text-sm text-amber-950">
+                        Camera Issues Reported by Candidates ({cameraHelpRequests.length})
+                      </h3>
+                      <p className="text-[11px] text-amber-800 font-medium">
+                        Webcam failed or permission was denied in Google Chrome. Allow them to proceed with 1 click.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="divide-y divide-amber-200/80 bg-white rounded-xl border border-amber-200 overflow-hidden">
+                  {cameraHelpRequests.map((req) => (
+                    <div key={req.studentId} className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-amber-50/40 transition-colors">
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-slate-900 text-xs">{req.studentName}</span>
+                          {req.college && (
+                            <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[10px] font-semibold">
+                              {req.college}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[11px] text-slate-500 font-mono">{req.studentEmail}</div>
+                        <div className="text-[10px] text-rose-600 font-medium">
+                          Issue: {req.reason || "Webcam failed to start in browser"}
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleAllowStudentWithoutCamera(req.studentId, req.studentName)}
+                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer shrink-0"
+                      >
+                        <Check className="w-4 h-4" />
+                        Allow Candidate (No Camera)
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Currently Active Candidates Table */}
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
+                <div className="flex items-center gap-2">
+                  <Radio className="w-4 h-4 text-emerald-600 animate-pulse" />
+                  <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">
+                    Currently Active Candidates in Exam ({liveAttempts.length})
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-slate-500 font-medium">
+                    Strictly Live Active Sessions • Auto-refreshed via WebSockets
+                  </span>
+                </div>
+              </div>
+
+              {liveAttempts.length === 0 ? (
+                <div className="py-16 text-center space-y-3">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
+                    <Radio className="w-6 h-6" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold text-slate-800">No candidates currently taking an exam</p>
+                    <p className="text-xs text-slate-500 max-w-md mx-auto">
+                      Only active live examinees appear here. All past completed exams and historical proctoring incident logs are archived separately.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab("past_proctor")}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold border border-slate-300 transition-colors cursor-pointer"
+                  >
+                    <HistoryIcon className="w-3.5 h-3.5" />
+                    <span>View Past Proctoring Logs ({malpracticeLogs.length})</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-extrabold uppercase tracking-wider text-slate-600">
+                        <th className="py-3.5 px-6">Candidate</th>
+                        <th className="py-3.5 px-6">Track & College</th>
+                        <th className="py-3.5 px-6">Live Exam Stage</th>
+                        <th className="py-3.5 px-6">Integrity / Strikes</th>
+                        <th className="py-3.5 px-6">Camera Status</th>
+                        <th className="py-3.5 px-6 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-xs">
+                      {liveAttempts.map((att) => {
+                        const isLocked = att.status === "MALPRACTICE_LOCKED";
+                        const strikes = att.tabSwitchCount || 0;
+                        const allowNoCam = att.user?.allowWithoutCamera;
+
+                        return (
+                          <tr key={att.id} className={`hover:bg-slate-50/60 transition-colors ${isLocked ? "bg-rose-50/40" : ""}`}>
+                            <td className="py-3.5 px-6">
+                              <div className="font-bold text-slate-900">{att.user?.name}</div>
+                              <div className="text-[11px] text-slate-400 font-mono">{att.user?.email}</div>
+                              {att.user?.rollNumber && (
+                                <div className="text-[10px] text-slate-500 font-mono">Roll: {att.user.rollNumber}</div>
+                              )}
+                            </td>
+
+                            <td className="py-3.5 px-6">
+                              <span className="inline-block px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-800 font-bold text-[10px] border border-slate-300">
+                                {att.user?.position || "General Candidate"}
+                              </span>
+                              <div className="text-[11px] text-slate-500 mt-0.5">{att.user?.college || "College not set"}</div>
+                            </td>
+
+                            <td className="py-3.5 px-6">
+                              {isLocked ? (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-300 font-extrabold text-[10px] animate-pulse">
+                                  <AlertOctagon className="w-3 h-3 text-rose-600" />
+                                  Suspended (Strike 2/2)
+                                </span>
+                              ) : att.status === "ROUND_2_IN_PROGRESS" ? (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 font-extrabold text-[10px]">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-ping" />
+                                  Round 2 Coding Active
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sky-100 text-sky-800 border border-sky-200 font-extrabold text-[10px]">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-ping" />
+                                  Round 1 Aptitude Active
+                                </span>
+                              )}
+                            </td>
+
+                            <td className="py-3.5 px-6">
+                              <span
+                                className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold border ${
+                                  strikes >= 2
+                                    ? "bg-rose-100 text-rose-800 border-rose-300"
+                                    : strikes === 1
+                                    ? "bg-amber-100 text-amber-800 border-amber-300"
+                                    : "bg-emerald-100 text-emerald-800 border-emerald-300"
+                                }`}
+                              >
+                                {strikes}/2 Strikes {strikes === 0 ? "✓ Clean" : strikes === 1 ? "⚠️ Warning" : "🚨 Locked"}
+                              </span>
+                            </td>
+
+                            <td className="py-3.5 px-6">
+                              {allowNoCam ? (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                                  <CameraOff className="w-3 h-3 text-amber-600" />
+                                  Exempted by Admin
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                                  <Camera className="w-3 h-3 text-emerald-600" />
+                                  Webcam Monitored
+                                </span>
+                              )}
+                            </td>
+
+                            <td className="py-3.5 px-6 text-right whitespace-nowrap">
+                              <div className="flex items-center justify-end gap-2">
+                                {isLocked && (
+                                  <>
+                                    <button
+                                      onClick={() => handleGiveChance(att.id, "Admin authorized candidate to resume from Live Room")}
+                                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] text-white font-bold text-xs shadow-xs cursor-pointer"
+                                    >
+                                      <CheckCircle2 className="w-3.5 h-3.5" />
+                                      <span>Unlock Exam</span>
+                                    </button>
+                                    <button
+                                      onClick={() => handleRejectCandidate(att.id, "Disqualified by admin from Live Room")}
+                                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs cursor-pointer"
+                                    >
+                                      <XCircle className="w-3.5 h-3.5" />
+                                      <span>Disqualify</span>
+                                    </button>
+                                  </>
+                                )}
+                                <button
+                                  onClick={() => handleToggleCameraExemption(att.user!.id, !!allowNoCam, att.user?.name || "Candidate")}
+                                  className={`p-1.5 rounded-lg border text-xs font-semibold cursor-pointer transition-colors ${
+                                    allowNoCam
+                                      ? "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300"
+                                      : "bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-300"
+                                  }`}
+                                  title={allowNoCam ? "Revoke Camera Exemption" : "Grant 1-Click Camera Exemption"}
+                                >
+                                  {allowNoCam ? <Camera className="w-3.5 h-3.5 text-slate-600" /> : <CameraOff className="w-3.5 h-3.5 text-amber-700" />}
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* TAB 2.5: 📜 PAST PROCTORING LOGS & MALPRACTICE HISTORY (DEDICATED SEPARATE UI) */}
+      {activeTab === "past_proctor" && (() => {
+        const filteredPastLogs = malpracticeLogs.filter((log) => {
+          // Search query
+          if (pastLogsSearch.trim()) {
+            const q = pastLogsSearch.toLowerCase().trim();
+            const name = (log.user?.name || "").toLowerCase();
+            const email = (log.user?.email || "").toLowerCase();
+            const type = (log.violationType || "").toLowerCase();
+            const remarks = (log.adminRemarks || "").toLowerCase();
+            if (!name.includes(q) && !email.includes(q) && !type.includes(q) && !remarks.includes(q)) {
+              return false;
+            }
+          }
+
+          // Decision filter
+          if (pastLogsDecisionFilter !== "ALL") {
+            if (pastLogsDecisionFilter === "GIVEN_CHANCE" && log.adminDecision !== "GIVEN_CHANCE") return false;
+            if (pastLogsDecisionFilter === "REJECTED" && log.adminDecision !== "REJECTED") return false;
+            if (pastLogsDecisionFilter === "PENDING" && (log.adminDecision && log.adminDecision !== "PENDING")) return false;
+          }
+
+          // Date preset
+          if (pastLogsDatePreset !== "ALL") {
+            const logDate = new Date(log.timestamp);
+            const now = new Date();
+            const logDateStr = logDate.toISOString().split("T")[0];
+            const todayStr = now.toISOString().split("T")[0];
+
+            if (pastLogsDatePreset === "TODAY") {
+              if (logDateStr !== todayStr) return false;
+            } else if (pastLogsDatePreset === "YESTERDAY") {
+              const yest = new Date(now);
+              yest.setDate(yest.getDate() - 1);
+              if (logDateStr !== yest.toISOString().split("T")[0]) return false;
+            } else if (pastLogsDatePreset === "LAST_7_DAYS") {
+              const d7 = new Date(now);
+              d7.setDate(d7.getDate() - 7);
+              if (logDate < d7) return false;
+            }
+          }
+
+          return true;
+        });
+
+        return (
+          <div className="space-y-6">
+            {/* Header Banner */}
+            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2.5">
+                  <span className="p-2 rounded-xl bg-slate-100 text-slate-800">
+                    <HistoryIcon className="w-5 h-5" />
+                  </span>
+                  <div>
+                    <h2 className="text-base font-extrabold text-slate-900">
+                      Past Proctoring & Malpractice Audit Logs
+                    </h2>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Historical archive of completed candidate sessions, resolved tab-switch violations, and administrator verdicts.
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="divide-y divide-amber-200/80 bg-white rounded-xl border border-amber-200 overflow-hidden">
-                {cameraHelpRequests.map((req) => (
-                  <div key={req.studentId} className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-amber-50/40 transition-colors">
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-slate-900 text-xs">{req.studentName}</span>
-                        {req.college && (
-                          <span className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[10px] font-semibold">
-                            {req.college}
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-[11px] text-slate-500 font-mono">{req.studentEmail}</div>
-                      <div className="text-[10px] text-rose-600 font-medium">
-                        Issue: {req.reason || "Webcam failed to start in browser"}
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handleAllowStudentWithoutCamera(req.studentId, req.studentName)}
-                      className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-all cursor-pointer shrink-0"
-                    >
-                      <Check className="w-4 h-4" />
-                      Allow Candidate (No Camera)
-                    </button>
-                  </div>
-                ))}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setActiveTab("proctor")}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-sm transition-colors cursor-pointer"
+                >
+                  <Radio className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>← Switch to Live Monitoring</span>
+                </button>
               </div>
             </div>
-          )}
 
-          <div className="p-4 rounded-2xl bg-[#eff5ff]/80 border border-[#16499c]/30 text-xs text-slate-900 flex items-start gap-3 shadow-xs">
-            <ShieldAlert className="w-5 h-5 text-[#16499c] shrink-0 mt-0.5" />
-            <div>
-              <p className="font-extrabold text-slate-900">Real-time Anti-Cheating System is Active</p>
-              <p className="text-[11px] text-slate-600 mt-0.5 font-medium">
-                When a candidate switches tabs twice in Round 2, an instant interactive pop-up
-                will appear allowing you to either give them another chance or immediately disqualify
-                them.
-              </p>
-            </div>
-          </div>
+            {/* Filter Bar */}
+            <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-xs flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2 flex-1">
+                {/* Search */}
+                <div className="relative min-w-[220px] flex-1 max-w-sm">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={pastLogsSearch}
+                    onChange={(e) => setPastLogsSearch(e.target.value)}
+                    placeholder="Search candidate name, email, remarks..."
+                    className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#16499c]"
+                  />
+                </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-              <h3 className="text-xs font-extrabold text-slate-900 uppercase tracking-wider">
-                Malpractice Incident History
-              </h3>
-              <span className="text-[11px] text-slate-500 font-medium">
-                Auto-synced via WebSockets
-              </span>
+                {/* Decision Filter Pills */}
+                <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+                  {[
+                    { id: "ALL", label: `All (${malpracticeLogs.length})` },
+                    { id: "GIVEN_CHANCE", label: `Chance Given (${malpracticeLogs.filter(l => l.adminDecision === "GIVEN_CHANCE").length})` },
+                    { id: "REJECTED", label: `Disqualified (${malpracticeLogs.filter(l => l.adminDecision === "REJECTED").length})` },
+                  ].map((f) => (
+                    <button
+                      key={f.id}
+                      onClick={() => setPastLogsDecisionFilter(f.id)}
+                      className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                        pastLogsDecisionFilter === f.id
+                          ? "bg-white text-slate-900 shadow-xs"
+                          : "text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Date Filter Pills */}
+                <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs">
+                  {[
+                    { id: "ALL", label: "All Time" },
+                    { id: "TODAY", label: "Today" },
+                    { id: "YESTERDAY", label: "Yesterday" },
+                    { id: "LAST_7_DAYS", label: "Last 7 Days" },
+                  ].map((d) => (
+                    <button
+                      key={d.id}
+                      onClick={() => setPastLogsDatePreset(d.id as any)}
+                      className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
+                        pastLogsDatePreset === d.id
+                          ? "bg-white text-slate-900 shadow-xs"
+                          : "text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      {d.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-extrabold uppercase tracking-wider text-slate-600">
-                  <th className="py-3.5 px-6">Candidate</th>
-                  <th className="py-3.5 px-6">Violation Type</th>
-                  <th className="py-3.5 px-6">Strikes</th>
-                  <th className="py-3.5 px-6">Admin Decision</th>
-                  <th className="py-3.5 px-6">Timestamp</th>
-                  <th className="py-3.5 px-6 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-xs">
-                {malpracticeLogs.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="py-8 text-center text-slate-400 font-medium">
-                      No malpractice incidents recorded yet. Clean exam environment!
-                    </td>
+
+            {/* Historical Audit Table */}
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-extrabold uppercase tracking-wider text-slate-600">
+                    <th className="py-3.5 px-6">Candidate</th>
+                    <th className="py-3.5 px-6">Violation Infraction</th>
+                    <th className="py-3.5 px-6">Strikes</th>
+                    <th className="py-3.5 px-6">Admin Decision</th>
+                    <th className="py-3.5 px-6">Admin Remarks</th>
+                    <th className="py-3.5 px-6">Incident Timestamp</th>
                   </tr>
-                ) : (
-                  malpracticeLogs.map((log) => (
-                    <tr key={log.id} className="hover:bg-slate-50/60 transition-colors">
-                      <td className="py-3.5 px-6">
-                        <div className="font-bold text-slate-900">{log.user?.name}</div>
-                        <div className="text-[11px] text-slate-400 font-mono">{log.user?.email}</div>
-                      </td>
-                      <td className="py-3.5 px-6">
-                        <span className="px-2.5 py-0.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 font-extrabold text-[10px]">
-                          {log.violationType}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-6 font-extrabold text-slate-900">
-                        {log.violationCount}/2 Strikes
-                      </td>
-                      <td className="py-3.5 px-6">
-                        <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${log.adminDecision === "GIVEN_CHANCE"
-                            ? "bg-[#eff5ff] text-[#16499c] border border-[#16499c]/30"
-                            : log.adminDecision === "REJECTED"
-                              ? "bg-rose-100 text-rose-800 border border-rose-200"
-                              : "bg-amber-100 text-amber-800 border border-amber-200"
-                            }`}
-                        >
-                          {log.adminDecision || "PENDING ACTION"}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-6 text-slate-500 text-[11px] font-medium">
-                        {new Date(log.timestamp).toLocaleString()}
-                      </td>
-                      <td className="py-3.5 px-6 text-right whitespace-nowrap">
-                        {log.adminDecision === "PENDING" || !log.adminDecision || log.attempt?.status === "MALPRACTICE_LOCKED" ? (
-                          <div className="flex items-center justify-end gap-2">
-                            <button
-                              onClick={() => handleGiveChance(log.attemptId, "Admin authorized candidate to resume", log.id)}
-                              disabled={processingLogId === log.id}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#16499c] hover:bg-[#123c80] disabled:opacity-50 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
-                              title="Give candidate another chance and unlock assessment"
-                            >
-                              <CheckCircle2 className="w-3.5 h-3.5" />
-                              <span>{processingLogId === log.id ? "Updating..." : "Give Chance"}</span>
-                            </button>
-                            <button
-                              onClick={() => handleRejectCandidate(log.attemptId, "Disqualified for repeated tab switching", log.id)}
-                              disabled={processingLogId === log.id}
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white font-bold text-xs shadow-xs transition-all cursor-pointer"
-                              title="Disqualify candidate"
-                            >
-                              <XCircle className="w-3.5 h-3.5" />
-                              <span>{processingLogId === log.id ? "Updating..." : "Disqualify"}</span>
-                            </button>
-                          </div>
-                        ) : log.adminDecision === "GIVEN_CHANCE" ? (
-                          <div className="flex items-center justify-end gap-2">
-                            <span className="inline-flex items-center gap-1 text-[#16499c] font-bold text-xs">
-                              <CheckCircle2 className="w-3.5 h-3.5" />
-                              Chance Granted
-                            </span>
-                            {log.attempt?.status === "MALPRACTICE_LOCKED" && (
-                              <button
-                                onClick={() => handleGiveChance(log.attemptId, "Admin re-unlocked exam", log.id)}
-                                disabled={processingLogId === log.id}
-                                className="px-2.5 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white text-[11px] font-bold cursor-pointer transition-all"
-                              >
-                                {processingLogId === log.id ? "Updating..." : "Re-Unlock"}
-                              </button>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-rose-600 font-bold text-xs">
-                            <XCircle className="w-3.5 h-3.5" />
-                            Disqualified
-                          </span>
-                        )}
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs">
+                  {filteredPastLogs.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-12 text-center text-slate-400 font-medium">
+                        No past malpractice incidents matched your filters.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    filteredPastLogs.map((log) => (
+                      <tr key={log.id} className="hover:bg-slate-50/60 transition-colors">
+                        <td className="py-3.5 px-6">
+                          <div className="font-bold text-slate-900">{log.user?.name}</div>
+                          <div className="text-[11px] text-slate-400 font-mono">{log.user?.email}</div>
+                        </td>
+                        <td className="py-3.5 px-6">
+                          <span className="px-2.5 py-0.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 font-extrabold text-[10px]">
+                            {log.violationType}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-6 font-extrabold text-slate-900">
+                          {log.violationCount}/2 Strikes
+                        </td>
+                        <td className="py-3.5 px-6">
+                          <span
+                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+                              log.adminDecision === "GIVEN_CHANCE"
+                                ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                                : log.adminDecision === "REJECTED"
+                                ? "bg-rose-100 text-rose-800 border border-rose-200"
+                                : "bg-amber-100 text-amber-800 border border-amber-200"
+                            }`}
+                          >
+                            {log.adminDecision === "GIVEN_CHANCE"
+                              ? "CHANCE GRANTED"
+                              : log.adminDecision === "REJECTED"
+                              ? "DISQUALIFIED"
+                              : log.adminDecision || "PENDING"}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-6 text-slate-600 text-[11px] font-medium max-w-xs">
+                          {log.adminRemarks || "—"}
+                        </td>
+                        <td className="py-3.5 px-6 text-slate-500 text-[11px] font-mono whitespace-nowrap">
+                          {new Date(log.timestamp).toLocaleString()}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* TAB 3: ASSESSMENTS & QUESTIONS */}
       {activeTab === "exams" && (
